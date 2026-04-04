@@ -61,7 +61,9 @@ function resetAuth() {
 function fetchStravaActivities() {
   const service = getStravaService();
   if (!service.hasAccess()) {
-    Logger.log('エラー: Stravaと連携されていません。startAuthを実行してください。');
+    const errorMsg = 'Stravaと連携されていません。startAuthを実行してください。';
+    Logger.log('エラー: ' + errorMsg);
+    sendErrorEmail(errorMsg);
     return [];
   }
 
@@ -72,15 +74,22 @@ function fetchStravaActivities() {
 
   // StravaのAPIにアクセス
   const url = `https://www.strava.com/api/v3/athlete/activities?after=${afterTime}`;
-  const response = UrlFetchApp.fetch(url, {
-    headers: {
-      Authorization: 'Bearer ' + service.getAccessToken()
-    }
-  });
+  try {
+    const response = UrlFetchApp.fetch(url, {
+      headers: {
+        Authorization: 'Bearer ' + service.getAccessToken()
+      }
+    });
 
-  const activities = JSON.parse(response.getContentText());
-  Logger.log(`${activities.length}件のアクティビティが見つかりました。`);
-  return activities;
+    const activities = JSON.parse(response.getContentText());
+    Logger.log(`${activities.length}件のアクティビティが見つかりました。`);
+    return activities;
+  } catch (e) {
+    const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + e.toString();
+    Logger.log('エラー: ' + errorMsg);
+    sendErrorEmail(errorMsg);
+    return [];
+  }
 }
 
 // 2. 取得したアクティビティをGoogleカレンダーに登録する
@@ -144,6 +153,24 @@ function syncStravaToCalendar() {
 }
 
 // ヘルパーメソッド
+
+/**
+ * エラーをメールで通知する
+ * @param {string} message - エラーメッセージ
+ */
+function sendErrorEmail(message) {
+  const email = Session.getEffectiveUser().getEmail();
+  const subject = '【Strava連携エラー】再認証が必要です';
+  const body = `Stravaとの連携でエラーが発生しました。
+
+エラー内容:
+${message}
+
+GASを開いてstartAuthを再実行してください。`;
+
+  MailApp.sendEmail(email, subject, body);
+  Logger.log(`エラーメールを送信しました: ${email}`);
+}
 
 // 既に登録済みのアクティビティかどうかを判定する
 function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
