@@ -118,8 +118,9 @@ function syncStravaToCalendar() {
 
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
     const type = activity.type; // 種類（Run, Rideなど）
+    const style = getActivityStyle(type);
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-    const title = `[${type}] ${activity.name} - ${distanceKm}km`;
+    const title = `[${style.emoji}${type}] ${activity.name} - ${distanceKm}km`;
 
     // カレンダーに登録する詳細メモ（リンクなどを入れておくと便利です）
     const description = `
@@ -135,9 +136,11 @@ function syncStravaToCalendar() {
     Logger.log("[DEBUG]description -> " + description);
 
     // カレンダーに予定として作成
-    calendar.createEvent(title, startTime, endTime, {
+    const event = calendar.createEvent(title, startTime, endTime, {
       description: description
     });
+    // イベントに色を設定する
+    event.setColor(style.color);
 
     Logger.log(`カレンダーに登録しました: ${title}`);
   });
@@ -145,7 +148,9 @@ function syncStravaToCalendar() {
 
 // ヘルパーメソッド
 
+// ==========================================
 // 既に登録済みのアクティビティかどうかを判定する
+// ==========================================
 function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
   // 登録しようとしている時間帯の予定をカレンダーから取得
   const existingEvents = calendar.getEvents(startTime, endTime);
@@ -161,4 +166,24 @@ function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
     return true;
   }
   return false;
+}
+
+// ==========================================
+// アクティビティごとの絵文字と色を定義する関数
+// ==========================================
+function getActivityStyle(type) {
+  switch (type) {
+    // ウォーキング
+    case 'Walk': return { emoji: '🚶', color: CalendarApp.EventColor.GREEN };
+    // ランニング
+    case 'Run': return { emoji: '🏃', color: CalendarApp.EventColor.BLUE };
+    // サイクリング
+    case 'Ride':
+    case 'VirtualRide': return { emoji: '🚴', color: CalendarApp.EventColor.RED };
+    // ワークアウト
+    case 'Workout':
+    case 'WeightTraining': return { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE };
+    // その他のアクティビティ
+    default: return { emoji: '🏅', color: CalendarApp.EventColor.GRAY };
+  }
 }
