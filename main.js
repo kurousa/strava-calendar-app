@@ -129,7 +129,17 @@ function syncStravaToCalendar() {
     const type = activity.type; // 種類（Run, Rideなど）
     const style = getActivityStyle(type);
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-    const title = "[" + style.emoji + " " + type + "] " + activity.name + " - " + distanceKm + "km";
+
+    // 距離を表示するアクティビティかどうかの判定
+    const distanceActivities = [
+      'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
+      'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
+      'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
+      'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
+    ];
+    const hasDistance = distanceActivities.some(t => type.includes(t)) && activity.distance > 0;
+
+    const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
 
     // カレンダーに登録する詳細メモ
     const description = makeDescription(activity);
