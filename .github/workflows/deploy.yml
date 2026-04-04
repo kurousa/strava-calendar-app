@@ -23,10 +23,8 @@ jobs:
         run: npm install -g @google/clasp
 
       - name: 4. 認証情報の作成（シークレットから復元）
-        env:
-          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
         run: |
-          printf "%s\n" "$CLASPRC_JSON" > ~/.clasprc.json
+          echo "${{ secrets.CLASPRC_BASE64 }}" | base64 --decode > ~/.clasprc.json
 
       - name: 5. プロジェクト設定ファイルの作成
         env:
