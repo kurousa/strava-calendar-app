@@ -127,8 +127,9 @@ function syncStravaToCalendar() {
 
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
     const type = activity.type; // 種類（Run, Rideなど）
+    const style = getActivityStyle(type);
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-    const title = `[${type}] ${activity.name} - ${distanceKm}km`;
+    const title = "[" + style.emoji + " " + type + "] " + activity.name + " - " + distanceKm + "km";
 
     // カレンダーに登録する詳細メモ（リンクなどを入れておくと便利です）
     const description = `
@@ -144,9 +145,11 @@ function syncStravaToCalendar() {
     Logger.log("[DEBUG]description -> " + description);
 
     // カレンダーに予定として作成
-    calendar.createEvent(title, startTime, endTime, {
+    const event = calendar.createEvent(title, startTime, endTime, {
       description: description
     });
+    // イベントに色を設定する
+    event.setColor(style.color);
 
     Logger.log(`カレンダーに登録しました: ${title}`);
   });
@@ -180,7 +183,35 @@ function sendErrorEmail(message) {
   Logger.log('エラーメールを送信しました: ' + email);
 }
 
+/**
+ * エラーをメールで通知する
+ * @param {string} message - エラーメッセージ
+ */
+function sendErrorEmail(message) {
+  const email = Session.getEffectiveUser().getEmail();
+  if (!email) {
+    Logger.log('通知先メールアドレスを取得できなかったため、メール送信をスキップしました。');
+    return;
+  }
+
+  const props = PropertiesService.getUserProperties();
+  const lastNotified = props.getProperty('LAST_ERROR_NOTIFIED_AT');
+  const now = new Date().getTime();
+  if (lastNotified && now - parseInt(lastNotified) < 24 * 60 * 60 * 1000) {
+    return;
+  }
+
+  const subject = '【Strava連携エラー】再認証が必要です';
+  const body = 'Stravaとの連携でエラーが発生しました。\n\nエラー内容:\n' + message + '\n\nGASを開いてstartAuthを再実行してください。';
+
+  MailApp.sendEmail(email, subject, body);
+  props.setProperty('LAST_ERROR_NOTIFIED_AT', now.toString());
+  Logger.log('エラーメールを送信しました: ' + email);
+}
+
+// ==========================================
 // 既に登録済みのアクティビティかどうかを判定する
+// ==========================================
 function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
   // 登録しようとしている時間帯の予定をカレンダーから取得
   const existingEvents = calendar.getEvents(startTime, endTime);
@@ -196,4 +227,22 @@ function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
     return true;
   }
   return false;
+}
+
+// ==========================================
+// アクティビティごとの絵文字と色を定義する関数
+// ==========================================
+function getActivityStyle(type) {
+  const styles = {
+    'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
+    'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
+    'VirtualRun': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
+    'Ride': { emoji: '🚴', color: CalendarApp.EventColor.RED },
+    'VirtualRide': { emoji: '🚴', color: CalendarApp.EventColor.RED },
+    'Swim': { emoji: '🏊', color: CalendarApp.EventColor.CYAN },
+    'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
+    'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
+    'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE }
+  };
+  return styles[type] || { emoji: '🏅', color: CalendarApp.EventColor.GRAY };
 }
