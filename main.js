@@ -7,7 +7,7 @@
 const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
 
 /**
- * 2. 取得したアクティビティをGoogleカレンダーに登録する
+ * 取得したアクティビティをGoogleカレンダーに登録する
  */
 function main() {
   const activities = getStravaActivities();

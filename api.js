@@ -4,7 +4,7 @@
 // ==========================================
 
 /**
- * 1. Stravaから直近のアクティビティを取得する
+ * Stravaから直近のアクティビティを取得する
  */
 function getStravaActivities() {
   const service = getOAuthService();
