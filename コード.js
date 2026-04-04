@@ -120,7 +120,7 @@ function syncStravaToCalendar() {
     const type = activity.type; // 種類（Run, Rideなど）
     const style = getActivityStyle(type);
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-    const title = `[${style.emoji}${type}] ${activity.name} - ${distanceKm}km`;
+    const title = "[" + style.emoji + " " + type + "] " + activity.name + " - " + distanceKm + "km";
 
     // カレンダーに登録する詳細メモ（リンクなどを入れておくと便利です）
     const description = `
