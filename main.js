@@ -85,3 +85,29 @@ function syncStravaToCalendar() {
     Logger.log(`カレンダーに登録しました: ${title}`);
   });
 }
+
+/**
+ * エラーをメールで通知する
+ * @param {string} message - エラーメッセージ
+ */
+function sendErrorEmail(message) {
+  const email = Session.getEffectiveUser().getEmail();
+  if (!email) {
+    Logger.log('通知先メールアドレスを取得できなかったため、メール送信をスキップしました。');
+    return;
+  }
+
+  const props = PropertiesService.getUserProperties();
+  const lastNotified = props.getProperty('LAST_ERROR_NOTIFIED_AT');
+  const now = new Date().getTime();
+  if (lastNotified && now - parseInt(lastNotified) < 24 * 60 * 60 * 1000) {
+    return;
+  }
+
+  const subject = '【Stravaアクティビティ連携】Stravaとの連携でエラーが発生しました。';
+  const body = 'Stravaとの連携でエラーが発生しました。\n\nエラー内容:\n' + message;
+
+  MailApp.sendEmail(email, subject, body);
+  props.setProperty('LAST_ERROR_NOTIFIED_AT', now.toString());
+  Logger.log('エラーメールを送信しました: ' + email);
+}
