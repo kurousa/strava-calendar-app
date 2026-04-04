@@ -29,7 +29,7 @@ function authCallback(request) {
   const service = getOAuthService();
   const authorized = service.handleCallback(request);
   if (authorized) {
-    return HtmlService.createHtmlOutput('認証が成功しました！このタブは閉じて、GASの画面に戻ってください。');
+    return HtmlService.createHtmlOutput('認証が成功しました。このタブは閉じて、GASの画面に戻ってください。');
   } else {
     return HtmlService.createHtmlOutput('認証に失敗しました。');
   }
@@ -42,7 +42,7 @@ function startAuth() {
   const service = getOAuthService();
 
   if (service.hasAccess()) {
-    Logger.log('すでにStravaとの連携（認証）は完了しています！');
+    Logger.log('すでにStravaとの連携は完了しています');
   } else {
     const authorizationUrl = service.getAuthorizationUrl();
     Logger.log('以下のURLをコピーして、ブラウザの新しいタブで開いてください:');
