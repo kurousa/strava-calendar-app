@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - 'appsscript.json'
-      - 'コード.js'
+      - 'main.js'
 
 jobs:
   deploy:
