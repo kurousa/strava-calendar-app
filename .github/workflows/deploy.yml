@@ -12,12 +12,12 @@ jobs:
 
     steps:
       - name: 1. コードをチェックアウト（取得）
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 2. Node.jsの準備
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: 3. claspのインストール
         run: npm install -g @google/clasp
@@ -32,6 +32,6 @@ jobs:
         run: |
           printf '{"scriptId":"%s","rootDir":"."}\n' "$SCRIPT_ID" > .clasp.json
 
-      - name: 6. GASへプッシュ（自動デプロイ）
+      - name: 6. GASへプッシュ(自動デプロイ)
         run: clasp push -f
 
