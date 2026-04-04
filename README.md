@@ -54,8 +54,27 @@ cd strava-calendar-app
 # claspのインストールとログイン
 npm install -g @google/clasp
 clasp login
+
+# vitestのインストール
+pnpm install --frozen-lockfile --ignore-scripts
 ```
 
+### 4. 単体テスト
+
+* テストの実行には、vitestを使用しています。
+* `tests`ディレクトリ以下に、`*.spec.js`の形式でテストファイルを作成してください。
+* `pnpm test` でテストを実行できます。
+    * テスト対象の関数は、それぞれモジュールの末尾で以下のようにexportしてください。
+    ```javascript
+    // Node.js環境（テスト時）のみエクスポートする
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            makeDefaultDescription,
+            getActivityStyle,
+            makeDescription
+        };
+    }
+    ```
 ## 📝ライセンス
 
 MIT License

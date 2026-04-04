@@ -50,6 +50,20 @@ git checkout -b fix/auth-error
 * GAS（Google Apps Script）の標準的なJavaScript（ES6）構文に従ってコードを記述してください。
 * ご自身の検証用GASプロジェクトに `clasp push` を行い、意図通りに動作するかテストを行ってください。
 * 機密情報（クライアントIDやシークレットなど）をコード内に直接書き込まないよう（ハードコードしないよう）十分注意してください。
+* テストの実行には、vitestを使用しています。
+* `tests`ディレクトリ以下に、`*.spec.js`の形式でテストファイルを作成してください。
+* `pnpm test` でテストを実行できます。
+    * テスト対象の関数は、それぞれモジュールの末尾で以下のようにexportしてください。
+    ```javascript
+    // Node.js環境（テスト時）のみエクスポートする
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            makeDefaultDescription,
+            getActivityStyle,
+            makeDescription
+        };
+    }
+    ```
 
 ### 5. コミットとプッシュ
 
