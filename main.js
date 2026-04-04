@@ -115,6 +115,14 @@ function syncStravaToCalendar() {
   }
   Logger.log(`[DEBUG]登録先calendar: ${calendar.getName()}`);
 
+  // 距離を表示するアクティビティのリスト
+  const distanceActivities = [
+    'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
+    'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
+    'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
+    'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
+  ];
+
   activities.forEach(activity => {
     // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
     const startTime = new Date(activity.start_date);
@@ -131,13 +139,7 @@ function syncStravaToCalendar() {
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
 
     // 距離を表示するアクティビティかどうかの判定
-    const distanceActivities = [
-      'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
-      'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
-      'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
-      'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
-    ];
-    const hasDistance = distanceActivities.some(t => type.includes(t)) && activity.distance > 0;
+    const hasDistance = distanceActivities.includes(type) && activity.distance > 0;
 
     const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
 
