@@ -9,7 +9,7 @@ const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDA
 /**
  * 2. 取得したアクティビティをGoogleカレンダーに登録する
  */
-function syncStravaToCalendar() {
+function main() {
   const activities = getStravaActivities();
   if (activities.length === 0) {
     Logger.log('登録するアクティビティがありませんでした。');
