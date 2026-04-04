@@ -23,12 +23,16 @@ jobs:
         run: npm install -g @google/clasp
 
       - name: 4. 認証情報の作成（シークレットから復元）
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
         run: |
-          echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+          printf "%s\n" "$CLASPRC_JSON" > ~/.clasprc.json
 
       - name: 5. プロジェクト設定ファイルの作成
+        env:
+          SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
         run: |
-          echo '{"scriptId":"${{ secrets.SCRIPT_ID }}","rootDir":"."}' > .clasp.json
+          printf '{"scriptId":"%s","rootDir":"."}\n' "$SCRIPT_ID" > .clasp.json
 
       - name: 6. GASへプッシュ（自動デプロイ）
         run: clasp push -f
