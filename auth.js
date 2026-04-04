@@ -11,6 +11,9 @@ const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
  * Strava連携のためのOAuth2サービスを取得する
  */
 function getOAuthService() {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET がスクリプトプロパティに設定されていません。');
+  }
   return OAuth2.createService('Strava')
     .setAuthorizationBaseUrl('https://www.strava.com/oauth/authorize')
     .setTokenUrl('https://www.strava.com/oauth/token')
