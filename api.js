@@ -3,6 +3,7 @@
 // Stravaのサーバーとお話をして、データを取ってくる役割だけを持ったファイルです。
 // ==========================================
 
+const API_BASE = "https://www.strava.com/api/v3";
 /**
  * Stravaから直近のアクティビティを取得する
  */
@@ -21,7 +22,7 @@ function getStravaActivities() {
   const afterTime = Math.floor(yesterday.getTime() / 1000);
 
   // StravaのAPIにアクセス
-  const url = `https://www.strava.com/api/v3/athlete/activities?after=${afterTime}`;
+  const url = `${API_BASE}/athlete/activities?after=${afterTime}`;
   try {
     const response = UrlFetchApp.fetch(url, {
       headers: {
