@@ -8,6 +8,9 @@ on:
     paths:
       - 'appsscript.json'
       - 'main.js'
+      - 'api.js'
+      - 'auth.js'
+      - 'formatters/*.js'
 
 jobs:
   deploy:
