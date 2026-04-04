@@ -172,18 +172,16 @@ function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
 // アクティビティごとの絵文字と色を定義する関数
 // ==========================================
 function getActivityStyle(type) {
-  switch (type) {
-    // ウォーキング
-    case 'Walk': return { emoji: '🚶', color: CalendarApp.EventColor.GREEN };
-    // ランニング
-    case 'Run': return { emoji: '🏃', color: CalendarApp.EventColor.BLUE };
-    // サイクリング
-    case 'Ride':
-    case 'VirtualRide': return { emoji: '🚴', color: CalendarApp.EventColor.RED };
-    // ワークアウト
-    case 'Workout':
-    case 'WeightTraining': return { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE };
-    // その他のアクティビティ
-    default: return { emoji: '🏅', color: CalendarApp.EventColor.GRAY };
-  }
+  const styles = {
+    'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
+    'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
+    'VirtualRun': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
+    'Ride': { emoji: '🚴', color: CalendarApp.EventColor.RED },
+    'VirtualRide': { emoji: '🚴', color: CalendarApp.EventColor.RED },
+    'Swim': { emoji: '🏊', color: CalendarApp.EventColor.CYAN },
+    'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
+    'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
+    'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE }
+  };
+  return styles[type] || { emoji: '🏅', color: CalendarApp.EventColor.GRAY };
 }
