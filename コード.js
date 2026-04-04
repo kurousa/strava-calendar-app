@@ -18,7 +18,7 @@ function getStravaService() {
     .setCallbackFunction('authCallback')
     .setPropertyStore(PropertiesService.getUserProperties())
     // activity:read_all で非公開アクティビティも含めて読み取り権限を要求します
-    .setScope('activity:read_all'); 
+    .setScope('activity:read_all');
 }
 
 // 認証が完了した後に呼ばれる処理
@@ -37,7 +37,7 @@ function authCallback(request) {
 // ==========================================
 function startAuth() {
   const service = getStravaService();
-  
+
   if (service.hasAccess()) {
     Logger.log('すでにStravaとの連携（認証）は完了しています！');
   } else {
@@ -111,6 +111,11 @@ function syncStravaToCalendar() {
     const startTime = new Date(activity.start_date);
     const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
 
+    // 既に登録済みのアクティビティかどうかを判定する
+    if (isAlreadyRegisteredActivity(calendar, activity.id, startTime, endTime)) {
+      return;
+    }
+
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
     const type = activity.type; // 種類（Run, Rideなど）
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
@@ -133,7 +138,27 @@ function syncStravaToCalendar() {
     calendar.createEvent(title, startTime, endTime, {
       description: description
     });
-    
+
     Logger.log(`カレンダーに登録しました: ${title}`);
   });
+}
+
+// ヘルパーメソッド
+
+// 既に登録済みのアクティビティかどうかを判定する
+function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
+  // 登録しようとしている時間帯の予定をカレンダーから取得
+  const existingEvents = calendar.getEvents(startTime, endTime);
+
+  // 取得した予定の中に、同じStravaのアクティビティIDが含まれているか確認
+  const isDuplicate = existingEvents.some(event => {
+    const desc = event.getDescription();
+    return desc && desc.includes(`strava.com/activities/${activityId}`);
+  });
+
+  if (isDuplicate) {
+    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activityId}`);
+    return true;
+  }
+  return false;
 }
