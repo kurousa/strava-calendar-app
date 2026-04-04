@@ -61,3 +61,12 @@ function resetAuth() {
   Logger.log('連携を解除しました。');
 }
 
+// Node.js環境（テスト時）のみエクスポートする
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    getOAuthService,
+    authCallback,
+    startAuth,
+    resetAuth,
+  };
+}

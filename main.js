@@ -111,3 +111,10 @@ function sendErrorEmail(message) {
   props.setProperty('LAST_ERROR_NOTIFIED_AT', now.toString());
   Logger.log('エラーメールを送信しました: ' + email);
 }
+
+// Node.js環境（テスト時）のみエクスポートする
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    sendErrorEmail,
+  };
+}

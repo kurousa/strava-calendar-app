@@ -1,0 +1,10 @@
+tests/**
+node_modules/**
+vitest.config.js
+vitest.setup.js
+package.json
+package-lock.json
+pnpm-lock.yaml
+.git/**
+.github/**
+*.md
