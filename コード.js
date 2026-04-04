@@ -119,12 +119,21 @@ function syncStravaToCalendar() {
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
     const type = activity.type; // 種類（Run, Rideなど）
     const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-    const title = `[${type}] ${activity.name} - ${distanceKm}km`;
+
+    // 距離を表示するアクティビティかどうかの判定
+    const distanceActivities = [
+      'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
+      'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
+      'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
+      'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
+    ];
+    const hasDistance = distanceActivities.some(t => type.includes(t)) && activity.distance > 0;
+
+    const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
 
     // カレンダーに登録する詳細メモ（リンクなどを入れておくと便利です）
     const description = `
-距離: ${distanceKm} km
-時間: ${Math.floor(activity.moving_time / 60)} 分
+${hasDistance ? `距離: ${distanceKm} km\n` : ''}時間: ${Math.floor(activity.moving_time / 60)} 分
 詳細: https://www.strava.com/activities/${activity.id}
     `;
 
