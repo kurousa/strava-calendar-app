@@ -160,4 +160,5 @@ function isAlreadyRegisteredActivity(calendar, activityId, startTime, endTime) {
     Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activityId}`);
     return true;
   }
+  return false;
 }
