@@ -40,3 +40,10 @@ function getStravaActivities() {
     return [];
   }
 }
+
+// Node.js環境（テスト時）のみエクスポートする
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    getStravaActivities,
+  };
+}
