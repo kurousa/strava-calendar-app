@@ -179,32 +179,6 @@ function sendErrorEmail(message) {
   Logger.log('エラーメールを送信しました: ' + email);
 }
 
-/**
- * エラーをメールで通知する
- * @param {string} message - エラーメッセージ
- */
-function sendErrorEmail(message) {
-  const email = Session.getEffectiveUser().getEmail();
-  if (!email) {
-    Logger.log('通知先メールアドレスを取得できなかったため、メール送信をスキップしました。');
-    return;
-  }
-
-  const props = PropertiesService.getUserProperties();
-  const lastNotified = props.getProperty('LAST_ERROR_NOTIFIED_AT');
-  const now = new Date().getTime();
-  if (lastNotified && now - parseInt(lastNotified) < 24 * 60 * 60 * 1000) {
-    return;
-  }
-
-  const subject = '【Strava連携エラー】再認証が必要です';
-  const body = 'Stravaとの連携でエラーが発生しました。\n\nエラー内容:\n' + message + '\n\nGASを開いてstartAuthを再実行してください。';
-
-  MailApp.sendEmail(email, subject, body);
-  props.setProperty('LAST_ERROR_NOTIFIED_AT', now.toString());
-  Logger.log('エラーメールを送信しました: ' + email);
-}
-
 // ==========================================
 // 既に登録済みのアクティビティかどうかを判定する
 // ==========================================
