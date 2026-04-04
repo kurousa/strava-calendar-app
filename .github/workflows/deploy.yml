@@ -25,19 +25,31 @@ jobs:
         with:
           node-version: '24'
 
-      - name: 3. claspのインストール
+      - name: 3. pnpmのインストール
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10.33.0
+          cache: true
+
+      - name: 4. 依存関係のインストール
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: 5. ユニットテストの実行
+        run: pnpm test
+
+      - name: 6. claspのインストール
         run: npm install -g @google/clasp
 
-      - name: 4. 認証情報の作成（シークレットから復元）
+      - name: 7. 認証情報の作成（シークレットから復元）
         run: |
           echo "${{ secrets.CLASPRC_BASE64 }}" | base64 --decode > ~/.clasprc.json
 
-      - name: 5. プロジェクト設定ファイルの作成
+      - name: 8. プロジェクト設定ファイルの作成
         env:
           SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
         run: |
           printf '{"scriptId":"%s","rootDir":"."}\n' "$SCRIPT_ID" > .clasp.json
 
-      - name: 6. GASへプッシュ(自動デプロイ)
+      - name: 9. GASへプッシュ(自動デプロイ)
         run: clasp push -f
 
