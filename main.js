@@ -82,6 +82,8 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
     return 'skipped';
   }
 
+  // ーーー ここから下は「新規」の時しか実行されない ーーー
+
   // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
   const type = activity.type; // 種類（Run, Rideなど）
   const style = getActivityStyle(type);
@@ -109,8 +111,10 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   if (style.color) {
     event.setColor(style.color);
   }
-  // カレンダーAPIの連続作成制限エラーを回避するため、1秒待機する
-  Utilities.sleep(1000);
+
+  // カレンダーAPIの連続作成制限を回避しつつ、GASの実行時間制限(6分)に配慮
+  // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間(200ms)待機する
+  Utilities.sleep(200);
 
   Logger.log(`カレンダーに登録しました: ${title}`);
   return 'success';

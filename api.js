@@ -67,8 +67,8 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
 
       page++;
 
-      // Strava APIのレート制限（連続アクセス制限）に配慮して1秒待機
-      Utilities.sleep(1000);
+      // Strava APIのレート制限（連続アクセス制限）対策
+      Utilities.sleep(200);
 
     } catch (e) {
       const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + e.toString();
