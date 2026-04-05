@@ -75,6 +75,7 @@ pnpm install --frozen-lockfile --ignore-scripts
 ### 5. 過去データのインポート
 
 ![import](import.png)
+
 ウェブアプリとしてデプロイすることで、画面から任意の期間を指定してデータをまとめてインポートできます。
 
 #### ウェブアプリのデプロイ
