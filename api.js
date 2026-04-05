@@ -16,15 +16,25 @@ function getStravaActivities(afterDate, beforeDate, per_page = 200) {
     return [];
   }
 
-  // StravaのAPIにアクセス
-  const url = new URL(`${API_BASE}/athlete/activities`);
+  // 1. ベースとなるURL
+  let url = `${API_BASE}/athlete/activities`;
 
+  // 2. パラメータの取得
   const params = getSearchParam(afterDate, beforeDate, per_page);
-  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
-  console.log(url.toString());
+  // 3. オブジェクトをクエリ文字列 (?key=value&...) に変換してURLに結合
+  const queryString = Object.keys(params)
+    .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
+    .join('&');
+
+  if (queryString) {
+    url += '?' + queryString;
+  }
+
+  console.log(url); // 組み立てられたURLを確認
+
   try {
-    const response = UrlFetchApp.fetch(url.toString(), {
+    const response = UrlFetchApp.fetch(url, {
       headers: {
         Authorization: 'Bearer ' + service.getAccessToken()
       }
