@@ -59,7 +59,10 @@ clasp login
 pnpm install --frozen-lockfile --ignore-scripts
 ```
 
-### 4. 実行設定（自動同期）
+## 📅 実行方法
+
+
+### 1. 自動同期
 
 アクティビティを毎日自動的に取得するための設定です。
 
@@ -72,7 +75,7 @@ pnpm install --frozen-lockfile --ignore-scripts
    * トリガーのタイプを選択: `日付ベースのタイマー`
    * 時刻を選択: （例：午前6時〜7時）
 
-### 5. 過去データのインポート
+### 2. 過去データのインポート
 
 ![import](import.png)
 
@@ -93,7 +96,7 @@ pnpm install --frozen-lockfile --ignore-scripts
    * **重複検知**: 既にカレンダーに登録済みのアクティビティ（Stravaの活動URLが詳細欄にあるもの）は自動的にスキップされます。
    * **処理時間**: 数ヶ月以上の長期データを一括取得する場合、処理に数分かかることがあります。
 
-### 6. 単体テスト
+## 🧪 テスト
 
 開発時のテストには Vitest を使用しています。
 
