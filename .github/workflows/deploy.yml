@@ -11,6 +11,8 @@ on:
       - 'api.js'
       - 'auth.js'
       - 'formatters/*.js'
+      - 'index.html'
+      - 'manual_import.js'
 
 jobs:
   deploy:
