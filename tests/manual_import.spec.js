@@ -30,7 +30,7 @@ describe('manual_import', () => {
         const expectedStartDate = new Date(mockNow);
         expectedStartDate.setMonth(mockNow.getMonth() - 1);
 
-        expect(global.getStravaActivities).toHaveBeenCalledWith(expectedStartDate, expectedEndDate);
+        expect(global.getStravaActivities).toHaveBeenCalledWith(expectedStartDate, expectedEndDate, 200);
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('直近1ヶ月'));
 
         vi.useRealTimers();
@@ -44,7 +44,7 @@ describe('manual_import', () => {
         const result = importPastActivities(startDate, endDate);
 
         expect(result).toBe('該当する期間のアクティビティはありませんでした。');
-        expect(global.getStravaActivities).toHaveBeenCalledWith(startDate, endDate);
+        expect(global.getStravaActivities).toHaveBeenCalledWith(startDate, endDate, 200);
     });
 
     it('should return an error message when calendar retrieval fails', () => {

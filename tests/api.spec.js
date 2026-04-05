@@ -9,6 +9,7 @@ describe('api', () => {
 
     const mockResponse = {
         getContentText: vi.fn(),
+        getResponseCode: vi.fn(),
     };
 
     beforeEach(() => {
@@ -29,6 +30,7 @@ describe('api', () => {
 
         mockService.hasAccess.mockReturnValue(true);
         mockService.getAccessToken.mockReturnValue('fake_token');
+        mockResponse.getResponseCode.mockReturnValue(200);
         mockResponse.getContentText.mockReturnValue(JSON.stringify(activities));
 
         const result = getStravaActivities();
