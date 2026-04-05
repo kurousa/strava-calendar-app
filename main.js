@@ -139,17 +139,6 @@ function doGet() {
     .setTitle('Strava カレンダーインポート');
 }
 
-// ==========================================
-// 【Webアプリ用】画面から受け取った日付でインポートを実行
-// ==========================================
-function importPastActivitiesFromWeb(startStr, endStr) {
-  // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
-  const startDate = new Date(`${startStr}T00:00:00`);
-  const endDate = new Date(`${endStr}T23:59:59`);
-
-  return importPastActivities(startDate, endDate);
-}
-
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {

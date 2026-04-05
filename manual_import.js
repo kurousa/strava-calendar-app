@@ -1,7 +1,19 @@
 // ==========================================
+// 【Webアプリ用】画面から受け取った日付でインポートを実行
+// ==========================================
+function importPastActivitiesFromWeb(startStr, endStr) {
+    // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
+    const startDate = new Date(`${startStr}T00:00:00`);
+    const endDate = new Date(`${endStr}T23:59:59`);
+
+    return importPastActivities(startDate, endDate);
+}
+
+
+// ==========================================
 // 指定した期間の過去データを取り込む (画面からの実行用)
 // ==========================================
-function importPastActivities(startDate, endDate) {
+function importPastActivities(startDate, endDate, perPage = 200) {
     // Web画面以外（エディタ等）から直接実行された場合のデフォルト（テスト用）
     if (!startDate || !endDate) {
         startDate = new Date();
@@ -13,7 +25,7 @@ function importPastActivities(startDate, endDate) {
     Logger.log(`[Import] ${startDate.toLocaleDateString()} から ${endDate.toLocaleDateString()} のデータを取り込みます...`);
 
     // api.js の関数を呼び出し
-    const activities = getStravaActivities(startDate, endDate);
+    const activities = getStravaActivities(startDate, endDate, perPage);
 
     if (activities.length === 0) {
         const msg = '該当する期間のアクティビティはありませんでした。';
