@@ -1,4 +1,4 @@
-// ==========================================
+// = :=========================================
 // 汎用 (その他) のフォーマット処理
 // ==========================================
 function makeDefaultDescription(activity) {
@@ -34,22 +34,27 @@ function makeDefaultDescription(activity) {
   return descriptionLines.join('\n').trim();
 }
 
+// アクティビティごとの絵文字と色の定義
+const ACTIVITY_STYLES = Object.freeze({
+  'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
+  'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
+  'VirtualRun': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
+  'Ride': { emoji: '🚴', color: CalendarApp.EventColor.RED },
+  'VirtualRide': { emoji: '🚴', color: CalendarApp.EventColor.RED },
+  'Swim': { emoji: '🏊', color: CalendarApp.EventColor.CYAN },
+  'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
+  'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
+  'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE }
+});
+
+// デフォルトのスタイル定義
+const DEFAULT_ACTIVITY_STYLE = Object.freeze({ emoji: '🏅', color: CalendarApp.EventColor.GRAY });
+
 // ==========================================
 // アクティビティごとの絵文字と色を定義する関数
 // ==========================================
 function getActivityStyle(type) {
-  const styles = {
-    'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
-    'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
-    'VirtualRun': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
-    'Ride': { emoji: '🚴', color: CalendarApp.EventColor.RED },
-    'VirtualRide': { emoji: '🚴', color: CalendarApp.EventColor.RED },
-    'Swim': { emoji: '🏊', color: CalendarApp.EventColor.CYAN },
-    'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
-    'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
-    'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE }
-  };
-  return styles[type] || { emoji: '🏅', color: CalendarApp.EventColor.GRAY };
+  return ACTIVITY_STYLES[type] || DEFAULT_ACTIVITY_STYLE;
 }
 
 // ==========================================
