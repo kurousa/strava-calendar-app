@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #fc4c02;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="date"] {
+            padding: 10px;
+            margin: 5px 0 20px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 12px;
+            background: #fc4c02;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #e34302;
+        }
+
+        #message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Strava データインポート</h2>
+        <label>開始日:</label>
+        <input type="date" id="startDate" required>
+        <label>終了日:</label>
+        <input type="date" id="endDate" required>
+        <button onclick="startImport()" id="btn">インポート開始</button>
+        <div id="message"></div>
+    </div>
+    <script>
+        function startImport() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            if (!start || !end) {
+                alert('開始日と終了日を入力してください。');
+                return;
+            }
+            document.getElementById('message').innerText = 'インポート処理を実行中...\n※データ量によっては数分かかります。そのままお待ちください。';
+            document.getElementById('btn').disabled = true;
+            document.getElementById('btn').innerText = '処理中...';
+
+            google.script.run
+                .withSuccessHandler(function (result) {
+                    document.getElementById('message').innerText = result;
+                    document.getElementById('btn').disabled = false;
+                    document.getElementById('btn').innerText = 'インポート開始';
+                })
+                .withFailureHandler(function (error) {
+                    document.getElementById('message').innerText = 'エラーが発生しました:\n' + error.message;
+                    document.getElementById('btn').disabled = false;
+                    document.getElementById('btn').innerText = 'インポート開始';
+                })
+                .importPastActivitiesFromWeb(start, end);
+        }
+    </script>
+</body>
+
+</html>

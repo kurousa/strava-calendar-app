@@ -5,6 +5,13 @@
 // ==========================================
 
 const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+// 距離を表示するアクティビティのリスト
+const DISTANCE_ACTIVITIES = [
+  'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
+  'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
+  'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
+  'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
+];
 
 /**
  * 取得したアクティビティをGoogleカレンダーに登録する
@@ -21,71 +28,11 @@ function main() {
   Logger.log("[DEBUG]取得できたアクティビティのsample" + JSON.stringify(activities[0]));
 
   // カレンダーの取得（IDが指定されていればそれを使用、なければデフォルトを使用）
-  let calendar;
-  if (CALENDAR_ID) {
-    calendar = CalendarApp.getCalendarById(CALENDAR_ID);
-    if (!calendar) {
-      Logger.log('エラー: 指定されたカレンダーが見つかりません。カレンダーIDを確認してください。');
-      return;
-    }
-  } else {
-    calendar = CalendarApp.getDefaultCalendar();
-    Logger.log('※カレンダーIDが設定されていないため、デフォルトのカレンダーに登録します。');
-  }
+  const calendar = getTargetCalendar();
   Logger.log(`[DEBUG]登録先calendar: ${calendar.getName()}`);
 
-  // 距離を表示するアクティビティのリスト
-  const distanceActivities = [
-    'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
-    'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
-    'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
-    'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
-  ];
-
   activities.forEach(activity => {
-    // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
-    const startTime = new Date(activity.start_date);
-    const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
-
-    // 既に登録済みのアクティビティかどうかを判定する (in-lined)
-    const existingEvents = calendar.getEvents(startTime, endTime);
-    const isDuplicate = existingEvents.some(event => {
-      const desc = event.getDescription();
-      return desc && desc.includes(`strava.com/activities/${activity.id}`);
-    });
-
-    if (isDuplicate) {
-      Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-      return;
-    }
-
-    // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
-    const type = activity.type; // 種類（Run, Rideなど）
-    const style = getActivityStyle(type);
-    const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-
-    // 距離を表示するアクティビティかどうかの判定
-    const hasDistance = distanceActivities.includes(type) && activity.distance > 0;
-
-    const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
-
-    // カレンダーに登録する詳細メモ
-    const description = makeDescription(activity);
-
-    Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
-    Logger.log("[DEBUG]title -> " + title);
-    Logger.log("[DEBUG]startTime -> " + startTime);
-    Logger.log("[DEBUG]endTime -> " + endTime);
-    Logger.log("[DEBUG]description -> " + description);
-
-    // カレンダーに予定として作成
-    const event = calendar.createEvent(title, startTime, endTime, {
-      description: description
-    });
-    // イベントに色を設定する
-    event.setColor(style.color);
-
-    Logger.log(`カレンダーに登録しました: ${title}`);
+    processActivityToCalendar(activity, calendar);
   });
 }
 
@@ -113,6 +60,94 @@ function sendErrorEmail(message) {
   MailApp.sendEmail(email, subject, body);
   props.setProperty('LAST_ERROR_NOTIFIED_AT', now.toString());
   Logger.log('エラーメールを送信しました: ' + email);
+}
+
+// ==========================================
+// アクティビティをカレンダーに登録する共通処理
+// ==========================================
+function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES) {
+  // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
+  const startTime = new Date(activity.start_date);
+  const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
+
+  // 既に登録済みのアクティビティかどうかを判定する (in-lined)
+  const existingEvents = calendar.getEvents(startTime, endTime);
+  const isDuplicate = existingEvents.some(event => {
+    const desc = event.getDescription();
+    return desc && desc.includes(`strava.com/activities/${activity.id}`);
+  });
+
+  if (isDuplicate) {
+    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+    return 'skipped';
+  }
+
+  // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
+  const type = activity.type; // 種類（Run, Rideなど）
+  const style = getActivityStyle(type);
+  const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
+
+  // 距離を表示するアクティビティかどうかの判定
+  const hasDistance = distanceActivities.includes(type) && activity.distance > 0;
+
+  const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
+
+  // カレンダーに登録する詳細メモ
+  const description = makeDescription(activity);
+
+  Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
+  Logger.log("[DEBUG]title -> " + title);
+  Logger.log("[DEBUG]startTime -> " + startTime);
+  Logger.log("[DEBUG]endTime -> " + endTime);
+  Logger.log("[DEBUG]description -> " + description);
+
+  // カレンダーに予定として作成
+  const event = calendar.createEvent(title, startTime, endTime, {
+    description: description
+  });
+  // イベントに色を設定する
+  if (style.color) {
+    event.setColor(style.color);
+  }
+  // カレンダーAPIの連続作成制限エラーを回避するため、1秒待機する
+  Utilities.sleep(1000);
+
+  Logger.log(`カレンダーに登録しました: ${title}`);
+  return 'success';
+}
+
+// ==========================================
+// カレンダー取得ユーティリティ
+// ==========================================
+function getTargetCalendar() {
+  if (CALENDAR_ID) {
+    const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+    if (!calendar) {
+      Logger.log('エラー: 指定されたカレンダーが見つかりません。');
+    }
+    return calendar;
+  }
+  return CalendarApp.getDefaultCalendar();
+}
+
+// ==========================================
+// 【Webアプリ用】インポート画面（HTML）を表示する
+// ==========================================
+function doGet() {
+  // 'index' という名前のHTMLファイルを読み込んで表示する
+  return HtmlService.createHtmlOutputFromFile('index')
+    .setTitle('Strava カレンダーインポート');
+}
+
+// ==========================================
+// 【Webアプリ用】画面から受け取った日付でインポートを実行
+// ==========================================
+function importPastActivitiesFromWeb(startStr, endStr) {
+  // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
+  const startDate = new Date(`${startStr}T00:00:00`);
+  const endDate = new Date(`${endStr}T23:59:59`);
+
+  return importPastActivities(startDate, endDate);
 }
 
 // Node.js環境（テスト時）のみエクスポートする
