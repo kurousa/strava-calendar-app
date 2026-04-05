@@ -1,4 +1,18 @@
 import { describe, it, expect } from 'vitest';
+
+// Mock Google Apps Script global CalendarApp
+global.CalendarApp = {
+    EventColor: {
+        BLUE: 'BLUE',
+        RED: 'RED',
+        GREEN: 'GREEN',
+        CYAN: 'CYAN',
+        PALE_GREEN: 'PALE_GREEN',
+        ORANGE: 'ORANGE',
+        GRAY: 'GRAY'
+    },
+};
+
 import { makeDefaultDescription, getActivityStyle } from '../formatters/DefaultFormatter';
 
 describe('DefaultFormatter', () => {
