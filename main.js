@@ -102,10 +102,8 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   const description = makeDescription(activity);
 
   Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
-  Logger.log("[DEBUG]title -> " + title);
   Logger.log("[DEBUG]startTime -> " + startTime);
   Logger.log("[DEBUG]endTime -> " + endTime);
-  Logger.log("[DEBUG]description -> " + description);
 
   // カレンダーに予定として作成
   const event = calendar.createEvent(title, startTime, endTime, {
@@ -120,7 +118,7 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間(200ms)待機する
   Utilities.sleep(200);
 
-  Logger.log(`カレンダーに登録しました: ${title}`);
+  Logger.log(`カレンダーに登録しました: ID ${activity.id}`);
   return 'success';
 }
 
