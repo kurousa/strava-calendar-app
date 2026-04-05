@@ -10,7 +10,10 @@ const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDA
  * 取得したアクティビティをGoogleカレンダーに登録する
  */
 function main() {
-  const activities = getStravaActivities();
+  // 実行時刻の1日前から現在時刻までのアクティビティを取得
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const activities = getStravaActivities(yesterday, new Date());
   if (activities.length === 0) {
     Logger.log('登録するアクティビティがありませんでした。');
     return;
