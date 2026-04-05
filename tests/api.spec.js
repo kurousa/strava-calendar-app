@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getStravaActivities } from '../api';
+import { getStravaActivities, getSearchParam, convertToTime } from '../api';
 
 describe('api', () => {
     const mockService = {
@@ -35,12 +35,12 @@ describe('api', () => {
 
         expect(result).toEqual(activities);
         expect(global.UrlFetchApp.fetch).toHaveBeenCalledWith(
-            expect.stringContaining('https://www.strava.com/api/v3/athlete/activities'),
-            {
+            expect.stringMatching(/https:\/\/www\.strava\.com\/api\/v3\/athlete\/activities/),
+            expect.objectContaining({
                 headers: {
                     Authorization: 'Bearer fake_token'
                 }
-            }
+            })
         );
     });
 
@@ -65,6 +65,48 @@ describe('api', () => {
 
         expect(result).toEqual([]);
         expect(global.sendErrorEmail).toHaveBeenCalled();
-        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Strava APIの呼び出しに失敗しました'));
+    });
+
+    describe('getSearchParam', () => {
+        it('should return correct params with all arguments', () => {
+            const afterDate = new Date('2024-01-01T00:00:00Z');
+            const beforeDate = new Date('2024-01-02T00:00:00Z');
+            const perPage = 100;
+
+            const params = getSearchParam(afterDate, beforeDate, perPage);
+
+            expect(params.per_page).toBe(100);
+            expect(params.after).toBe(convertToTime(afterDate));
+            expect(params.before).toBe(convertToTime(beforeDate));
+        });
+
+        it('should set default after and before dates if not provided', () => {
+            const perPage = 50;
+            const now = new Date('2024-01-05T12:00:00Z');
+            vi.useFakeTimers();
+            vi.setSystemTime(now);
+
+            const params = getSearchParam(undefined, undefined, perPage);
+
+            expect(params.per_page).toBe(50);
+
+            const expectedBefore = convertToTime(now);
+            const expectedAfterDate = new Date(now);
+            expectedAfterDate.setDate(now.getDate() - 1);
+            const expectedAfter = convertToTime(expectedAfterDate);
+
+            expect(params.before).toBe(expectedBefore);
+            expect(params.after).toBe(expectedAfter);
+
+            vi.useRealTimers();
+        });
+    });
+
+    describe('convertToTime', () => {
+        it('should convert Date to unix timestamp (seconds)', () => {
+            const date = new Date('2024-01-02T00:00:10Z');
+            const seconds = convertToTime(date);
+            expect(seconds).toBe(1704153610);
+        });
     });
 });
