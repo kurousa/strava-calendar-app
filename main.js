@@ -29,6 +29,10 @@ function main() {
 
   // カレンダーの取得（IDが指定されていればそれを使用、なければデフォルトを使用）
   const calendar = getTargetCalendar();
+  if (!calendar) {
+    Logger.log('カレンダーの取得に失敗しました。');
+    return;
+  }
   Logger.log(`[DEBUG]登録先calendar: ${calendar.getName()}`);
 
   activities.forEach(activity => {
