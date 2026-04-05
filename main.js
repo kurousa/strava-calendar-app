@@ -25,7 +25,7 @@ function main() {
     Logger.log('登録するアクティビティがありませんでした。');
     return;
   }
-  Logger.log("[DEBUG]取得できたアクティビティのsample" + JSON.stringify(activities[0]));
+  Logger.log("[DEBUG]取得できたアクティビティのID: " + activities[0].id);
 
   // カレンダーの取得（IDが指定されていればそれを使用、なければデフォルトを使用）
   const calendar = getTargetCalendar();
