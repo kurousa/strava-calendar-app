@@ -60,10 +60,6 @@ describe('main', () => {
     });
 
     describe('doGet', () => {
-        beforeEach(() => {
-            vi.clearAllMocks();
-        });
-
         it('should create HTML output from index file and set title', () => {
             const mockSetTitle = vi.fn().mockReturnThis();
             global.HtmlService.createHtmlOutputFromFile.mockReturnValue({
