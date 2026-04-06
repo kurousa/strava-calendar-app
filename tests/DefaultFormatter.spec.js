@@ -14,8 +14,6 @@ global.CalendarApp = {
 };
 
 import { makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
-import { makeRideDescription } from '../formatters/RideFormatter';
-import { makeRunDescription } from '../formatters/RunFormatter';
 
 describe('DefaultFormatter', () => {
     describe('makeDefaultDescription', () => {
