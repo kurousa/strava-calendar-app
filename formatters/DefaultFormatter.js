@@ -51,13 +51,10 @@ function deepFreeze(object) {
 // アクティビティごとの絵文字と色の定義
 // CalendarApp.EventColor への参照は、Node.js環境での ReferenceError 回避のため
 // 関数呼び出し時に解決されるように遅延評価するか、またはモックが存在することを確認する必要があります。
-// ここでは、定義自体を関数内にカプセル化して、初回呼び出し時に初期化するパターンを採用します。
 let ACTIVITY_STYLES_CACHE = null;
 let DEFAULT_ACTIVITY_STYLE_CACHE = null;
 
 function initStyles() {
-  if (ACTIVITY_STYLES_CACHE) return;
-
   ACTIVITY_STYLES_CACHE = deepFreeze({
     'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
     'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
@@ -77,7 +74,9 @@ function initStyles() {
 // アクティビティごとの絵文字と色を定義する関数
 // ==========================================
 function getActivityStyle(type) {
-  initStyles();
+  if (!ACTIVITY_STYLES_CACHE) {
+    initStyles();
+  }
   return ACTIVITY_STYLES_CACHE[type] || DEFAULT_ACTIVITY_STYLE_CACHE;
 }
 
