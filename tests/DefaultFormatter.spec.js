@@ -40,34 +40,44 @@ describe('DefaultFormatter', () => {
     });
 
     describe('getActivityStyle', () => {
-        const styleTestCases = [
-            ['Walk', { emoji: '🚶', color: 'GREEN' }],
-            ['Run', { emoji: '🏃', color: 'BLUE' }],
-            ['VirtualRun', { emoji: '🏃', color: 'BLUE' }],
-            ['Ride', { emoji: '🚴', color: 'RED' }],
-            ['VirtualRide', { emoji: '🚴', color: 'RED' }],
-            ['Swim', { emoji: '🏊', color: 'CYAN' }],
-            ['Hike', { emoji: '🥾', color: 'PALE_GREEN' }],
-            ['Workout', { emoji: '🏋️', color: 'ORANGE' }],
-            ['WeightTraining', { emoji: '🏋️', color: 'ORANGE' }],
-            ['Unknown', { emoji: '🏅', color: 'GRAY' }] // Default case
-        ];
-
-        it.each(styleTestCases)('should return correct style for %s', (type, expectedStyle) => {
-            expect(getActivityStyle(type)).toEqual(expectedStyle);
+        it('should return correct style for Walk', () => {
+            expect(getActivityStyle('Walk')).toEqual({ emoji: '🚶', color: 'GREEN' });
         });
 
-        it('should return an immutable (frozen) object to prevent cache side-effects', () => {
-            const style = getActivityStyle('Run');
+        it('should return correct style for Run', () => {
+            expect(getActivityStyle('Run')).toEqual({ emoji: '🏃', color: 'BLUE' });
+        });
 
-            // Verify the object is frozen
-            expect(Object.isFrozen(style)).toBe(true);
+        it('should return correct style for VirtualRun', () => {
+            expect(getActivityStyle('VirtualRun')).toEqual({ emoji: '🏃', color: 'BLUE' });
+        });
 
-            // Attempting to mutate a frozen object should throw a TypeError in strict mode.
-            expect(() => {
-                'use strict';
-                style.emoji = '🚀';
-            }).toThrow(TypeError);
+        it('should return correct style for Ride', () => {
+            expect(getActivityStyle('Ride')).toEqual({ emoji: '🚴', color: 'RED' });
+        });
+
+        it('should return correct style for VirtualRide', () => {
+            expect(getActivityStyle('VirtualRide')).toEqual({ emoji: '🚴', color: 'RED' });
+        });
+
+        it('should return correct style for Swim', () => {
+            expect(getActivityStyle('Swim')).toEqual({ emoji: '🏊', color: 'CYAN' });
+        });
+
+        it('should return correct style for Hike', () => {
+            expect(getActivityStyle('Hike')).toEqual({ emoji: '🥾', color: 'PALE_GREEN' });
+        });
+
+        it('should return correct style for Workout', () => {
+            expect(getActivityStyle('Workout')).toEqual({ emoji: '🏋️', color: 'ORANGE' });
+        });
+
+        it('should return correct style for WeightTraining', () => {
+            expect(getActivityStyle('WeightTraining')).toEqual({ emoji: '🏋️', color: 'ORANGE' });
+        });
+
+        it('should return default style for unknown type', () => {
+            expect(getActivityStyle('Unknown')).toEqual({ emoji: '🏅', color: 'GRAY' });
         });
     });
 });

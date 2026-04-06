@@ -38,13 +38,7 @@ global.OAuth2 = {
 };
 
 global.HtmlService = {
-    createHtmlOutput: vi.fn(),
-    createHtmlOutputFromFile: vi.fn(() => {
-        const mockOutput = {
-            setTitle: vi.fn().mockReturnThis(),
-        };
-        return mockOutput;
-    })
+    createHtmlOutput: vi.fn()
 };
 
 global.Session = {
@@ -56,7 +50,3 @@ global.Session = {
 global.MailApp = {
     sendEmail: vi.fn()
 };
-
-// Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
-import * as DefaultFormatter from './formatters/DefaultFormatter.js';
-global.getCommonMetrics = DefaultFormatter.getCommonMetrics || (() => ({}));

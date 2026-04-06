@@ -9,12 +9,12 @@ const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDA
 const CALENDAR_API_DELAY_MS = 200;
 
 // 距離を表示するアクティビティのリスト
-const DISTANCE_ACTIVITIES = new Set([
+const DISTANCE_ACTIVITIES = [
   'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
   'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
   'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
   'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
-]);
+];
 
 /**
  * 取得したアクティビティをGoogleカレンダーに登録する
@@ -28,7 +28,7 @@ function main() {
     Logger.log('登録するアクティビティがありませんでした。');
     return;
   }
-  Logger.log("[DEBUG]取得できたアクティビティの数: " + activities.length + ", 最初のアクティビティID: " + activities[0].id); // 🔒 Security: Only log activity ID to prevent PII exposure
+  Logger.log("[DEBUG]取得できたアクティビティのID: " + activities[0].id);
 
   // カレンダーの取得（IDが指定されていればそれを使用、なければデフォルトを使用）
   const calendar = getTargetCalendar();
@@ -100,7 +100,7 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
 
   // 距離を表示するアクティビティかどうかの判定
-  const hasDistance = distanceActivities.has(type) && activity.distance > 0;
+  const hasDistance = distanceActivities.includes(type) && activity.distance > 0;
 
   const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
 
@@ -156,6 +156,5 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     sendErrorEmail,
     getTargetCalendar,
-    doGet,
   };
 }

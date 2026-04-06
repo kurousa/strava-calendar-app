@@ -2,8 +2,10 @@
 // 自転車 (Ride / VirtualRide) 専用のフォーマット処理
 // ==========================================
 function makeRideDescription(activity) {
-  // 共通のメトリクス計算 (DefaultFormatter.js で定義、GAS環境/vitestでグローバル解決)
-  const { distanceKm, timeMin, elevation, hr } = getCommonMetrics(activity);
+  const distanceKm = (activity.distance / 1000).toFixed(1);
+  const timeMin = Math.floor(activity.moving_time / 60);
+  const elevation = activity.total_elevation_gain || 0;
+  const hr = activity.has_heartrate ? `${activity.average_heartrate} bpm` : '測定なし';
 
   // 自転車専用の計算（時速、パワー、ケイデンス）
   const speedKmh = activity.average_speed ? (activity.average_speed * 3.6).toFixed(1) : 0;
