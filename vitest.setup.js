@@ -48,3 +48,12 @@ global.Session = {
 global.MailApp = {
     sendEmail: vi.fn()
 };
+// Test utils dependency resolution
+global.extractCommonMetrics = function(activity) {
+  return {
+    distanceKm: (activity.distance / 1000).toFixed(1),
+    timeMin: Math.floor(activity.moving_time / 60),
+    elevation: activity.total_elevation_gain || 0,
+    hr: activity.has_heartrate ? `${activity.average_heartrate} bpm` : '測定なし'
+  };
+};

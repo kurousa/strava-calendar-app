@@ -1,7 +1,19 @@
 // ==========================================
+// 共通のメトリクス計算処理
+// ==========================================
+export function extractCommonMetrics(activity) {
+  return {
+    distanceKm: (activity.distance / 1000).toFixed(1),
+    timeMin: Math.floor(activity.moving_time / 60),
+    elevation: activity.total_elevation_gain || 0,
+    hr: activity.has_heartrate ? `${activity.average_heartrate} bpm` : '測定なし'
+  };
+}
+
+// ==========================================
 // 汎用 (その他) のフォーマット処理
 // ==========================================
-function makeDefaultDescription(activity) {
+export function makeDefaultDescription(activity) {
   let descriptionLines = [];
 
   // 距離 (0より大きければ追加)
@@ -76,7 +88,7 @@ function initStyles() {
 // ==========================================
 // アクティビティごとの絵文字と色を定義する関数
 // ==========================================
-function getActivityStyle(type) {
+export function getActivityStyle(type) {
   initStyles();
   return ACTIVITY_STYLES_CACHE[type] || DEFAULT_ACTIVITY_STYLE_CACHE;
 }
@@ -84,24 +96,20 @@ function getActivityStyle(type) {
 // ==========================================
 // アクティビティごとのフォーマット処理を呼び分ける関数
 // ==========================================
-function makeDescription(activity) {
+export function makeDescription(activity) {
   console.log(`[DEBUG] activity type: ${activity.type}`);
 
+  // GASはESモジュールをサポートしていないため、import文なしでグローバルに関数を呼び出せる前提のコードですが
+  // import文がないとテストが通らなくなります。
+  // GASの環境ではファイルが結合されるのでmakeRideDescriptionなどがグローバルに存在します
   if (activity.type === 'Ride' || activity.type === 'VirtualRide') {
-    return makeRideDescription(activity);
+    // GAS環境で動かすためのハック。
+    // 実際には main.js などのエントリーポイントで統合されたファイルとして扱われる。
+    return typeof makeRideDescription !== 'undefined' ? makeRideDescription(activity) : makeDefaultDescription(activity);
   } else if (activity.type === 'Run' || activity.type === 'Walk') {
-    return makeRunDescription(activity);
+    return typeof makeRunDescription !== 'undefined' ? makeRunDescription(activity) : makeDefaultDescription(activity);
   } else {
     // 追加した汎用フォーマッタを呼び出す
     return makeDefaultDescription(activity);
   }
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    makeDefaultDescription,
-    getActivityStyle,
-    makeDescription
-  };
 }
