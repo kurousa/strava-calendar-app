@@ -28,7 +28,7 @@ function main() {
     Logger.log('登録するアクティビティがありませんでした。');
     return;
   }
-  Logger.log("[DEBUG]取得できたアクティビティのID: " + activities[0].id);
+  Logger.log("[DEBUG]取得できたアクティビティの数: " + activities.length + ", 最初のアクティビティID: " + activities[0].id); // 🔒 Security: Only log activity ID to prevent PII exposure
 
   // カレンダーの取得（IDが指定されていればそれを使用、なければデフォルトを使用）
   const calendar = getTargetCalendar();
