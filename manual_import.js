@@ -2,9 +2,20 @@
 // 【Webアプリ用】画面から受け取った日付でインポートを実行
 // ==========================================
 function importPastActivitiesFromWeb(startStr, endStr) {
+    // Validate input format YYYY-MM-DD
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!startStr || !endStr || !dateRegex.test(startStr) || !dateRegex.test(endStr)) {
+        return 'エラー: 日付の形式が正しくありません (YYYY-MM-DD)。';
+    }
+
     // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
     const startDate = new Date(`${startStr}T00:00:00`);
     const endDate = new Date(`${endStr}T23:59:59`);
+
+    // Check if dates are valid
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return 'エラー: 無効な日付が指定されました。';
+    }
 
     return importPastActivities(startDate, endDate);
 }
@@ -81,5 +92,6 @@ function importPastActivities(startDate, endDate, perPage = 200) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         importPastActivities,
+        importPastActivitiesFromWeb,
     };
 }

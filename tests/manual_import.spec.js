@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { importPastActivities } from '../manual_import';
+import { importPastActivities, importPastActivitiesFromWeb } from '../manual_import';
 
 describe('manual_import', () => {
     beforeEach(() => {
@@ -88,5 +88,43 @@ describe('manual_import', () => {
         expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(1, mockActivities[0], mockCalendar, undefined, true);
         expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(2, mockActivities[2], mockCalendar, undefined, true);
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('完了!'));
+    });
+});
+
+describe('importPastActivitiesFromWeb', () => {
+    beforeEach(() => {
+        vi.resetAllMocks();
+        vi.stubGlobal('getStravaActivities', vi.fn().mockReturnValue([]));
+        vi.stubGlobal('getTargetCalendar', vi.fn().mockReturnValue(null));
+        vi.stubGlobal('Logger', { log: vi.fn() });
+    });
+
+    it('should reject invalid date formats', () => {
+        const result1 = importPastActivitiesFromWeb('2024/01/01', '2024-01-31');
+        const result2 = importPastActivitiesFromWeb('2024-01-01', '2024/01/31');
+        const result3 = importPastActivitiesFromWeb('abcdef', '123456');
+        const result4 = importPastActivitiesFromWeb('', '2024-01-31');
+
+        const expectedError = 'エラー: 日付の形式が正しくありません (YYYY-MM-DD)。';
+        expect(result1).toBe(expectedError);
+        expect(result2).toBe(expectedError);
+        expect(result3).toBe(expectedError);
+        expect(result4).toBe(expectedError);
+    });
+
+    it('should reject invalid dates', () => {
+        const result = importPastActivitiesFromWeb('2024-13-45', '2024-01-31');
+        expect(result).toBe('エラー: 無効な日付が指定されました。');
+    });
+
+    it('should process valid dates', () => {
+        const startStr = '2024-01-01';
+        const endStr = '2024-01-31';
+
+        global.getStravaActivities.mockReturnValue([]);
+
+        const result = importPastActivitiesFromWeb(startStr, endStr);
+        expect(result).toBe('該当する期間のアクティビティはありませんでした。');
+        expect(global.getStravaActivities).toHaveBeenCalled();
     });
 });
