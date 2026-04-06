@@ -1,7 +1,44 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { importPastActivities } from '../manual_import';
+import { importPastActivities, importPastActivitiesFromWeb } from '../manual_import';
 
 describe('manual_import', () => {
+
+    describe('importPastActivitiesFromWeb', () => {
+        beforeEach(() => {
+            vi.resetAllMocks();
+            vi.stubGlobal('Logger', { log: vi.fn() });
+            vi.stubGlobal('getStravaActivities', vi.fn());
+            vi.stubGlobal('getTargetCalendar', vi.fn());
+        });
+
+        it('should correctly parse dates and pass them to importPastActivities', () => {
+            global.getStravaActivities.mockReturnValue([]);
+
+            const startStr = '2024-03-01';
+            const endStr = '2024-03-31';
+
+            const result = importPastActivitiesFromWeb(startStr, endStr);
+
+            expect(result).toBe('該当する期間のアクティビティはありませんでした。');
+
+            // Check that getStravaActivities was called with correctly parsed dates
+            expect(global.getStravaActivities).toHaveBeenCalledTimes(1);
+            const callArgs = global.getStravaActivities.mock.calls[0];
+
+            expect(callArgs[0]).toBeInstanceOf(Date);
+            // using getTime() to compare properly, accounting for local timezone issues where Date string output varies
+            const expectedStart = new Date('2024-03-01T00:00:00');
+            const expectedEnd = new Date('2024-03-31T23:59:59');
+
+            expect(callArgs[0].getTime()).toBe(expectedStart.getTime());
+
+            expect(callArgs[1]).toBeInstanceOf(Date);
+            expect(callArgs[1].getTime()).toBe(expectedEnd.getTime());
+
+            expect(callArgs[2]).toBe(200); // default perPage
+        });
+    });
+
     beforeEach(() => {
         vi.resetAllMocks();
 
