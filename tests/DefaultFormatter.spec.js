@@ -14,6 +14,8 @@ global.CalendarApp = {
 };
 
 import { makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
+import { makeRideDescription } from '../formatters/RideFormatter';
+import { makeRunDescription } from '../formatters/RunFormatter';
 
 describe('DefaultFormatter', () => {
     describe('makeDefaultDescription', () => {
@@ -86,13 +88,12 @@ describe('DefaultFormatter', () => {
             // makeDescription internally calls global makeRideDescription and makeRunDescription
             // because in GAS they are in the same global scope.
             // We mock them globally for tests to verify routing behavior.
-            global.makeRideDescription = vi.fn((activity) => `RIDE: ${activity.id}`);
-            global.makeRunDescription = vi.fn((activity) => `RUN: ${activity.id}`);
+            vi.stubGlobal('makeRideDescription', vi.fn((activity) => `RIDE: ${activity.id}`));
+            vi.stubGlobal('makeRunDescription', vi.fn((activity) => `RUN: ${activity.id}`));
         });
 
         afterEach(() => {
-            delete global.makeRideDescription;
-            delete global.makeRunDescription;
+            vi.unstubAllGlobals();
         });
 
         it('should delegate to makeRideDescription for Ride', () => {
