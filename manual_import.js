@@ -81,5 +81,6 @@ function importPastActivities(startDate, endDate, perPage = 200) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         importPastActivities,
+        importPastActivitiesFromWeb,
     };
 }
