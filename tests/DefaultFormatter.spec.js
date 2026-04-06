@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock Google Apps Script global CalendarApp
 global.CalendarApp = {
@@ -13,7 +13,9 @@ global.CalendarApp = {
     },
 };
 
-import { makeDefaultDescription, getActivityStyle } from '../formatters/DefaultFormatter';
+import { makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
+import { makeRideDescription } from '../formatters/RideFormatter';
+import { makeRunDescription } from '../formatters/RunFormatter';
 
 describe('DefaultFormatter', () => {
     describe('makeDefaultDescription', () => {
@@ -78,6 +80,59 @@ describe('DefaultFormatter', () => {
 
         it('should return default style for unknown type', () => {
             expect(getActivityStyle('Unknown')).toEqual({ emoji: '🏅', color: 'GRAY' });
+        });
+    });
+
+    describe('makeDescription', () => {
+        beforeEach(() => {
+            // makeDescription internally calls global makeRideDescription and makeRunDescription
+            // because in GAS they are in the same global scope.
+            // We mock them globally for tests to verify routing behavior.
+            global.makeRideDescription = vi.fn((activity) => `RIDE: ${activity.id}`);
+            global.makeRunDescription = vi.fn((activity) => `RUN: ${activity.id}`);
+        });
+
+        afterEach(() => {
+            delete global.makeRideDescription;
+            delete global.makeRunDescription;
+        });
+
+        it('should delegate to makeRideDescription for Ride', () => {
+            const activity = { type: 'Ride', id: 1 };
+            const result = makeDescription(activity);
+            expect(global.makeRideDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RIDE: 1');
+        });
+
+        it('should delegate to makeRideDescription for VirtualRide', () => {
+            const activity = { type: 'VirtualRide', id: 2 };
+            const result = makeDescription(activity);
+            expect(global.makeRideDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RIDE: 2');
+        });
+
+        it('should delegate to makeRunDescription for Run', () => {
+            const activity = { type: 'Run', id: 3 };
+            const result = makeDescription(activity);
+            expect(global.makeRunDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RUN: 3');
+        });
+
+        it('should delegate to makeRunDescription for Walk', () => {
+            const activity = { type: 'Walk', id: 4 };
+            const result = makeDescription(activity);
+            expect(global.makeRunDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RUN: 4');
+        });
+
+        it('should fall back to makeDefaultDescription for other types (e.g. Swim)', () => {
+            const activity = { type: 'Swim', id: 5, distance: 1000 };
+            const result = makeDescription(activity);
+            // Default description includes detailed formatting, we check part of it
+            expect(result).toContain('距離: 1.0 km');
+            expect(result).toContain('詳細: https://www.strava.com/activities/5');
+            expect(global.makeRideDescription).not.toHaveBeenCalled();
+            expect(global.makeRunDescription).not.toHaveBeenCalled();
         });
     });
 });
