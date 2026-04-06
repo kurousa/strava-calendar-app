@@ -36,7 +36,10 @@ global.OAuth2 = {
 };
 
 global.HtmlService = {
-    createHtmlOutput: vi.fn()
+    createHtmlOutput: vi.fn(),
+    createHtmlOutputFromFile: vi.fn(() => ({
+        setTitle: vi.fn()
+    }))
 };
 
 global.Session = {
