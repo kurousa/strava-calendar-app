@@ -34,11 +34,31 @@ function makeDefaultDescription(activity) {
   return descriptionLines.join('\n').trim();
 }
 
-// ==========================================
-// アクティビティごとの絵文字と色を定義する関数
-// ==========================================
-function getActivityStyle(type) {
-  const styles = {
+/**
+ * Object.freeze をネストされたオブジェクトにも適用するヘルパー関数
+ */
+function deepFreeze(object) {
+  const propNames = Object.getOwnPropertyNames(object);
+  for (const name of propNames) {
+    const value = object[name];
+    if (value && typeof value === 'object') {
+      deepFreeze(value);
+    }
+  }
+  return Object.freeze(object);
+}
+
+// アクティビティごとの絵文字と色の定義
+// CalendarApp.EventColor への参照は、Node.js環境での ReferenceError 回避のため
+// 関数呼び出し時に解決されるように遅延評価するか、またはモックが存在することを確認する必要があります。
+// ここでは、定義自体を関数内にカプセル化して、初回呼び出し時に初期化するパターンを採用します。
+let ACTIVITY_STYLES_CACHE = null;
+let DEFAULT_ACTIVITY_STYLE_CACHE = null;
+
+function initStyles() {
+  if (ACTIVITY_STYLES_CACHE) return;
+
+  ACTIVITY_STYLES_CACHE = deepFreeze({
     'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
     'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
     'VirtualRun': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
@@ -48,8 +68,17 @@ function getActivityStyle(type) {
     'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
     'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
     'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE }
-  };
-  return styles[type] || { emoji: '🏅', color: CalendarApp.EventColor.GRAY };
+  });
+
+  DEFAULT_ACTIVITY_STYLE_CACHE = Object.freeze({ emoji: '🏅', color: CalendarApp.EventColor.GRAY });
+}
+
+// ==========================================
+// アクティビティごとの絵文字と色を定義する関数
+// ==========================================
+function getActivityStyle(type) {
+  initStyles();
+  return ACTIVITY_STYLES_CACHE[type] || DEFAULT_ACTIVITY_STYLE_CACHE;
 }
 
 // ==========================================
