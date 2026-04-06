@@ -5,9 +5,6 @@
 // ==========================================
 
 const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
-// カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
-const CALENDAR_API_DELAY_MS = 200;
-
 // 距離を表示するアクティビティのリスト
 const DISTANCE_ACTIVITIES = [
   'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
@@ -28,7 +25,7 @@ function main() {
     Logger.log('登録するアクティビティがありませんでした。');
     return;
   }
-  Logger.log("[DEBUG]取得できたアクティビティのID: " + activities[0].id);
+  Logger.log("[DEBUG]取得できたアクティビティのsample" + JSON.stringify(activities[0]));
 
   // カレンダーの取得（IDが指定されていればそれを使用、なければデフォルトを使用）
   const calendar = getTargetCalendar();
@@ -72,24 +69,21 @@ function sendErrorEmail(message) {
 // ==========================================
 // アクティビティをカレンダーに登録する共通処理
 // ==========================================
-function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES, skipDuplicateCheck = false) {
+function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES) {
   // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
   const startTime = new Date(activity.start_date);
   const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
 
   // 既に登録済みのアクティビティかどうかを判定する (in-lined)
-  // ⚡ Bolt: skipDuplicateCheck フラグで事前チェックをバイパスできるように変更
-  if (!skipDuplicateCheck) {
-    const existingEvents = calendar.getEvents(startTime, endTime);
-    const isDuplicate = existingEvents.some(event => {
-      const desc = event.getDescription();
-      return desc && desc.includes(`strava.com/activities/${activity.id}`);
-    });
+  const existingEvents = calendar.getEvents(startTime, endTime);
+  const isDuplicate = existingEvents.some(event => {
+    const desc = event.getDescription();
+    return desc && desc.includes(`strava.com/activities/${activity.id}`);
+  });
 
-    if (isDuplicate) {
-      Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-      return 'skipped';
-    }
+  if (isDuplicate) {
+    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+    return 'skipped';
   }
 
   // ーーー ここから下は「新規」の時しか実行されない ーーー
@@ -108,8 +102,10 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   const description = makeDescription(activity);
 
   Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
+  Logger.log("[DEBUG]title -> " + title);
   Logger.log("[DEBUG]startTime -> " + startTime);
   Logger.log("[DEBUG]endTime -> " + endTime);
+  Logger.log("[DEBUG]description -> " + description);
 
   // カレンダーに予定として作成
   const event = calendar.createEvent(title, startTime, endTime, {
@@ -121,10 +117,10 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   }
 
   // カレンダーAPIの連続作成制限を回避しつつ、GASの実行時間制限(6分)に配慮
-  // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間待機する
-  Utilities.sleep(CALENDAR_API_DELAY_MS);
+  // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間(200ms)待機する
+  Utilities.sleep(200);
 
-  Logger.log(`カレンダーに登録しました: ID ${activity.id}`);
+  Logger.log(`カレンダーに登録しました: ${title}`);
   return 'success';
 }
 

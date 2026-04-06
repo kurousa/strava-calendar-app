@@ -1,6 +1,4 @@
 name: Unit Test Suite
-permissions:
-  contents: read
 
 on:
   pull_request:

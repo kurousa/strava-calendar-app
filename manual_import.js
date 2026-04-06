@@ -38,36 +38,8 @@ function importPastActivities(startDate, endDate, perPage = 200) {
     let successCount = 0;
     let skipCount = 0;
 
-    // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
-    // Fetch all events for the entire import period in one Calendar API call
-    const existingEvents = calendar.getEvents(startDate, endDate);
-
-    // Create a Set of existing Strava activity IDs for O(1) lookup
-    // Note: event.getDescription() does trigger a read in CalendarApp, but this is still
-    // vastly faster than getEvents() for every single activity in the list.
-    const existingActivityIds = new Set();
-    existingEvents.forEach(event => {
-        const desc = event.getDescription();
-        if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
-            if (match && match[1]) {
-                existingActivityIds.add(match[1]);
-            }
-        }
-    });
-
-    Logger.log(`[Import] 既にカレンダーにあるイベントを ${existingActivityIds.size} 件検出しました。`);
-
     activities.forEach(activity => {
-        const activityIdStr = String(activity.id);
-        if (existingActivityIds.has(activityIdStr)) {
-            Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-            skipCount++;
-            return;
-        }
-
-        // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
-        const result = processActivityToCalendar(activity, calendar, undefined, true);
+        const result = processActivityToCalendar(activity, calendar);
         if (result === 'skipped') skipCount++;
         if (result === 'success') successCount++;
     });
