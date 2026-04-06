@@ -5,7 +5,9 @@ function importPastActivitiesFromWeb(startStr, endStr) {
     // Validate input format YYYY-MM-DD
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!startStr || !endStr || !dateRegex.test(startStr) || !dateRegex.test(endStr)) {
-        return 'エラー: 日付の形式が正しくありません (YYYY-MM-DD)。';
+        const msg = 'エラー: 日付の形式が正しくありません (YYYY-MM-DD)。';
+        Logger.log(msg);
+        return msg;
     }
 
     // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
