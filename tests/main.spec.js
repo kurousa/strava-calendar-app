@@ -69,10 +69,7 @@ describe('getTargetCalendar', () => {
 
     it('should return specific calendar when CALENDAR_ID is set and valid', async () => {
         global.PropertiesService.getScriptProperties.mockReturnValueOnce({
-            getProperty: vi.fn((key) => {
-                if (key === 'CALENDAR_ID') return 'custom_calendar_id';
-                return null;
-            })
+            getProperty: vi.fn().mockReturnValue('custom_calendar_id')
         });
         const mockCalendar = { id: 'custom_calendar_id' };
         global.CalendarApp.getCalendarById.mockReturnValueOnce(mockCalendar);
@@ -86,10 +83,7 @@ describe('getTargetCalendar', () => {
 
     it('should log error and return null when CALENDAR_ID is invalid', async () => {
         global.PropertiesService.getScriptProperties.mockReturnValueOnce({
-            getProperty: vi.fn((key) => {
-                if (key === 'CALENDAR_ID') return 'invalid_id';
-                return null;
-            })
+            getProperty: vi.fn().mockReturnValue('invalid_id')
         });
         global.CalendarApp.getCalendarById.mockReturnValueOnce(null);
 
