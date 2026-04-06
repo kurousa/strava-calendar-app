@@ -4,6 +4,8 @@
 // ==========================================
 
 const API_BASE = "https://www.strava.com/api/v3";
+// Strava APIのレート制限（連続アクセス制限）対策の待機時間 (ms)
+const STRAVA_API_DELAY_MS = 200;
 
 /**
  * Stravaから指定期間のアクティビティを全件取得する（ページネーション対応）
@@ -68,7 +70,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
       page++;
 
       // Strava APIのレート制限（連続アクセス制限）対策
-      Utilities.sleep(200);
+      Utilities.sleep(STRAVA_API_DELAY_MS);
 
     } catch (e) {
       const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + e.toString();

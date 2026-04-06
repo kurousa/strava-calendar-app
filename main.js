@@ -5,6 +5,9 @@
 // ==========================================
 
 const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+// カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
+const CALENDAR_API_DELAY_MS = 200;
+
 // 距離を表示するアクティビティのリスト
 const DISTANCE_ACTIVITIES = [
   'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
@@ -115,8 +118,8 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   }
 
   // カレンダーAPIの連続作成制限を回避しつつ、GASの実行時間制限(6分)に配慮
-  // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間(200ms)待機する
-  Utilities.sleep(200);
+  // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間待機する
+  Utilities.sleep(CALENDAR_API_DELAY_MS);
 
   Logger.log(`カレンダーに登録しました: ID ${activity.id}`);
   return 'success';
