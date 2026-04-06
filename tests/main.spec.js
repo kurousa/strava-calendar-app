@@ -59,3 +59,60 @@ describe('main', () => {
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップしました'));
     });
 });
+
+
+describe('getTargetCalendar', () => {
+    beforeEach(() => {
+        vi.resetAllMocks();
+        vi.resetModules();
+    });
+
+    it('should return specific calendar when CALENDAR_ID is set and valid', async () => {
+        global.PropertiesService.getScriptProperties.mockReturnValueOnce({
+            getProperty: vi.fn((key) => {
+                if (key === 'CALENDAR_ID') return 'custom_calendar_id';
+                return null;
+            })
+        });
+        const mockCalendar = { id: 'custom_calendar_id' };
+        global.CalendarApp.getCalendarById.mockReturnValueOnce(mockCalendar);
+
+        const { getTargetCalendar } = await import('../main.js');
+        const result = getTargetCalendar();
+
+        expect(global.CalendarApp.getCalendarById).toHaveBeenCalledWith('custom_calendar_id');
+        expect(result).toBe(mockCalendar);
+    });
+
+    it('should log error and return null when CALENDAR_ID is invalid', async () => {
+        global.PropertiesService.getScriptProperties.mockReturnValueOnce({
+            getProperty: vi.fn((key) => {
+                if (key === 'CALENDAR_ID') return 'invalid_id';
+                return null;
+            })
+        });
+        global.CalendarApp.getCalendarById.mockReturnValueOnce(null);
+
+        const { getTargetCalendar } = await import('../main.js');
+        const result = getTargetCalendar();
+
+        expect(global.CalendarApp.getCalendarById).toHaveBeenCalledWith('invalid_id');
+        expect(global.Logger.log).toHaveBeenCalledWith('エラー: 指定されたカレンダーが見つかりません。');
+        expect(result).toBeNull();
+    });
+
+    it('should return default calendar when CALENDAR_ID is not set', async () => {
+        global.PropertiesService.getScriptProperties.mockReturnValueOnce({
+            getProperty: vi.fn(() => null)
+        });
+        const mockDefaultCalendar = { id: 'default_id' };
+        global.CalendarApp.getDefaultCalendar.mockReturnValueOnce(mockDefaultCalendar);
+
+        const { getTargetCalendar } = await import('../main.js');
+        const result = getTargetCalendar();
+
+        expect(global.CalendarApp.getDefaultCalendar).toHaveBeenCalled();
+        expect(global.CalendarApp.getCalendarById).not.toHaveBeenCalled();
+        expect(result).toBe(mockDefaultCalendar);
+    });
+});
