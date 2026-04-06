@@ -156,5 +156,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     sendErrorEmail,
     doGet,
+    getTargetCalendar,
   };
 }
