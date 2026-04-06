@@ -6,6 +6,8 @@ global.Logger = {
 };
 
 global.CalendarApp = {
+    getCalendarById: vi.fn(),
+    getDefaultCalendar: vi.fn(),
     EventColor: {
         BLUE: 'BLUE',
         RED: 'RED',
