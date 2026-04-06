@@ -85,8 +85,8 @@ describe('manual_import', () => {
 
         expect(result).toBe('✅ 完了! 新規登録: 2件 / スキップ: 1件');
         expect(global.processActivityToCalendar).toHaveBeenCalledTimes(2);
-        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(1, mockActivities[0], mockCalendar);
-        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(2, mockActivities[2], mockCalendar);
+        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(1, mockActivities[0], mockCalendar, undefined, true);
+        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(2, mockActivities[2], mockCalendar, undefined, true);
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('完了!'));
     });
 });

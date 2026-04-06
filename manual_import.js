@@ -43,6 +43,8 @@ function importPastActivities(startDate, endDate, perPage = 200) {
     const existingEvents = calendar.getEvents(startDate, endDate);
 
     // Create a Set of existing Strava activity IDs for O(1) lookup
+    // Note: event.getDescription() does trigger a read in CalendarApp, but this is still
+    // vastly faster than getEvents() for every single activity in the list.
     const existingActivityIds = new Set();
     existingEvents.forEach(event => {
         const desc = event.getDescription();
@@ -64,7 +66,8 @@ function importPastActivities(startDate, endDate, perPage = 200) {
             return;
         }
 
-        const result = processActivityToCalendar(activity, calendar);
+        // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
+        const result = processActivityToCalendar(activity, calendar, undefined, true);
         if (result === 'skipped') skipCount++;
         if (result === 'success') successCount++;
     });

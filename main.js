@@ -69,23 +69,24 @@ function sendErrorEmail(message) {
 // ==========================================
 // アクティビティをカレンダーに登録する共通処理
 // ==========================================
-function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES) {
+function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES, skipDuplicateCheck = false) {
   // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
   const startTime = new Date(activity.start_date);
   const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
 
   // 既に登録済みのアクティビティかどうかを判定する (in-lined)
-  // ⚡ Bolt: manual_import で事前フィルタリングされるようになりましたが、
-  // 日次バッチ (main) のために念のためここでもチェックを残します。
-  const existingEvents = calendar.getEvents(startTime, endTime);
-  const isDuplicate = existingEvents.some(event => {
-    const desc = event.getDescription();
-    return desc && desc.includes(`strava.com/activities/${activity.id}`);
-  });
+  // ⚡ Bolt: skipDuplicateCheck フラグで事前チェックをバイパスできるように変更
+  if (!skipDuplicateCheck) {
+    const existingEvents = calendar.getEvents(startTime, endTime);
+    const isDuplicate = existingEvents.some(event => {
+      const desc = event.getDescription();
+      return desc && desc.includes(`strava.com/activities/${activity.id}`);
+    });
 
-  if (isDuplicate) {
-    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-    return 'skipped';
+    if (isDuplicate) {
+      Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+      return 'skipped';
+    }
   }
 
   // ーーー ここから下は「新規」の時しか実行されない ーーー
