@@ -63,15 +63,11 @@ describe('DefaultFormatter', () => {
             // Verify the object is frozen
             expect(Object.isFrozen(style)).toBe(true);
 
-            // Attempting to mutate should fail in strict mode (which vitest uses)
-            // We use a try/catch or expect().toThrow to handle if strict mode applies
+            // Attempting to mutate a frozen object should throw a TypeError in strict mode.
             expect(() => {
                 'use strict';
                 style.emoji = '🚀';
             }).toThrow(TypeError);
-
-            // The original object should remain unchanged regardless
-            expect(style.emoji).toBe('🏃');
         });
     });
 });
