@@ -48,3 +48,7 @@ global.Session = {
 global.MailApp = {
     sendEmail: vi.fn()
 };
+
+// Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
+import * as DefaultFormatter from './formatters/DefaultFormatter.js';
+global.getCommonMetrics = DefaultFormatter.getCommonMetrics || function() {};

@@ -1,4 +1,16 @@
 // ==========================================
+// 共通のメトリクス計算
+// ==========================================
+function getCommonMetrics(activity) {
+  return {
+    distanceKm: (activity.distance / 1000).toFixed(1),
+    timeMin: Math.floor(activity.moving_time / 60),
+    elevation: activity.total_elevation_gain || 0,
+    hr: activity.has_heartrate ? `${activity.average_heartrate} bpm` : '測定なし'
+  };
+}
+
+// ==========================================
 // 汎用 (その他) のフォーマット処理
 // ==========================================
 function makeDefaultDescription(activity) {
@@ -100,6 +112,7 @@ function makeDescription(activity) {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    getCommonMetrics,
     makeDefaultDescription,
     getActivityStyle,
     makeDescription
