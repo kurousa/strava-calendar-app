@@ -41,7 +41,10 @@ function deepFreeze(object) {
   const propNames = Object.getOwnPropertyNames(object);
   for (const name of propNames) {
     const value = object[name];
-    if (value && typeof value === 'object') {
+    // CalendarApp.EventColor などのGAS固有のプロキシオブジェクトを
+    // 再帰的に freeze するとパフォーマンスが極端に悪化するため、
+    // プレーンなオブジェクト（または配列）のみを対象とする
+    if (value && typeof value === 'object' && (value.constructor === Object || value.constructor === Array)) {
       deepFreeze(value);
     }
   }
