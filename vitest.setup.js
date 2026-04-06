@@ -36,7 +36,13 @@ global.OAuth2 = {
 };
 
 global.HtmlService = {
-    createHtmlOutput: vi.fn()
+    createHtmlOutput: vi.fn(),
+    createHtmlOutputFromFile: vi.fn(() => {
+        const mockOutput = {
+            setTitle: vi.fn().mockReturnThis(),
+        };
+        return mockOutput;
+    })
 };
 
 global.Session = {
