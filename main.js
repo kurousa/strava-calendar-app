@@ -75,6 +75,8 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
 
   // 既に登録済みのアクティビティかどうかを判定する (in-lined)
+  // ⚡ Bolt: manual_import で事前フィルタリングされるようになりましたが、
+  // 日次バッチ (main) のために念のためここでもチェックを残します。
   const existingEvents = calendar.getEvents(startTime, endTime);
   const isDuplicate = existingEvents.some(event => {
     const desc = event.getDescription();

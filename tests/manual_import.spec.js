@@ -66,24 +66,27 @@ describe('manual_import', () => {
             { id: 102, name: 'Activity 2' },
             { id: 103, name: 'Activity 3' }
         ];
-        const mockCalendar = { getName: () => 'Test Calendar' };
+        const mockCalendar = {
+            getName: () => 'Test Calendar',
+            getEvents: vi.fn(() => [
+                { getDescription: () => 'strava.com/activities/102' }
+            ])
+        };
 
         global.getStravaActivities.mockReturnValue(mockActivities);
         global.getTargetCalendar.mockReturnValue(mockCalendar);
 
-        // Return 'success' for two and 'skipped' for one
+        // Mock the results for the two activities that are actually processed
         global.processActivityToCalendar
             .mockReturnValueOnce('success')
-            .mockReturnValueOnce('skipped')
-            .mockReturnValueOnce('success');
+            .mockReturnValueOnce('success'); // The second call is now for activity 3, as activity 2 is skipped beforehand
 
         const result = importPastActivities(startDate, endDate);
 
         expect(result).toBe('✅ 完了! 新規登録: 2件 / スキップ: 1件');
-        expect(global.processActivityToCalendar).toHaveBeenCalledTimes(3);
+        expect(global.processActivityToCalendar).toHaveBeenCalledTimes(2);
         expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(1, mockActivities[0], mockCalendar);
-        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(2, mockActivities[1], mockCalendar);
-        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(3, mockActivities[2], mockCalendar);
+        expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(2, mockActivities[2], mockCalendar);
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('完了!'));
     });
 });
