@@ -110,11 +110,19 @@ describe('importPastActivitiesFromWeb', () => {
         expect(result2).toBe(expectedError);
         expect(result3).toBe(expectedError);
         expect(result4).toBe(expectedError);
+        expect(global.Logger.log).toHaveBeenCalledWith(expectedError);
     });
 
     it('should reject invalid dates', () => {
         const result = importPastActivitiesFromWeb('2024-13-45', '2024-01-31');
         expect(result).toBe('エラー: 無効な日付が指定されました。');
+        expect(global.Logger.log).toHaveBeenCalledWith('エラー: 無効な日付が指定されました。');
+    });
+
+    it('should reject date ranges where start is after end', () => {
+        const result = importPastActivitiesFromWeb('2024-01-31', '2024-01-01');
+        expect(result).toBe('エラー: 開始日は終了日より前の日付を指定してください。');
+        expect(global.Logger.log).toHaveBeenCalledWith('エラー: 開始日は終了日より前の日付を指定してください。');
     });
 
     it('should process valid dates', () => {

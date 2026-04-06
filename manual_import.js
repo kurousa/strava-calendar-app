@@ -16,7 +16,15 @@ function importPastActivitiesFromWeb(startStr, endStr) {
 
     // Check if dates are valid
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return 'エラー: 無効な日付が指定されました。';
+        const msg = 'エラー: 無効な日付が指定されました。';
+        Logger.log(msg);
+        return msg;
+    }
+
+    if (startDate > endDate) {
+        const msg = 'エラー: 開始日は終了日より前の日付を指定してください。';
+        Logger.log(msg);
+        return msg;
     }
 
     return importPastActivities(startDate, endDate);
