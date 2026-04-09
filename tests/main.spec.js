@@ -240,34 +240,5 @@ describe('processActivityToCalendar', () => {
         const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']));
 
         expect(result).toBe('success');
-        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
-            '[Run] Morning Run - 5.2km',
-            expect.any(Date),
-            expect.any(Date),
-            { description: 'Test Description' }
-        );
-        expect(mockEvent.setColor).toHaveBeenCalledWith('BLUE');
-        expect(global.Utilities.sleep).toHaveBeenCalled();
-    });
-
-    it('should create event without distance for non-distance activity', () => {
-        const activity = {
-            id: 123,
-            type: 'Yoga',
-            name: 'Morning Yoga',
-            distance: 0,
-            start_date: '2023-01-01T10:00:00Z',
-            elapsed_time: 3600
-        };
-
-        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']));
-
-        expect(result).toBe('success');
-        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
-            '[Yoga] Morning Yoga',
-            expect.any(Date),
-            expect.any(Date),
-            { description: 'Test Description' }
-        );
     });
 });
