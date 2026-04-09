@@ -13,9 +13,69 @@ global.CalendarApp = {
     },
 };
 
-import { makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
+import { getCommonMetrics, makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
 
 describe('DefaultFormatter', () => {
+    describe('getCommonMetrics', () => {
+        it('should calculate metrics for a complete activity object', () => {
+            const activity = {
+                distance: 12345,
+                moving_time: 3675,
+                total_elevation_gain: 150,
+                has_heartrate: true,
+                average_heartrate: 145
+            };
+            const metrics = getCommonMetrics(activity);
+            expect(metrics).toEqual({
+                distanceKm: '12.3',
+                timeMin: 61,
+                elevation: 150,
+                hr: '145 bpm'
+            });
+        });
+
+        it('should handle missing optional fields with defaults', () => {
+            const activity = {};
+            const metrics = getCommonMetrics(activity);
+            expect(metrics).toEqual({
+                distanceKm: '0.0',
+                timeMin: 0,
+                elevation: 0,
+                hr: '測定なし'
+            });
+        });
+
+        it('should handle heart rate when has_heartrate is false', () => {
+            const activity = {
+                has_heartrate: false,
+                average_heartrate: 145 // Should be ignored
+            };
+            const metrics = getCommonMetrics(activity);
+            expect(metrics.hr).toBe('測定なし');
+        });
+
+        it('should handle heart rate when has_heartrate is true', () => {
+            const activity = {
+                has_heartrate: true,
+                average_heartrate: 160
+            };
+            const metrics = getCommonMetrics(activity);
+            expect(metrics.hr).toBe('160 bpm');
+        });
+
+        it('should handle zero values for distance, time, and elevation', () => {
+            const activity = {
+                distance: 0,
+                moving_time: 0,
+                total_elevation_gain: 0
+            };
+            const metrics = getCommonMetrics(activity);
+            expect(metrics.distanceKm).toBe('0.0');
+            expect(metrics.timeMin).toBe(0);
+            expect(metrics.elevation).toBe(0);
+        });
+    });
+
     describe('makeDefaultDescription', () => {
         it('should make default description', () => {
             const activity = {
