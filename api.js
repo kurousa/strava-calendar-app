@@ -36,7 +36,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
       .join('&');
 
     const url = `${API_BASE}/athlete/activities?${queryString}`;
-    console.log(`[API Request] URL: ${url}`);
+    Logger.log(`[API Request] URL: ${url}`);
 
     try {
       const response = UrlFetchApp.fetch(url, {
