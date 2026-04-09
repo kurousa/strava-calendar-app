@@ -111,6 +111,7 @@ function makeDescription(activity) {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    deepFreeze,
     getCommonMetrics,
     makeDefaultDescription,
     getActivityStyle,
