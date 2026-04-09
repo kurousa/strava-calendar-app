@@ -96,7 +96,7 @@ function getActivityStyle(type) {
 // アクティビティごとのフォーマット処理を呼び分ける関数
 // ==========================================
 function makeDescription(activity) {
-  console.log(`[DEBUG] activity type: ${activity.type}`);
+  Logger.log(`[DEBUG] activity type: ${activity.type}`);
 
   if (activity.type === 'Ride' || activity.type === 'VirtualRide') {
     return makeRideDescription(activity);
