@@ -59,7 +59,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
       }
 
       // 取得したデータを全体の配列に追加
-      allActivities = allActivities.concat(activities);
+      allActivities.push(...activities);
       Logger.log(`ページ ${page} から ${activities.length} 件取得しました...`);
 
       // 取得件数が要求したperPage未満なら、次のページは無いと判断してループを抜ける
