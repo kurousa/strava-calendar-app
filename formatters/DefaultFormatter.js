@@ -14,7 +14,7 @@ function getCommonMetrics(activity) {
 // 汎用 (その他) のフォーマット処理
 // ==========================================
 function makeDefaultDescription(activity) {
-  let descriptionLines = [];
+  const descriptionLines = [];
 
   // 距離 (0より大きければ追加)
   if (activity.distance && activity.distance > 0) {
@@ -96,7 +96,7 @@ function getActivityStyle(type) {
 // アクティビティごとのフォーマット処理を呼び分ける関数
 // ==========================================
 function makeDescription(activity) {
-  console.log(`[DEBUG] activity type: ${activity.type}`);
+  Logger.log(`[DEBUG] activity type: ${activity.type}`);
 
   if (activity.type === 'Ride' || activity.type === 'VirtualRide') {
     return makeRideDescription(activity);
@@ -111,6 +111,7 @@ function makeDescription(activity) {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    deepFreeze,
     initStyles,
     get ACTIVITY_STYLES_CACHE() { return ACTIVITY_STYLES_CACHE; },
     get DEFAULT_ACTIVITY_STYLE_CACHE() { return DEFAULT_ACTIVITY_STYLE_CACHE; },
