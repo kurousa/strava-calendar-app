@@ -159,5 +159,7 @@ if (typeof module !== 'undefined' && module.exports) {
     getTargetCalendar,
     main,
     processActivityToCalendar,
+    DISTANCE_ACTIVITIES,
+    CALENDAR_API_DELAY_MS,
   };
 }

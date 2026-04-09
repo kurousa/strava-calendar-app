@@ -130,6 +130,7 @@ describe('getTargetCalendar', () => {
         expect(result).toBe(mockDefaultCalendar);
     });
 });
+
 describe('main function', () => {
     let main;
 
@@ -205,7 +206,7 @@ describe('processActivityToCalendar', () => {
         };
 
         mockCalendar = {
-            getEvents: vi.fn(() => []),
+            getEvents: vi.fn(() => []), // No existing events
             createEvent: vi.fn(() => mockEvent)
         };
 
@@ -219,7 +220,7 @@ describe('processActivityToCalendar', () => {
             getDescription: vi.fn(() => 'strava.com/activities/123')
         }]);
 
-        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']));
+        const result = processActivityToCalendar(activity, mockCalendar);
 
         expect(result).toBe('skipped');
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済みのアクティビティです'));

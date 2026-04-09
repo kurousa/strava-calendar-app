@@ -57,12 +57,13 @@ global.MailApp = {
     sendEmail: vi.fn()
 };
 
-// Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
-import * as DefaultFormatter from './formatters/DefaultFormatter.js';
-global.getCommonMetrics = DefaultFormatter.getCommonMetrics || (() => ({}));
 global.Utilities = {
     sleep: vi.fn()
 };
 global.getStravaActivities = vi.fn();
 global.getActivityStyle = vi.fn(() => ({ color: global.CalendarApp.EventColor.BLUE }));
 global.makeDescription = vi.fn(() => 'Test Description');
+
+// Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
+import * as DefaultFormatter from './formatters/DefaultFormatter.js';
+global.getCommonMetrics = DefaultFormatter.getCommonMetrics || (() => ({}));
