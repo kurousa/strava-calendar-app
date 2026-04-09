@@ -10,12 +10,21 @@ function importPastActivitiesFromWeb(startStr, endStr) {
         return msg;
     }
 
+    // Helper to validate date components to prevent rollover (e.g., 2024-02-31 -> 2024-03-02)
+    function isValidDateComponents(dateStr, dateObj) {
+        if (isNaN(dateObj.getTime())) return false;
+        const [y, m, d] = dateStr.split('-');
+        return dateObj.getFullYear() === parseInt(y, 10) &&
+               dateObj.getMonth() + 1 === parseInt(m, 10) &&
+               dateObj.getDate() === parseInt(d, 10);
+    }
+
     // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
     const startDate = new Date(`${startStr}T00:00:00`);
     const endDate = new Date(`${endStr}T23:59:59`);
 
     // Check if dates are valid
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    if (!isValidDateComponents(startStr, startDate) || !isValidDateComponents(endStr, endDate)) {
         const msg = 'エラー: 無効な日付が指定されました。';
         Logger.log(msg);
         return msg;
