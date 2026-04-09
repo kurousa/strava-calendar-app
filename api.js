@@ -36,7 +36,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
       .join('&');
 
     const url = `${API_BASE}/athlete/activities?${queryString}`;
-    Logger.log(`[API Request] URL: ${url}`);
+    console.log(`[API Request] URL: ${url}`);
 
     try {
       const response = UrlFetchApp.fetch(url, {
@@ -47,8 +47,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
       });
 
       if (response.getResponseCode() !== 200) {
-        // セキュリティのため、生のエラーレスポンスはログに出力せず、ステータスコードのみ記録します
-        Logger.log(`[API Error] Status Code: ${response.getResponseCode()}`);
+        Logger.log(`[API Error] ${response.getContentText()}`);
         break; // エラー時はループを抜ける
       }
 
