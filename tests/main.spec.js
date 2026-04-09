@@ -130,3 +130,143 @@ describe('getTargetCalendar', () => {
         expect(result).toBe(mockDefaultCalendar);
     });
 });
+describe('main function', () => {
+    let main;
+
+    beforeEach(async () => {
+        vi.resetModules();
+        vi.clearAllMocks();
+
+        // Reset properties service
+        global.PropertiesService.getScriptProperties.mockReturnValue({
+            getProperty: vi.fn(() => 'default_id')
+        });
+
+        const module = await import('../main.js');
+        main = module.main;
+
+        // Mock getTargetCalendar internally by mocking the GAS service it uses
+        global.CalendarApp.getCalendarById.mockReturnValue({
+            getName: vi.fn(() => 'Test Calendar')
+        });
+    });
+
+    it('should log and return if no activities are found', () => {
+        global.getStravaActivities.mockReturnValueOnce([]);
+
+        main();
+
+        expect(global.getStravaActivities).toHaveBeenCalled();
+        expect(global.Logger.log).toHaveBeenCalledWith('登録するアクティビティがありませんでした。');
+        expect(global.CalendarApp.getCalendarById).not.toHaveBeenCalled();
+    });
+
+    it('should log and return if target calendar is not found', () => {
+        global.getStravaActivities.mockReturnValueOnce([{ id: 123 }]);
+        global.CalendarApp.getCalendarById.mockReturnValueOnce(null);
+
+        main();
+
+        expect(global.Logger.log).toHaveBeenCalledWith('カレンダーの取得に失敗しました。');
+    });
+
+    it('should process activities if found and calendar exists', () => {
+        const activities = [{ id: 1, start_date: '2023-01-01T10:00:00Z', elapsed_time: 3600 }];
+        global.getStravaActivities.mockReturnValueOnce(activities);
+
+        const mockCalendar = {
+            getName: vi.fn(() => 'Test Calendar'),
+            getEvents: vi.fn(() => []), // No existing events
+            createEvent: vi.fn(() => ({ setColor: vi.fn() }))
+        };
+        global.CalendarApp.getCalendarById.mockReturnValueOnce(mockCalendar);
+
+        main();
+
+        // Ensure processActivityToCalendar is called (implied by execution flow and logs)
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('取得できたアクティビティの数: 1'));
+    });
+});
+
+describe('processActivityToCalendar', () => {
+    let processActivityToCalendar;
+    let mockCalendar;
+    let mockEvent;
+
+    beforeEach(async () => {
+        vi.resetModules();
+        vi.clearAllMocks();
+
+        const module = await import('../main.js');
+        processActivityToCalendar = module.processActivityToCalendar;
+
+        mockEvent = {
+            setColor: vi.fn()
+        };
+
+        mockCalendar = {
+            getEvents: vi.fn(() => []),
+            createEvent: vi.fn(() => mockEvent)
+        };
+
+        global.getActivityStyle.mockReturnValue({ color: 'BLUE' });
+        global.makeDescription.mockReturnValue('Test Description');
+    });
+
+    it('should skip duplicate activity', () => {
+        const activity = { id: 123, start_date: '2023-01-01T10:00:00Z', elapsed_time: 3600 };
+        mockCalendar.getEvents.mockReturnValueOnce([{
+            getDescription: vi.fn(() => 'strava.com/activities/123')
+        }]);
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']));
+
+        expect(result).toBe('skipped');
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済みのアクティビティです'));
+        expect(mockCalendar.createEvent).not.toHaveBeenCalled();
+    });
+
+    it('should create event for new distance activity', () => {
+        const activity = {
+            id: 123,
+            type: 'Run',
+            name: 'Morning Run',
+            distance: 5200,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600
+        };
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']));
+
+        expect(result).toBe('success');
+        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
+            '[Run] Morning Run - 5.2km',
+            expect.any(Date),
+            expect.any(Date),
+            { description: 'Test Description' }
+        );
+        expect(mockEvent.setColor).toHaveBeenCalledWith('BLUE');
+        expect(global.Utilities.sleep).toHaveBeenCalled();
+    });
+
+    it('should create event without distance for non-distance activity', () => {
+        const activity = {
+            id: 123,
+            type: 'Yoga',
+            name: 'Morning Yoga',
+            distance: 0,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600
+        };
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']));
+
+        expect(result).toBe('success');
+        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
+            '[Yoga] Morning Yoga',
+            expect.any(Date),
+            expect.any(Date),
+            { description: 'Test Description' }
+        );
+    });
+});
