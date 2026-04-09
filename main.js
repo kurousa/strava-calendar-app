@@ -157,5 +157,6 @@ if (typeof module !== 'undefined' && module.exports) {
     sendErrorEmail,
     doGet,
     getTargetCalendar,
+    processActivityToCalendar,
   };
 }

@@ -130,3 +130,127 @@ describe('getTargetCalendar', () => {
         expect(result).toBe(mockDefaultCalendar);
     });
 });
+describe('processActivityToCalendar', () => {
+    let mockCalendar;
+    let mockEventColorSetter;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+
+        global.Utilities = { sleep: vi.fn() };
+        global.getActivityStyle = vi.fn().mockReturnValue({ color: 'BLUE' });
+        global.makeDescription = vi.fn().mockReturnValue('mock description');
+
+        mockEventColorSetter = vi.fn();
+        mockCalendar = {
+            getEvents: vi.fn().mockReturnValue([]),
+            createEvent: vi.fn().mockReturnValue({ setColor: mockEventColorSetter }),
+            getName: vi.fn().mockReturnValue('Mock Calendar')
+        };
+    });
+
+    it('should skip activity if duplicate exists and skipDuplicateCheck is false', async () => {
+        const { processActivityToCalendar } = await import('../main.js');
+        const activity = {
+            id: 12345,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600
+        };
+
+        // Mock getEvents to return an event with a description that matches this activity ID
+        mockCalendar.getEvents.mockReturnValue([{
+            getDescription: () => 'some description... https://www.strava.com/activities/12345'
+        }]);
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(), false);
+
+        expect(result).toBe('skipped');
+        expect(mockCalendar.createEvent).not.toHaveBeenCalled();
+    });
+
+    it('should create activity if skipDuplicateCheck is true even if getEvents would return it', async () => {
+        const { processActivityToCalendar } = await import('../main.js');
+        const activity = {
+            id: 12345,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600,
+            type: 'Run',
+            distance: 5000,
+            name: 'Morning Run'
+        };
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(), true);
+
+        expect(result).toBe('success');
+        expect(mockCalendar.getEvents).not.toHaveBeenCalled();
+        expect(mockCalendar.createEvent).toHaveBeenCalled();
+    });
+
+    it('should create event with distance in title for distance-based activities', async () => {
+        const { processActivityToCalendar } = await import('../main.js');
+        const activity = {
+            id: 12345,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600,
+            type: 'Run',
+            distance: 5200,
+            name: 'Morning Jog'
+        };
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']), false);
+
+        expect(result).toBe('success');
+        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
+            '[Run] Morning Jog - 5.2km',
+            expect.any(Date),
+            expect.any(Date),
+            { description: 'mock description' }
+        );
+        expect(mockEventColorSetter).toHaveBeenCalledWith('BLUE');
+        expect(global.Utilities.sleep).toHaveBeenCalledWith(200);
+    });
+
+    it('should create event without distance in title if distance is 0', async () => {
+        const { processActivityToCalendar } = await import('../main.js');
+        const activity = {
+            id: 12345,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600,
+            type: 'Run',
+            distance: 0,
+            name: 'Treadmill'
+        };
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run']), false);
+
+        expect(result).toBe('success');
+        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
+            '[Run] Treadmill',
+            expect.any(Date),
+            expect.any(Date),
+            { description: 'mock description' }
+        );
+    });
+
+    it('should create event without distance in title for non-distance activities', async () => {
+        const { processActivityToCalendar } = await import('../main.js');
+        const activity = {
+            id: 12345,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600,
+            type: 'Yoga',
+            distance: 100, // Should ignore distance for Yoga
+            name: 'Morning Stretch'
+        };
+
+        const result = processActivityToCalendar(activity, mockCalendar, new Set(['Run', 'Ride']), false);
+
+        expect(result).toBe('success');
+        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
+            '[Yoga] Morning Stretch',
+            expect.any(Date),
+            expect.any(Date),
+            { description: 'mock description' }
+        );
+    });
+});
