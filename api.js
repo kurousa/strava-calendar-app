@@ -47,7 +47,8 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
       });
 
       if (response.getResponseCode() !== 200) {
-        Logger.log(`[API Error] ${response.getContentText()}`);
+        // セキュリティのため、生のエラーレスポンスはログに出力せず、ステータスコードのみ記録します
+        Logger.log(`[API Error] Status Code: ${response.getResponseCode()}`);
         break; // エラー時はループを抜ける
       }
 
