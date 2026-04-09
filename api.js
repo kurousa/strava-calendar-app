@@ -76,7 +76,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
     } catch (e) {
       const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + e.toString();
       Logger.log('エラー: ' + errorMsg);
-      sendErrorEmail(errorMsg);
+      if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
       break;
     }
   }
