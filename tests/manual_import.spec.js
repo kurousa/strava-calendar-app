@@ -156,6 +156,14 @@ describe('importPastActivitiesFromWeb', () => {
         expect(global.Logger.log).toHaveBeenCalledWith('エラー: 無効な日付が指定されました。');
     });
 
+    it('should reject invalid dates with rollover', () => {
+        const result1 = importPastActivitiesFromWeb('2024-02-31', '2024-03-31');
+        expect(result1).toBe('エラー: 無効な日付が指定されました。');
+
+        const result2 = importPastActivitiesFromWeb('2024-11-31', '2024-12-01');
+        expect(result2).toBe('エラー: 無効な日付が指定されました。');
+    });
+
     it('should reject date ranges where start is after end', () => {
         const result = importPastActivitiesFromWeb('2024-01-31', '2024-01-01');
         expect(result).toBe('エラー: 開始日は終了日より前の日付を指定してください。');
