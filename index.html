@@ -84,20 +84,20 @@
                 alert('開始日と終了日を入力してください。');
                 return;
             }
-            document.getElementById('message').innerText = 'インポート処理を実行中...\n※データ量によっては数分かかります。そのままお待ちください。';
+            document.getElementById('message').textContent = 'インポート処理を実行中...\n※データ量によっては数分かかります。そのままお待ちください。';
             document.getElementById('btn').disabled = true;
-            document.getElementById('btn').innerText = '処理中...';
+            document.getElementById('btn').textContent = '処理中...';
 
             google.script.run
                 .withSuccessHandler(function (result) {
-                    document.getElementById('message').innerText = result;
+                    document.getElementById('message').textContent = result;
                     document.getElementById('btn').disabled = false;
-                    document.getElementById('btn').innerText = 'インポート開始';
+                    document.getElementById('btn').textContent = 'インポート開始';
                 })
                 .withFailureHandler(function (error) {
-                    document.getElementById('message').innerText = 'エラーが発生しました:\n' + error.message;
+                    document.getElementById('message').textContent = 'エラーが発生しました:\n' + error.message;
                     document.getElementById('btn').disabled = false;
-                    document.getElementById('btn').innerText = 'インポート開始';
+                    document.getElementById('btn').textContent = 'インポート開始';
                 })
                 .importPastActivitiesFromWeb(start, end);
         }
