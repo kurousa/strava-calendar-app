@@ -66,7 +66,8 @@ describe('api', () => {
         const result = getStravaActivities();
 
         expect(result).toEqual([]);
-        expect(global.sendErrorEmail).toHaveBeenCalled();
+        expect(global.sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('Network error'));
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Network error'));
     });
 
     describe('getSearchParam', () => {
