@@ -14,7 +14,7 @@ function getCommonMetrics(activity) {
 // 汎用 (その他) のフォーマット処理
 // ==========================================
 function makeDefaultDescription(activity) {
-  let descriptionLines = [];
+  const descriptionLines = [];
 
   // 距離 (0より大きければ追加)
   if (activity.distance && activity.distance > 0) {
