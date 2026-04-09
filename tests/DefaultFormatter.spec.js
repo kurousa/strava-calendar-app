@@ -39,6 +39,37 @@ describe('DefaultFormatter', () => {
         });
     });
 
+    describe('initStyles', () => {
+        it('should correctly initialize ACTIVITY_STYLES_CACHE and DEFAULT_ACTIVITY_STYLE_CACHE', async () => {
+            // Use dynamic import and resetModules to get the fresh getters
+            vi.resetModules();
+            const formatter = await import('../formatters/DefaultFormatter.js');
+
+            formatter.initStyles();
+
+            // Verify that cache is not null
+            expect(formatter.ACTIVITY_STYLES_CACHE).not.toBeNull();
+            expect(formatter.DEFAULT_ACTIVITY_STYLE_CACHE).not.toBeNull();
+
+            // Verify DEFAULT_ACTIVITY_STYLE_CACHE contents and that it is frozen
+            expect(formatter.DEFAULT_ACTIVITY_STYLE_CACHE).toEqual({ emoji: '🏅', color: 'GRAY' });
+            expect(Object.isFrozen(formatter.DEFAULT_ACTIVITY_STYLE_CACHE)).toBe(true);
+
+            // Verify some ACTIVITY_STYLES_CACHE contents
+            expect(formatter.ACTIVITY_STYLES_CACHE['Run']).toEqual({ emoji: '🏃', color: 'BLUE' });
+            expect(formatter.ACTIVITY_STYLES_CACHE['Ride']).toEqual({ emoji: '🚴', color: 'RED' });
+            expect(formatter.ACTIVITY_STYLES_CACHE['Swim']).toEqual({ emoji: '🏊', color: 'CYAN' });
+            expect(formatter.ACTIVITY_STYLES_CACHE['Workout']).toEqual({ emoji: '🏋️', color: 'ORANGE' });
+
+            // Verify that ACTIVITY_STYLES_CACHE itself is frozen
+            expect(Object.isFrozen(formatter.ACTIVITY_STYLES_CACHE)).toBe(true);
+
+            // Verify that nested objects inside ACTIVITY_STYLES_CACHE are also frozen (deep freeze)
+            expect(Object.isFrozen(formatter.ACTIVITY_STYLES_CACHE['Run'])).toBe(true);
+
+        });
+    });
+
     describe('getActivityStyle', () => {
         const styleTestCases = [
             ['Walk', { emoji: '🚶', color: 'GREEN' }],
