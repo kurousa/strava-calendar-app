@@ -15,7 +15,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
   if (!service.hasAccess()) {
     const errorMsg = 'Stravaと連携されていません。startAuthを実行してください。';
     Logger.log('エラー: ' + errorMsg);
-    if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+    sendErrorEmail(errorMsg);
     return [];
   }
 
@@ -75,7 +75,7 @@ function getStravaActivities(afterDate, beforeDate, perPage = 200) {
     } catch (e) {
       const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + e.toString();
       Logger.log('エラー: ' + errorMsg);
-      if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+      sendErrorEmail(errorMsg);
       break;
     }
   }
