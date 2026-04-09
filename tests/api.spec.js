@@ -78,16 +78,12 @@ describe('api', () => {
         });
 
         // Temporarily remove sendErrorEmail from global
-        const originalSendErrorEmail = global.sendErrorEmail;
-        delete global.sendErrorEmail;
+        vi.stubGlobal('sendErrorEmail', undefined);
 
         const result = getStravaActivities();
 
         expect(result).toEqual([]);
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Network error'));
-
-        // Restore
-        global.sendErrorEmail = originalSendErrorEmail;
     });
 
     it('should break loop and return empty array when response status is not 200', () => {
