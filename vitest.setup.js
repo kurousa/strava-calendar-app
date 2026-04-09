@@ -60,3 +60,25 @@ global.MailApp = {
 // Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
 import * as DefaultFormatter from './formatters/DefaultFormatter.js';
 global.getCommonMetrics = DefaultFormatter.getCommonMetrics || (() => ({}));
+
+// Utilitiesのモック
+global.Utilities = {
+    sleep: vi.fn(),
+};
+
+
+// Globalize formatter functions for main.js testing
+global.getActivityStyle = DefaultFormatter.getActivityStyle || (() => ({ color: "BLUE" }));
+global.makeDescription = DefaultFormatter.makeDescription || (() => "mock description");
+
+
+import * as RunFormatter from "./formatters/RunFormatter.js";
+import * as RideFormatter from "./formatters/RideFormatter.js";
+
+global.makeRunDescription = RunFormatter.makeRunDescription || (() => "mock run desc");
+global.makeRideDescription = RideFormatter.makeRideDescription || (() => "mock ride desc");
+
+
+// Restore original functions
+global.makeRunDescription = RunFormatter.makeRunDescription;
+global.makeRideDescription = RideFormatter.makeRideDescription;

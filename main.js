@@ -157,5 +157,8 @@ if (typeof module !== 'undefined' && module.exports) {
     sendErrorEmail,
     doGet,
     getTargetCalendar,
+    processActivityToCalendar,
+    DISTANCE_ACTIVITIES,
+    CALENDAR_API_DELAY_MS,
   };
 }
