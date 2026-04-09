@@ -21,9 +21,10 @@ const DISTANCE_ACTIVITIES = new Set([
  */
 function main() {
   // 実行時刻の1日前から現在時刻までのアクティビティを取得
+  const now = new Date();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const activities = getStravaActivities(yesterday, new Date());
+  const activities = getStravaActivities(yesterday, now);
   if (activities.length === 0) {
     Logger.log('登録するアクティビティがありませんでした。');
     return;
@@ -38,8 +39,28 @@ function main() {
   }
   Logger.log(`[DEBUG]登録先calendar: ${calendar.getName()}`);
 
+  // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
+  const existingEvents = calendar.getEvents(yesterday, now);
+  const existingActivityIds = new Set();
+  existingEvents.forEach(event => {
+    const desc = event.getDescription();
+    if (desc) {
+      const match = desc.match(/strava\.com\/activities\/(\d+)/);
+      if (match && match[1]) {
+        existingActivityIds.add(match[1]);
+      }
+    }
+  });
+
   activities.forEach(activity => {
-    processActivityToCalendar(activity, calendar);
+    const activityIdStr = String(activity.id);
+    if (existingActivityIds.has(activityIdStr)) {
+      Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+      return;
+    }
+
+    // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
+    processActivityToCalendar(activity, calendar, undefined, true);
   });
 }
 
@@ -157,5 +178,8 @@ if (typeof module !== 'undefined' && module.exports) {
     sendErrorEmail,
     doGet,
     getTargetCalendar,
+    processActivityToCalendar,
+    DISTANCE_ACTIVITIES,
+    CALENDAR_API_DELAY_MS,
   };
 }
