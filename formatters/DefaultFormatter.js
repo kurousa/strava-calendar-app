@@ -17,19 +17,19 @@ function makeDefaultDescription(activity) {
   const descriptionLines = [];
 
   // 距離 (0より大きければ追加)
-  if (activity.distance && activity.distance > 0) {
+  if (activity.distance > 0) {
     const distanceKm = (activity.distance / 1000).toFixed(1);
     descriptionLines.push(`距離: ${distanceKm} km`);
   }
 
   // 時間 (0より大きければ追加)
-  if (activity.moving_time && activity.moving_time > 0) {
+  if (activity.moving_time > 0) {
     const timeMin = Math.floor(activity.moving_time / 60);
     descriptionLines.push(`時間: ${timeMin} 分`);
   }
 
   // 獲得標高 (0より大きければ追加)
-  if (activity.total_elevation_gain && activity.total_elevation_gain > 0) {
+  if (activity.total_elevation_gain > 0) {
     descriptionLines.push(`獲得標高: ${activity.total_elevation_gain} m`);
   }
 
