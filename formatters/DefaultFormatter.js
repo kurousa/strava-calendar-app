@@ -111,6 +111,7 @@ function makeDescription(activity) {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    deepFreeze,
     initStyles,
     get ACTIVITY_STYLES_CACHE() { return ACTIVITY_STYLES_CACHE; },
     get DEFAULT_ACTIVITY_STYLE_CACHE() { return DEFAULT_ACTIVITY_STYLE_CACHE; },

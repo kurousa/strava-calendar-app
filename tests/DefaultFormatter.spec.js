@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { deepFreeze, getCommonMetrics, makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
 
 // Mock Google Apps Script global CalendarApp
 global.CalendarApp = {
@@ -13,10 +14,98 @@ global.CalendarApp = {
     },
 };
 
-import { getCommonMetrics, makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
 
 describe('DefaultFormatter', () => {
-    describe('getCommonMetrics', () => {
+
+    describe('deepFreeze', () => {
+        it('should freeze a simple object', () => {
+            const obj = { a: 1, b: 2 };
+            const frozen = deepFreeze(obj);
+            expect(Object.isFrozen(frozen)).toBe(true);
+            expect(() => {
+                'use strict';
+                frozen.a = 3;
+            }).toThrow(TypeError);
+        });
+
+        it('should deeply freeze nested objects', () => {
+            const obj = {
+                a: 1,
+                nested: {
+                    b: 2,
+                    deep: {
+                        c: 3
+                    }
+                }
+            };
+            const frozen = deepFreeze(obj);
+
+            expect(Object.isFrozen(frozen)).toBe(true);
+            expect(Object.isFrozen(frozen.nested)).toBe(true);
+            expect(Object.isFrozen(frozen.nested.deep)).toBe(true);
+
+            expect(() => {
+                'use strict';
+                frozen.nested.b = 4;
+            }).toThrow(TypeError);
+
+            expect(() => {
+                'use strict';
+                frozen.nested.deep.c = 5;
+            }).toThrow(TypeError);
+        });
+
+        it('should deeply freeze arrays', () => {
+            const arr = [1, { a: 2 }, [3, 4]];
+            const frozen = deepFreeze(arr);
+
+            expect(Object.isFrozen(frozen)).toBe(true);
+            expect(Object.isFrozen(frozen[1])).toBe(true);
+            expect(Object.isFrozen(frozen[2])).toBe(true);
+
+            expect(() => {
+                'use strict';
+                frozen[0] = 5;
+            }).toThrow(TypeError);
+
+            expect(() => {
+                'use strict';
+                frozen[1].a = 6;
+            }).toThrow(TypeError);
+
+            expect(() => {
+                'use strict';
+                frozen[2].push(5);
+            }).toThrow(TypeError);
+        });
+
+        it('should handle null and primitive values gracefully', () => {
+            const obj = {
+                a: null,
+                b: undefined,
+                c: 'string',
+                d: 123,
+                e: true
+            };
+            const frozen = deepFreeze(obj);
+
+            expect(Object.isFrozen(frozen)).toBe(true);
+            expect(frozen.a).toBeNull();
+            expect(frozen.b).toBeUndefined();
+        });
+
+        it('should handle objects that are already partially frozen', () => {
+             const obj = {
+                 a: Object.freeze({ b: 1 }),
+                 c: { d: 2 }
+             };
+
+             const frozen = deepFreeze(obj);
+             expect(Object.isFrozen(frozen)).toBe(true);
+             expect(Object.isFrozen(frozen.a)).toBe(true);
+             expect(Object.isFrozen(frozen.c)).toBe(true);
+        });
+
         it('should calculate metrics for a complete activity object', () => {
             const activity = {
                 distance: 12345,
