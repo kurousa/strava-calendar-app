@@ -1,5 +1,0 @@
-🧪 Improve API fetch error testing and safely call sendErrorEmail
-
-🎯 **What:** The `api.js` catch block called `sendErrorEmail` without checking if it existed, and `tests/api.spec.js` didn't have adequate test coverage for this exception block and other API branches.
-📊 **Coverage:** Added tests to cover the defensive type check for `sendErrorEmail` in the exception block, as well as tests covering non-200 responses, 0 returned activities, and multi-page responses where `Utilities.sleep` is invoked.
-✨ **Result:** Statement coverage for `api.js` improved to 100%. Code robustness is increased by defending against undefined global function calls.
