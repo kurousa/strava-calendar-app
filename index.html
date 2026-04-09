@@ -77,6 +77,9 @@
         <div id="message"></div>
     </div>
     <script>
+        const messageEl = document.getElementById('message');
+        const btnEl = document.getElementById('btn');
+
         function startImport() {
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
@@ -84,8 +87,6 @@
                 alert('開始日と終了日を入力してください。');
                 return;
             }
-            const messageEl = document.getElementById('message');
-            const btnEl = document.getElementById('btn');
 
             messageEl.textContent = 'インポート処理を実行中...\n※データ量によっては数分かかります。そのままお待ちください。';
             btnEl.disabled = true;
