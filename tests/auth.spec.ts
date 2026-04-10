@@ -41,7 +41,7 @@ describe('auth', () => {
     it('should handle auth callback successfully', () => {
         const request = { parameter: { code: 'auth_code' } };
         mockService.handleCallback.mockReturnValue(true);
-        global.HtmlService.createHtmlOutput.mockImplementation((msg) => msg);
+        global.HtmlService.createHtmlOutput.mockImplementation((msg: string) => msg);
 
         const result = authCallback(request);
 
@@ -52,7 +52,7 @@ describe('auth', () => {
     it('should handle auth callback failure', () => {
         const request = { parameter: { error: 'access_denied' } };
         mockService.handleCallback.mockReturnValue(false);
-        global.HtmlService.createHtmlOutput.mockImplementation((msg) => msg);
+        global.HtmlService.createHtmlOutput.mockImplementation((msg: string) => msg);
 
         const result = authCallback(request);
 

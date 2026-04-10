@@ -1,7 +1,7 @@
 // ==========================================
 // 【Webアプリ用】画面から受け取った日付でインポートを実行
 // ==========================================
-function importPastActivitiesFromWeb(startStr, endStr) {
+function importPastActivitiesFromWeb(startStr: string, endStr: string): string {
     // Validate input format YYYY-MM-DD
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!startStr || !endStr || !dateRegex.test(startStr) || !dateRegex.test(endStr)) {
@@ -10,12 +10,21 @@ function importPastActivitiesFromWeb(startStr, endStr) {
         return msg;
     }
 
+    // Helper to validate date components to prevent rollover (e.g., 2024-02-31 -> 2024-03-02)
+    function isValidDateComponents(dateStr: string, dateObj: Date): boolean {
+        if (isNaN(dateObj.getTime())) return false;
+        const [y, m, d] = dateStr.split('-');
+        return dateObj.getFullYear() === parseInt(y, 10) &&
+            dateObj.getMonth() + 1 === parseInt(m, 10) &&
+            dateObj.getDate() === parseInt(d, 10);
+    }
+
     // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
     const startDate = new Date(`${startStr}T00:00:00`);
     const endDate = new Date(`${endStr}T23:59:59`);
 
     // Check if dates are valid
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    if (!isValidDateComponents(startStr, startDate) || !isValidDateComponents(endStr, endDate)) {
         const msg = 'エラー: 無効な日付が指定されました。';
         Logger.log(msg);
         return msg;
@@ -34,7 +43,7 @@ function importPastActivitiesFromWeb(startStr, endStr) {
 // ==========================================
 // 指定した期間の過去データを取り込む (画面からの実行用)
 // ==========================================
-function importPastActivities(startDate, endDate, perPage = 200) {
+function importPastActivities(startDate?: Date, endDate?: Date, perPage: number = 200): string {
     // Web画面以外（エディタ等）から直接実行された場合のデフォルト（テスト用）
     if (!startDate || !endDate) {
         startDate = new Date();
@@ -45,7 +54,7 @@ function importPastActivities(startDate, endDate, perPage = 200) {
 
     Logger.log(`[Import] ${startDate.toLocaleDateString()} から ${endDate.toLocaleDateString()} のデータを取り込みます...`);
 
-    // api.js の関数を呼び出し
+    // api.ts の関数を呼び出し
     const activities = getStravaActivities(startDate, endDate, perPage);
 
     if (activities.length === 0) {
@@ -66,7 +75,7 @@ function importPastActivities(startDate, endDate, perPage = 200) {
     // Create a Set of existing Strava activity IDs for O(1) lookup
     // Note: event.getDescription() does trigger a read in CalendarApp, but this is still
     // vastly faster than getEvents() for every single activity in the list.
-    const existingActivityIds = new Set();
+    const existingActivityIds = new Set<string>();
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {

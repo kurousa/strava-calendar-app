@@ -27,5 +27,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Run unit tests
-        run: pnpm test
+      - name: Run type check
+        run: pnpm run typecheck
+
+      - name: Run unit tests with coverage
+        run: pnpm run coverage
