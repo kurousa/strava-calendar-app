@@ -15,7 +15,7 @@ describe('RideFormatter', () => {
             average_cadence: 90
         };
 
-        const result = makeRideDescription(activity);
+        const result = makeRideDescription(activity as any);
         expect(result).toBe(`
 距離: 40.0 km
 時間: 120 分
@@ -38,8 +38,8 @@ describe('RideFormatter', () => {
             average_speed: 5.555,
         };
 
-        const result = makeRideDescription(activity);
-        // Note: per current RideFormatter.js, no blank line before "詳細" if watts/cadence are empty
+        const result = makeRideDescription(activity as any);
+        // Note: per current RideFormatter.ts, no blank line before "詳細" if watts/cadence are empty
         expect(result).toBe(`
 距離: 10.0 km
 時間: 30 分

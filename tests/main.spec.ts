@@ -94,7 +94,7 @@ describe('getTargetCalendar', () => {
         const mockCalendar = { id: 'custom_calendar_id' };
         global.CalendarApp.getCalendarById.mockReturnValueOnce(mockCalendar);
 
-        const { getTargetCalendar } = await import('../main.js');
+        const { getTargetCalendar } = await import('../main.ts');
         const result = getTargetCalendar();
 
         expect(global.CalendarApp.getCalendarById).toHaveBeenCalledWith('custom_calendar_id');
@@ -107,7 +107,7 @@ describe('getTargetCalendar', () => {
         });
         global.CalendarApp.getCalendarById.mockReturnValueOnce(null);
 
-        const { getTargetCalendar } = await import('../main.js');
+        const { getTargetCalendar } = await import('../main.ts');
         const result = getTargetCalendar();
 
         expect(global.CalendarApp.getCalendarById).toHaveBeenCalledWith('invalid_id');
@@ -122,7 +122,7 @@ describe('getTargetCalendar', () => {
         const mockDefaultCalendar = { id: 'default_id' };
         global.CalendarApp.getDefaultCalendar.mockReturnValueOnce(mockDefaultCalendar);
 
-        const { getTargetCalendar } = await import('../main.js');
+        const { getTargetCalendar } = await import('../main.ts');
         const result = getTargetCalendar();
 
         expect(global.CalendarApp.getDefaultCalendar).toHaveBeenCalled();
@@ -131,8 +131,8 @@ describe('getTargetCalendar', () => {
     });
 });
 describe('processActivityToCalendar', () => {
-    let mockCalendar;
-    let mockEvent;
+    let mockCalendar: any;
+    let mockEvent: any;
 
     beforeEach(() => {
         vi.resetAllMocks();
@@ -156,7 +156,7 @@ describe('processActivityToCalendar', () => {
         mockEvent.getDescription.mockReturnValue('Some description with strava.com/activities/12345 inside');
         mockCalendar.getEvents.mockReturnValue([mockEvent]);
 
-        const { processActivityToCalendar } = await import('../main.js');
+        const { processActivityToCalendar } = await import('../main.ts');
         const activity = {
             id: 12345,
             start_date: '2023-01-01T10:00:00Z',
@@ -172,7 +172,7 @@ describe('processActivityToCalendar', () => {
     });
 
     it('should create event with distance in title if type is in distanceActivities and distance > 0', async () => {
-        const { processActivityToCalendar, DISTANCE_ACTIVITIES, CALENDAR_API_DELAY_MS } = await import('../main.js');
+        const { processActivityToCalendar, DISTANCE_ACTIVITIES, CALENDAR_API_DELAY_MS } = await import('../main.ts');
 
         const activity = {
             id: 12345,
@@ -197,7 +197,7 @@ describe('processActivityToCalendar', () => {
     });
 
     it('should create event without distance in title if distance is 0', async () => {
-        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.js');
+        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.ts');
 
         const activity = {
             id: 12345,
@@ -220,7 +220,7 @@ describe('processActivityToCalendar', () => {
     });
 
     it('should create event without distance in title if type is not in distanceActivities', async () => {
-        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.js');
+        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.ts');
 
         const activity = {
             id: 12345,
@@ -243,7 +243,7 @@ describe('processActivityToCalendar', () => {
     });
 
     it('should bypass duplicate check if skipDuplicateCheck is true', async () => {
-        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.js');
+        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.ts');
 
         const activity = {
             id: 12345,
