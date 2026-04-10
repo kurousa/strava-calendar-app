@@ -119,11 +119,14 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   const type = activity.type; // 種類（Run, Rideなど）
   const style = getActivityStyle(type);
   const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
+  const emoji = style.emoji;
 
   // 距離を表示するアクティビティかどうかの判定
   const hasDistance = distanceActivities.has(type) && activity.distance > 0;
 
-  const title = hasDistance ? `[${type}] ${activity.name} - ${distanceKm}km` : `[${type}] ${activity.name}`;
+  const title = hasDistance ?
+    `[${emoji} ${type}] ${activity.name} - ${distanceKm}km` :
+    `[${emoji} ${type}] ${activity.name}`;
 
   // カレンダーに登録する詳細メモ
   const description = makeDescription(activity);
@@ -131,6 +134,7 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
   Logger.log("[DEBUG]startTime -> " + startTime);
   Logger.log("[DEBUG]endTime -> " + endTime);
+  Logger.log("[DEBUG]title -> " + title);
 
   // カレンダーに予定として作成
   const event = calendar.createEvent(title, startTime, endTime, {
