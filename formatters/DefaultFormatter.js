@@ -76,7 +76,8 @@ function initStyles() {
     'Swim': { emoji: '🏊', color: CalendarApp.EventColor.CYAN },
     'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
     'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
-    'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE }
+    'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
+    'Yoga': { emoji: '🧘', color: CalendarApp.EventColor.GREEN },
   });
 
   DEFAULT_ACTIVITY_STYLE_CACHE = Object.freeze({ emoji: '🏅', color: CalendarApp.EventColor.GRAY });
