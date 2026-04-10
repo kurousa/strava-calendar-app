@@ -97,7 +97,7 @@ function importPastActivities(startDate, endDate, perPage = 200) {
         }
 
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
-        const result = processActivityToCalendar(activity, calendar, undefined, true);
+        const result = processActivityToCalendar(activity, calendar);
         if (result === 'skipped') skipCount++;
         if (result === 'success') successCount++;
     });

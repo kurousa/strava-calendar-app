@@ -152,25 +152,6 @@ describe('processActivityToCalendar', () => {
         global.Logger.log = vi.fn();
     });
 
-    it('should skip creation if activity is already registered and skipDuplicateCheck is false', async () => {
-        mockEvent.getDescription.mockReturnValue('Some description with strava.com/activities/12345 inside');
-        mockCalendar.getEvents.mockReturnValue([mockEvent]);
-
-        const { processActivityToCalendar } = await import('../main.js');
-        const activity = {
-            id: 12345,
-            start_date: '2023-01-01T10:00:00Z',
-            elapsed_time: 3600
-        };
-
-        const result = processActivityToCalendar(activity, mockCalendar);
-
-        expect(mockCalendar.getEvents).toHaveBeenCalled();
-        expect(mockCalendar.createEvent).not.toHaveBeenCalled();
-        expect(result).toBe('skipped');
-        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済みのアクティビティです'));
-    });
-
     it('should create event with distance in title if type is in distanceActivities and distance > 0', async () => {
         const { processActivityToCalendar, DISTANCE_ACTIVITIES, CALENDAR_API_DELAY_MS } = await import('../main.js');
 
@@ -183,10 +164,9 @@ describe('processActivityToCalendar', () => {
             distance: 5200 // 5.2 km
         };
 
-        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, false);
+        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES);
 
-        expect(mockCalendar.getEvents).toHaveBeenCalled();
-        expect(mockCalendar.createEvent).toHaveBeenCalledWith(
+                expect(mockCalendar.createEvent).toHaveBeenCalledWith(
             '[Run] Morning Run - 5.2km',
             expect.any(Date),
             expect.any(Date),
@@ -208,7 +188,7 @@ describe('processActivityToCalendar', () => {
             distance: 0
         };
 
-        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, false);
+        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES);
 
         expect(mockCalendar.createEvent).toHaveBeenCalledWith(
             '[Run] Treadmill Run',
@@ -231,7 +211,7 @@ describe('processActivityToCalendar', () => {
             distance: 5000 // Even if distance is provided
         };
 
-        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, false);
+        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES);
 
         expect(mockCalendar.createEvent).toHaveBeenCalledWith(
             '[Yoga] Morning Yoga',
@@ -242,22 +222,4 @@ describe('processActivityToCalendar', () => {
         expect(result).toBe('success');
     });
 
-    it('should bypass duplicate check if skipDuplicateCheck is true', async () => {
-        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.js');
-
-        const activity = {
-            id: 12345,
-            start_date: '2023-01-01T10:00:00Z',
-            elapsed_time: 3600,
-            type: 'Run',
-            name: 'Morning Run',
-            distance: 5200
-        };
-
-        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, true);
-
-        expect(mockCalendar.getEvents).not.toHaveBeenCalled();
-        expect(mockCalendar.createEvent).toHaveBeenCalled();
-        expect(result).toBe('success');
-    });
 });

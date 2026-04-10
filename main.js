@@ -60,7 +60,7 @@ function main() {
     }
 
     // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
-    processActivityToCalendar(activity, calendar, undefined, true);
+    processActivityToCalendar(activity, calendar);
   });
 }
 
@@ -93,27 +93,11 @@ function sendErrorEmail(message) {
 // ==========================================
 // アクティビティをカレンダーに登録する共通処理
 // ==========================================
-function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES, skipDuplicateCheck = false) {
+function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES) {
   // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
   const startTime = new Date(activity.start_date);
   const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
 
-  // 既に登録済みのアクティビティかどうかを判定する (in-lined)
-  // ⚡ Bolt: skipDuplicateCheck フラグで事前チェックをバイパスできるように変更
-  if (!skipDuplicateCheck) {
-    const existingEvents = calendar.getEvents(startTime, endTime);
-    const isDuplicate = existingEvents.some(event => {
-      const desc = event.getDescription();
-      return desc && desc.includes(`strava.com/activities/${activity.id}`);
-    });
-
-    if (isDuplicate) {
-      Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-      return 'skipped';
-    }
-  }
-
-  // ーーー ここから下は「新規」の時しか実行されない ーーー
 
   // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
   const type = activity.type; // 種類（Run, Rideなど）
