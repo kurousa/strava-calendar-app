@@ -187,7 +187,7 @@ describe('processActivityToCalendar', () => {
 
         expect(mockCalendar.getEvents).toHaveBeenCalled();
         expect(mockCalendar.createEvent).toHaveBeenCalledWith(
-            '[Run] Morning Run - 5.2km',
+            '[🏃 Run] Morning Run - 5.2km',
             expect.any(Date),
             expect.any(Date),
             expect.any(Object)
@@ -211,7 +211,7 @@ describe('processActivityToCalendar', () => {
         const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, false);
 
         expect(mockCalendar.createEvent).toHaveBeenCalledWith(
-            '[Run] Treadmill Run',
+            '[🏃 Run] Treadmill Run',
             expect.any(Date),
             expect.any(Date),
             expect.any(Object)
@@ -234,7 +234,7 @@ describe('processActivityToCalendar', () => {
         const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, false);
 
         expect(mockCalendar.createEvent).toHaveBeenCalledWith(
-            '[Yoga] Morning Yoga',
+            '[🧘 Yoga] Morning Yoga',
             expect.any(Date),
             expect.any(Date),
             expect.any(Object)

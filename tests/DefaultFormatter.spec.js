@@ -95,15 +95,15 @@ describe('DefaultFormatter', () => {
         });
 
         it('should handle objects that are already partially frozen', () => {
-             const obj = {
-                 a: Object.freeze({ b: 1 }),
-                 c: { d: 2 }
-             };
+            const obj = {
+                a: Object.freeze({ b: 1 }),
+                c: { d: 2 }
+            };
 
-             const frozen = deepFreeze(obj);
-             expect(Object.isFrozen(frozen)).toBe(true);
-             expect(Object.isFrozen(frozen.a)).toBe(true);
-             expect(Object.isFrozen(frozen.c)).toBe(true);
+            const frozen = deepFreeze(obj);
+            expect(Object.isFrozen(frozen)).toBe(true);
+            expect(Object.isFrozen(frozen.a)).toBe(true);
+            expect(Object.isFrozen(frozen.c)).toBe(true);
         });
 
         it('should calculate metrics for a complete activity object', () => {
@@ -246,6 +246,7 @@ describe('DefaultFormatter', () => {
             ['Hike', { emoji: '🥾', color: 'PALE_GREEN' }],
             ['Workout', { emoji: '🏋️', color: 'ORANGE' }],
             ['WeightTraining', { emoji: '🏋️', color: 'ORANGE' }],
+            ['Yoga', { emoji: '🧘', color: 'GREEN' }],
             ['Unknown', { emoji: '🏅', color: 'GRAY' }] // Default case
         ];
 
