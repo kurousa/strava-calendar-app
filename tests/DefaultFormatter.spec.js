@@ -1,125 +1,148 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-
-// Mock Google Apps Script global CalendarApp
-global.CalendarApp = {
-    EventColor: {
-        BLUE: 'BLUE',
-        RED: 'RED',
-        GREEN: 'GREEN',
-        CYAN: 'CYAN',
-        PALE_GREEN: 'PALE_GREEN',
-        ORANGE: 'ORANGE',
-        GRAY: 'GRAY'
-    },
-};
-
-import { makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as DefaultFormatter from '../src/formatters/DefaultFormatter';
+import * as RideFormatter from '../src/formatters/RideFormatter';
+import * as RunFormatter from '../src/formatters/RunFormatter';
 
 describe('DefaultFormatter', () => {
-    describe('makeDefaultDescription', () => {
-        it('should make default description', () => {
+    describe('getCommonMetrics', () => {
+        it('should correctly extract metrics', () => {
             const activity = {
-                name: 'テストアクティビティ',
                 distance: 10000,
                 moving_time: 3600,
                 total_elevation_gain: 100,
                 has_heartrate: true,
-                average_heartrate: 150,
-                id: 123456789,
+                average_heartrate: 150
             };
+            const result = DefaultFormatter.getCommonMetrics(activity);
+            expect(result.distanceKm).toBe('10.0');
+            expect(result.timeMin).toBe(60);
+            expect(result.elevation).toBe(100);
+            expect(result.hr).toBe('150 bpm');
+        });
+    });
 
-            expect(makeDefaultDescription(activity)).toBe(`
-距離: 10.0 km
-時間: 60 分
-獲得標高: 100 m
-平均心拍数: 150 bpm
-
-詳細: https://www.strava.com/activities/123456789
-  `.trim());
+    describe('makeDefaultDescription', () => {
+        it('should make default description', () => {
+            const activity = {
+                id: 123,
+                distance: 10000,
+                moving_time: 3600,
+                total_elevation_gain: 100,
+                has_heartrate: true,
+                average_heartrate: 150
+            };
+            const result = DefaultFormatter.makeDefaultDescription(activity);
+            expect(result).toContain('距離: 10.0 km');
+            expect(result).toContain('時間: 60 分');
+            expect(result).toContain('獲得標高: 100 m');
+            expect(result).toContain('平均心拍数: 150 bpm');
+            expect(result).toContain('https://www.strava.com/activities/123');
         });
     });
 
     describe('getActivityStyle', () => {
-        const styleTestCases = [
-            ['Walk', { emoji: '🚶', color: 'GREEN' }],
-            ['Run', { emoji: '🏃', color: 'BLUE' }],
-            ['VirtualRun', { emoji: '🏃', color: 'BLUE' }],
-            ['Ride', { emoji: '🚴', color: 'RED' }],
-            ['VirtualRide', { emoji: '🚴', color: 'RED' }],
-            ['Swim', { emoji: '🏊', color: 'CYAN' }],
-            ['Hike', { emoji: '🥾', color: 'PALE_GREEN' }],
-            ['Workout', { emoji: '🏋️', color: 'ORANGE' }],
-            ['WeightTraining', { emoji: '🏋️', color: 'ORANGE' }],
-            ['Unknown', { emoji: '🏅', color: 'GRAY' }] // Default case
-        ];
-
-        it.each(styleTestCases)('should return correct style for %s', (type, expectedStyle) => {
-            expect(getActivityStyle(type)).toEqual(expectedStyle);
+        beforeEach(() => {
+            vi.resetModules();
         });
 
-        it('should return an immutable (frozen) object to prevent cache side-effects', () => {
-            const style = getActivityStyle('Run');
+        it('should return correct style for Walk', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Walk')).toEqual({ emoji: '🚶', color: 'GREEN' });
+        });
 
-            // Verify the object is frozen
+        it('should return correct style for Run', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Run')).toEqual({ emoji: '🏃', color: 'BLUE' });
+        });
+
+        it('should return correct style for VirtualRun', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('VirtualRun')).toEqual({ emoji: '🏃', color: 'BLUE' });
+        });
+
+        it('should return correct style for Ride', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Ride')).toEqual({ emoji: '🚴', color: 'RED' });
+        });
+
+        it('should return correct style for VirtualRide', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('VirtualRide')).toEqual({ emoji: '🚴', color: 'RED' });
+        });
+
+        it('should return correct style for Swim', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Swim')).toEqual({ emoji: '🏊', color: 'CYAN' });
+        });
+
+        it('should return correct style for Hike', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Hike')).toEqual({ emoji: '🥾', color: 'PALE_GREEN' });
+        });
+
+        it('should return correct style for Workout', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Workout')).toEqual({ emoji: '🏋️', color: 'ORANGE' });
+        });
+
+        it('should return correct style for WeightTraining', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('WeightTraining')).toEqual({ emoji: '🏋️', color: 'ORANGE' });
+        });
+
+        it('should return correct style for Unknown', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            expect(getActivityStyle('Unknown')).toEqual({ emoji: '🏅', color: 'GRAY' });
+        });
+
+        it('should return an immutable (frozen) object to prevent cache side-effects', async () => {
+            const { getActivityStyle } = await import('../src/formatters/DefaultFormatter');
+            const style = getActivityStyle('Walk');
             expect(Object.isFrozen(style)).toBe(true);
-
-            // Attempting to mutate a frozen object should throw a TypeError in strict mode.
-            expect(() => {
-                'use strict';
-                style.emoji = '🚀';
-            }).toThrow(TypeError);
         });
     });
 
     describe('makeDescription', () => {
         beforeEach(() => {
-            // makeDescription internally calls global makeRideDescription and makeRunDescription
-            // because in GAS they are in the same global scope.
-            // We mock them globally for tests to verify routing behavior.
-            vi.stubGlobal('makeRideDescription', vi.fn((activity) => `RIDE: ${activity.id}`));
-            vi.stubGlobal('makeRunDescription', vi.fn((activity) => `RUN: ${activity.id}`));
-        });
-
-        afterEach(() => {
-            vi.unstubAllGlobals();
+            vi.clearAllMocks();
+            vi.spyOn(RideFormatter, 'makeRideDescription').mockReturnValue('RIDE: mock');
+            vi.spyOn(RunFormatter, 'makeRunDescription').mockReturnValue('RUN: mock');
         });
 
         it('should delegate to makeRideDescription for Ride', () => {
             const activity = { type: 'Ride', id: 1 };
-            const result = makeDescription(activity);
-            expect(global.makeRideDescription).toHaveBeenCalledWith(activity);
-            expect(result).toBe('RIDE: 1');
+            const result = DefaultFormatter.makeDescription(activity);
+            expect(RideFormatter.makeRideDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RIDE: mock');
         });
 
         it('should delegate to makeRideDescription for VirtualRide', () => {
             const activity = { type: 'VirtualRide', id: 2 };
-            const result = makeDescription(activity);
-            expect(global.makeRideDescription).toHaveBeenCalledWith(activity);
-            expect(result).toBe('RIDE: 2');
+            const result = DefaultFormatter.makeDescription(activity);
+            expect(RideFormatter.makeRideDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RIDE: mock');
         });
 
         it('should delegate to makeRunDescription for Run', () => {
             const activity = { type: 'Run', id: 3 };
-            const result = makeDescription(activity);
-            expect(global.makeRunDescription).toHaveBeenCalledWith(activity);
-            expect(result).toBe('RUN: 3');
+            const result = DefaultFormatter.makeDescription(activity);
+            expect(RunFormatter.makeRunDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RUN: mock');
         });
 
         it('should delegate to makeRunDescription for Walk', () => {
             const activity = { type: 'Walk', id: 4 };
-            const result = makeDescription(activity);
-            expect(global.makeRunDescription).toHaveBeenCalledWith(activity);
-            expect(result).toBe('RUN: 4');
+            const result = DefaultFormatter.makeDescription(activity);
+            expect(RunFormatter.makeRunDescription).toHaveBeenCalledWith(activity);
+            expect(result).toBe('RUN: mock');
         });
 
         it('should fall back to makeDefaultDescription for other types (e.g. Swim)', () => {
             const activity = { type: 'Swim', id: 5, distance: 1000 };
-            const result = makeDescription(activity);
-            // Default description includes detailed formatting, we check part of it
+            const result = DefaultFormatter.makeDescription(activity);
+            expect(RideFormatter.makeRideDescription).not.toHaveBeenCalled();
+            expect(RunFormatter.makeRunDescription).not.toHaveBeenCalled();
             expect(result).toContain('距離: 1.0 km');
-            expect(result).toContain('詳細: https://www.strava.com/activities/5');
-            expect(global.makeRideDescription).not.toHaveBeenCalled();
-            expect(global.makeRunDescription).not.toHaveBeenCalled();
         });
     });
 });

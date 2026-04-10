@@ -1,8 +1,11 @@
+import { StravaActivity } from '../api';
+import { getCommonMetrics } from './DefaultFormatter';
+
 // ==========================================
 // 自転車 (Ride / VirtualRide) 専用のフォーマット処理
 // ==========================================
-function makeRideDescription(activity) {
-  // 共通のメトリクス計算 (DefaultFormatter.js で定義、GAS環境/vitestでグローバル解決)
+export function makeRideDescription(activity: StravaActivity): string {
+  // 共通のメトリクス計算
   const { distanceKm, timeMin, elevation, hr } = getCommonMetrics(activity);
 
   // 自転車専用の計算（時速、パワー、ケイデンス）
@@ -18,11 +21,4 @@ function makeRideDescription(activity) {
 平均心拍数: ${hr}
 ${wattsText}${cadenceText}詳細: https://www.strava.com/activities/${activity.id}
   `.trim();
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    makeRideDescription,
-  };
 }

@@ -1,10 +1,12 @@
 // ==========================================
-// メインの処理とカレンダー操作 (main.js)
+// メインの処理とカレンダー操作 (main.ts)
 // プログラムの入り口（タイマーから実行される関数）と、
 // カレンダーへの書き込みといった「このアプリのメインのお仕事」だけを残します。
 // ==========================================
 
-const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+import { getStravaActivities, StravaActivity } from './api';
+import { getActivityStyle, makeDescription } from './formatters/DefaultFormatter';
+
 // カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
 const CALENDAR_API_DELAY_MS = 200;
 
@@ -19,7 +21,7 @@ const DISTANCE_ACTIVITIES = new Set([
 /**
  * 取得したアクティビティをGoogleカレンダーに登録する
  */
-function main() {
+export function main(): void {
   // 実行時刻の1日前から現在時刻までのアクティビティを取得
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -47,7 +49,7 @@ function main() {
  * エラーをメールで通知する
  * @param {string} message - エラーメッセージ
  */
-function sendErrorEmail(message) {
+export function sendErrorEmail(message: string): void {
   const email = Session.getEffectiveUser().getEmail();
   if (!email) {
     Logger.log('通知先メールアドレスを取得できなかったため、メール送信をスキップしました。');
@@ -72,7 +74,12 @@ function sendErrorEmail(message) {
 // ==========================================
 // アクティビティをカレンダーに登録する共通処理
 // ==========================================
-function processActivityToCalendar(activity, calendar, distanceActivities = DISTANCE_ACTIVITIES, skipDuplicateCheck = false) {
+export function processActivityToCalendar(
+  activity: StravaActivity,
+  calendar: GoogleAppsScript.Calendar.Calendar,
+  distanceActivities: Set<string> = DISTANCE_ACTIVITIES,
+  skipDuplicateCheck: boolean = false
+): 'skipped' | 'success' {
   // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
   const startTime = new Date(activity.start_date);
   const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
@@ -117,7 +124,7 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
   });
   // イベントに色を設定する
   if (style.color) {
-    event.setColor(style.color);
+    event.setColor(style.color as any);
   }
 
   // カレンダーAPIの連続作成制限を回避しつつ、GASの実行時間制限(6分)に配慮
@@ -131,7 +138,8 @@ function processActivityToCalendar(activity, calendar, distanceActivities = DIST
 // ==========================================
 // カレンダー取得ユーティリティ
 // ==========================================
-function getTargetCalendar() {
+export function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
+  const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
   if (CALENDAR_ID) {
     const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
     if (!calendar) {
@@ -145,17 +153,8 @@ function getTargetCalendar() {
 // ==========================================
 // 【Webアプリ用】インポート画面（HTML）を表示する
 // ==========================================
-function doGet() {
+export function doGet(): GoogleAppsScript.HTML.HtmlOutput {
   // 'index' という名前のHTMLファイルを読み込んで表示する
   return HtmlService.createHtmlOutputFromFile('index')
     .setTitle('Strava カレンダーインポート');
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    sendErrorEmail,
-    doGet,
-    getTargetCalendar,
-  };
 }

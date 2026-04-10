@@ -1,8 +1,11 @@
+import { StravaActivity } from '../api';
+import { getCommonMetrics } from './DefaultFormatter';
+
 // ==========================================
 // ラン・ウォーク (Run / Walk) 専用のフォーマット処理
 // ==========================================
-function makeRunDescription(activity) {
-  // 共通のメトリクス計算 (DefaultFormatter.js で定義、GAS環境/vitestでグローバル解決)
+export function makeRunDescription(activity: StravaActivity): string {
+  // 共通のメトリクス計算
   const { distanceKm, timeMin, elevation, hr } = getCommonMetrics(activity);
 
   // ラン専用の計算（ペース）
@@ -23,11 +26,4 @@ function makeRunDescription(activity) {
 
 詳細: https://www.strava.com/activities/${activity.id}
   `.trim();
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    makeRunDescription,
-  };
 }

@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getStravaActivities, getSearchParam, convertToTime } from '../api';
+import * as api from '../src/api';
+import * as auth from '../src/auth';
+import * as main from '../src/main';
 
 describe('api', () => {
     const mockService = {
@@ -15,11 +17,14 @@ describe('api', () => {
     beforeEach(() => {
         vi.resetAllMocks();
 
-        // GAS globals / specific functions used in api.js
-        vi.stubGlobal('getOAuthService', vi.fn(() => mockService));
+        // Mock auth and main methods
+        vi.spyOn(auth, 'getOAuthService').mockReturnValue(mockService);
+        vi.spyOn(main, 'sendErrorEmail').mockImplementation(() => {});
+
+        // GAS globals
         vi.stubGlobal('Logger', { log: vi.fn() });
         vi.stubGlobal('UrlFetchApp', { fetch: vi.fn(() => mockResponse) });
-        vi.stubGlobal('sendErrorEmail', vi.fn());
+        vi.stubGlobal('Utilities', { sleep: vi.fn() });
     });
 
     it('should return activities when access is granted and fetch is successful', () => {
@@ -33,7 +38,7 @@ describe('api', () => {
         mockResponse.getResponseCode.mockReturnValue(200);
         mockResponse.getContentText.mockReturnValue(JSON.stringify(activities));
 
-        const result = getStravaActivities();
+        const result = api.getStravaActivities();
 
         expect(result).toEqual(activities);
         expect(global.UrlFetchApp.fetch).toHaveBeenCalledWith(
@@ -49,10 +54,10 @@ describe('api', () => {
     it('should return empty array and log error when no access', () => {
         mockService.hasAccess.mockReturnValue(false);
 
-        const result = getStravaActivities();
+        const result = api.getStravaActivities();
 
         expect(result).toEqual([]);
-        expect(global.sendErrorEmail).toHaveBeenCalled();
+        expect(main.sendErrorEmail).toHaveBeenCalled();
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Stravaと連携されていません'));
     });
 
@@ -63,10 +68,10 @@ describe('api', () => {
             throw new Error('Network error');
         });
 
-        const result = getStravaActivities();
+        const result = api.getStravaActivities();
 
         expect(result).toEqual([]);
-        expect(global.sendErrorEmail).toHaveBeenCalled();
+        expect(main.sendErrorEmail).toHaveBeenCalled();
     });
 
     describe('getSearchParam', () => {
@@ -75,11 +80,11 @@ describe('api', () => {
             const beforeDate = new Date('2024-01-02T00:00:00Z');
             const perPage = 100;
 
-            const params = getSearchParam(afterDate, beforeDate, perPage);
+            const params = api.getSearchParam(afterDate, beforeDate, perPage);
 
             expect(params.per_page).toBe(100);
-            expect(params.after).toBe(convertToTime(afterDate));
-            expect(params.before).toBe(convertToTime(beforeDate));
+            expect(params.after).toBe(api.convertToTime(afterDate));
+            expect(params.before).toBe(api.convertToTime(beforeDate));
         });
 
         it('should set default after and before dates if not provided', () => {
@@ -88,14 +93,14 @@ describe('api', () => {
             vi.useFakeTimers();
             vi.setSystemTime(now);
 
-            const params = getSearchParam(undefined, undefined, perPage);
+            const params = api.getSearchParam(undefined, undefined, perPage);
 
             expect(params.per_page).toBe(50);
 
-            const expectedBefore = convertToTime(now);
+            const expectedBefore = api.convertToTime(now);
             const expectedAfterDate = new Date(now);
             expectedAfterDate.setDate(now.getDate() - 1);
-            const expectedAfter = convertToTime(expectedAfterDate);
+            const expectedAfter = api.convertToTime(expectedAfterDate);
 
             expect(params.before).toBe(expectedBefore);
             expect(params.after).toBe(expectedAfter);
@@ -107,7 +112,7 @@ describe('api', () => {
     describe('convertToTime', () => {
         it('should convert Date to unix timestamp (seconds)', () => {
             const date = new Date('2024-01-02T00:00:10Z');
-            const seconds = convertToTime(date);
+            const seconds = api.convertToTime(date);
             expect(seconds).toBe(1704153610);
         });
     });

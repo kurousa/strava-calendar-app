@@ -1,7 +1,23 @@
+import { StravaActivity } from '../api';
+import { makeRideDescription } from './RideFormatter';
+import { makeRunDescription } from './RunFormatter';
+
+export interface CommonMetrics {
+  distanceKm: string;
+  timeMin: number;
+  elevation: number;
+  hr: string | number;
+}
+
+export interface ActivityStyle {
+  emoji: string;
+  color: any; // GoogleAppsScript.Calendar.EventColor
+}
+
 // ==========================================
 // 共通のメトリクス計算
 // ==========================================
-function getCommonMetrics(activity) {
+export function getCommonMetrics(activity: StravaActivity): CommonMetrics {
   return {
     distanceKm: ((activity.distance || 0) / 1000).toFixed(1),
     timeMin: Math.floor((activity.moving_time || 0) / 60),
@@ -13,8 +29,8 @@ function getCommonMetrics(activity) {
 // ==========================================
 // 汎用 (その他) のフォーマット処理
 // ==========================================
-function makeDefaultDescription(activity) {
-  let descriptionLines = [];
+export function makeDefaultDescription(activity: StravaActivity): string {
+  let descriptionLines: string[] = [];
 
   // 距離 (0より大きければ追加)
   if (activity.distance && activity.distance > 0) {
@@ -49,10 +65,10 @@ function makeDefaultDescription(activity) {
 /**
  * Object.freeze をネストされたオブジェクトにも適用するヘルパー関数
  */
-function deepFreeze(object) {
+function deepFreeze<T>(object: T): T {
   const propNames = Object.getOwnPropertyNames(object);
   for (const name of propNames) {
-    const value = object[name];
+    const value = (object as any)[name];
     if (value && typeof value === 'object') {
       deepFreeze(value);
     }
@@ -63,8 +79,8 @@ function deepFreeze(object) {
 // アクティビティごとの絵文字と色の定義
 // CalendarApp.EventColor への参照は、Node.js環境での ReferenceError 回避のため
 // 関数呼び出し時に解決されるように遅延評価するか、またはモックが存在することを確認する必要があります。
-let ACTIVITY_STYLES_CACHE = null;
-let DEFAULT_ACTIVITY_STYLE_CACHE = null;
+let ACTIVITY_STYLES_CACHE: Record<string, ActivityStyle> | null = null;
+let DEFAULT_ACTIVITY_STYLE_CACHE: ActivityStyle | null = null;
 
 function initStyles() {
   ACTIVITY_STYLES_CACHE = deepFreeze({
@@ -85,17 +101,17 @@ function initStyles() {
 // ==========================================
 // アクティビティごとの絵文字と色を定義する関数
 // ==========================================
-function getActivityStyle(type) {
+export function getActivityStyle(type: string): ActivityStyle {
   if (!ACTIVITY_STYLES_CACHE) {
     initStyles();
   }
-  return ACTIVITY_STYLES_CACHE[type] || DEFAULT_ACTIVITY_STYLE_CACHE;
+  return ACTIVITY_STYLES_CACHE![type] || DEFAULT_ACTIVITY_STYLE_CACHE;
 }
 
 // ==========================================
 // アクティビティごとのフォーマット処理を呼び分ける関数
 // ==========================================
-function makeDescription(activity) {
+export function makeDescription(activity: StravaActivity): string {
   console.log(`[DEBUG] activity type: ${activity.type}`);
 
   if (activity.type === 'Ride' || activity.type === 'VirtualRide') {
@@ -106,14 +122,4 @@ function makeDescription(activity) {
     // 追加した汎用フォーマッタを呼び出す
     return makeDefaultDescription(activity);
   }
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    getCommonMetrics,
-    makeDefaultDescription,
-    getActivityStyle,
-    makeDescription
-  };
 }

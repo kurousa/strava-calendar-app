@@ -5,6 +5,14 @@ global.Logger = {
     log: vi.fn(),
 };
 
+global.Utilities = {
+    sleep: vi.fn()
+};
+
+global.UrlFetchApp = {
+    fetch: vi.fn()
+};
+
 global.CalendarApp = {
     getCalendarById: vi.fn(),
     getDefaultCalendar: vi.fn(),
@@ -34,7 +42,23 @@ global.PropertiesService = {
 };
 
 global.OAuth2 = {
-    createService: vi.fn()
+    createService: vi.fn(() => {
+        const mockService = {
+            setAuthorizationBaseUrl: vi.fn().mockReturnThis(),
+            setTokenUrl: vi.fn().mockReturnThis(),
+            setClientId: vi.fn().mockReturnThis(),
+            setClientSecret: vi.fn().mockReturnThis(),
+            setCallbackFunction: vi.fn().mockReturnThis(),
+            setPropertyStore: vi.fn().mockReturnThis(),
+            setScope: vi.fn().mockReturnThis(),
+            hasAccess: vi.fn(),
+            getAccessToken: vi.fn(),
+            handleCallback: vi.fn(),
+            getAuthorizationUrl: vi.fn(),
+            reset: vi.fn(),
+        };
+        return mockService;
+    })
 };
 
 global.HtmlService = {
@@ -56,7 +80,3 @@ global.Session = {
 global.MailApp = {
     sendEmail: vi.fn()
 };
-
-// Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
-import * as DefaultFormatter from './formatters/DefaultFormatter.js';
-global.getCommonMetrics = DefaultFormatter.getCommonMetrics || (() => ({}));

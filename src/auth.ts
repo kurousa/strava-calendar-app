@@ -1,16 +1,18 @@
 // ==========================================
-// 認証周りの役割 (auth.js)
+// 認証周りの役割 (auth.ts)
 // OAuth2ライブラリを使った、Stravaとのログイン（認証）に関する処理をまとめたファイルです。
 // ==========================================
 
-const scriptProps = PropertiesService.getScriptProperties();
-const CLIENT_ID = scriptProps.getProperty('STRAVA_CLIENT_ID');
-const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+declare var OAuth2: any; // Type declaration for the external OAuth2 library
 
 /**
  * Strava連携のためのOAuth2サービスを取得する
  */
-function getOAuthService() {
+export function getOAuthService(): any {
+  const scriptProps = PropertiesService.getScriptProperties();
+  const CLIENT_ID = scriptProps.getProperty('STRAVA_CLIENT_ID');
+  const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error('STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET がスクリプトプロパティに設定されていません。');
   }
@@ -28,7 +30,7 @@ function getOAuthService() {
 /**
  * 認証が完了した後に呼ばれる処理
  */
-function authCallback(request) {
+export function authCallback(request: any): GoogleAppsScript.HTML.HtmlOutput {
   const service = getOAuthService();
   const authorized = service.handleCallback(request);
   if (authorized) {
@@ -41,7 +43,7 @@ function authCallback(request) {
 /**
  * 実行用：ここから認証をスタートします
  */
-function startAuth() {
+export function startAuth(): void {
   const service = getOAuthService();
 
   if (service.hasAccess()) {
@@ -56,17 +58,7 @@ function startAuth() {
 /**
  * 連携を解除したい時用の関数（普段は使いません）
  */
-function resetAuth() {
+export function resetAuth(): void {
   getOAuthService().reset();
   Logger.log('連携を解除しました。');
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    getOAuthService,
-    authCallback,
-    startAuth,
-    resetAuth,
-  };
 }

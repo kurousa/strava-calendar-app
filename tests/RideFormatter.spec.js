@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { makeRideDescription } from '../formatters/RideFormatter';
+import { makeRideDescription } from '../src/formatters/RideFormatter';
 
 describe('RideFormatter', () => {
     it('should format ride description with all fields', () => {
@@ -39,7 +39,7 @@ describe('RideFormatter', () => {
         };
 
         const result = makeRideDescription(activity);
-        // Note: per current RideFormatter.js, no blank line before "詳細" if watts/cadence are empty
+        // Note: per current RideFormatter.ts, no blank line before "詳細" if watts/cadence are empty
         expect(result).toBe(`
 距離: 10.0 km
 時間: 30 分

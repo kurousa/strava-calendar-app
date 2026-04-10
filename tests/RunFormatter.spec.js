@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { makeRunDescription } from '../formatters/RunFormatter';
+import { makeRunDescription } from '../src/formatters/RunFormatter';
 
 describe('RunFormatter', () => {
     it('should format run description with pace and heart rate', () => {

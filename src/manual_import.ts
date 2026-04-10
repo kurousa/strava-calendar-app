@@ -1,7 +1,10 @@
+import { getStravaActivities } from './api';
+import { getTargetCalendar, processActivityToCalendar } from './main';
+
 // ==========================================
 // 【Webアプリ用】画面から受け取った日付でインポートを実行
 // ==========================================
-function importPastActivitiesFromWeb(startStr, endStr) {
+export function importPastActivitiesFromWeb(startStr: string, endStr: string): string {
     // Validate input format YYYY-MM-DD
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!startStr || !endStr || !dateRegex.test(startStr) || !dateRegex.test(endStr)) {
@@ -34,7 +37,7 @@ function importPastActivitiesFromWeb(startStr, endStr) {
 // ==========================================
 // 指定した期間の過去データを取り込む (画面からの実行用)
 // ==========================================
-function importPastActivities(startDate, endDate, perPage = 200) {
+export function importPastActivities(startDate?: Date, endDate?: Date, perPage: number = 200): string {
     // Web画面以外（エディタ等）から直接実行された場合のデフォルト（テスト用）
     if (!startDate || !endDate) {
         startDate = new Date();
@@ -66,7 +69,7 @@ function importPastActivities(startDate, endDate, perPage = 200) {
     // Create a Set of existing Strava activity IDs for O(1) lookup
     // Note: event.getDescription() does trigger a read in CalendarApp, but this is still
     // vastly faster than getEvents() for every single activity in the list.
-    const existingActivityIds = new Set();
+    const existingActivityIds = new Set<string>();
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {
@@ -96,12 +99,4 @@ function importPastActivities(startDate, endDate, perPage = 200) {
     const resultMsg = `✅ 完了! 新規登録: ${successCount}件 / スキップ: ${skipCount}件`;
     Logger.log(resultMsg);
     return resultMsg;
-}
-
-// Node.js環境（テスト時）のみエクスポートする
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        importPastActivities,
-        importPastActivitiesFromWeb,
-    };
 }
