@@ -15,7 +15,7 @@ describe('api', () => {
     beforeEach(() => {
         vi.resetAllMocks();
 
-        // GAS globals / specific functions used in api.js
+        // GAS globals / specific functions used in api.ts
         vi.stubGlobal('getOAuthService', vi.fn(() => mockService));
         vi.stubGlobal('Logger', { log: vi.fn() });
         vi.stubGlobal('UrlFetchApp', { fetch: vi.fn(() => mockResponse) });
