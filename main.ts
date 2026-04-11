@@ -158,7 +158,6 @@ function processActivityToCalendar(
     Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
     Logger.log("[DEBUG]startTime -> " + startTime);
     Logger.log("[DEBUG]endTime -> " + endTime);
-    Logger.log("[DEBUG]title -> " + title);
 
     // カレンダーに予定として作成
     const event = calendar.createEvent(title, startTime, endTime, {
