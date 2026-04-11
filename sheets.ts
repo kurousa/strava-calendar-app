@@ -52,6 +52,8 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             const date = activity.start_date_local
                 ? new Date(activity.start_date_local.replace(/Z$/i, ''))
                 : new Date(activity.start_date);
+            // NOTE: ループ内で体重を取得しているが、これはアクティビティで記録が変わる可能性を加味したもの
+            // 実際の出力等を検討後に変更するかを検討する
             const weight = getAthleteWeight();
             const url = `https://www.strava.com/activities/${activity.id}`;
 
