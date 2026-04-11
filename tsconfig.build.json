@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "target": "ES2019",
+        "lib": [
+            "ES2019"
+        ],
+        "module": "None",
+        "ignoreDeprecations": "6.0",
+        "strict": false,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "dist",
+        "declaration": false,
+        "removeComments": false,
+        "isolatedModules": true,
+        "types": [
+            "google-apps-script",
+            "node"
+        ]
+    },
+    "include": [
+        "types.ts",
+        "auth.ts",
+        "api.ts",
+        "main.ts",
+        "manual_import.ts",
+        "sheets.ts",
+        "formatters/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "tests/**",
+        "vitest.config.ts",
+        "vitest.setup.ts"
+    ]
+}
