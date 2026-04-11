@@ -15,7 +15,7 @@ on:
       - "manual_import.ts"
       - "sheets.ts"
       - "types.ts"
-      - "tsconfig.build.json"
+      - "tsconfig.json"
 
 jobs:
   deploy:
