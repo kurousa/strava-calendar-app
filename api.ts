@@ -75,7 +75,7 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
             Utilities.sleep(STRAVA_API_DELAY_MS);
 
         } catch (e) {
-            const errorMsg = 'Strava APIの呼び出しに失敗しました（ネットワークエラーまたは想定外の例外が発生しました）';
+            const errorMsg = 'アクティビティの取得中にStrava APIの呼び出しに失敗しました（ネットワークエラーまたは想定外の例外が発生しました）';
             Logger.log('エラー: ' + errorMsg);
             if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
             break;
