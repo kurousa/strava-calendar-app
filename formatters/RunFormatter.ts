@@ -15,10 +15,11 @@ function formatPace(averageSpeed: number | undefined): string {
 
 function makeRunDescription(activity: StravaActivity): string {
     // 共通のメトリクス計算 (DefaultFormatter.ts で定義、GAS環境/vitestでグローバル解決)
-    const { distanceKm, timeMin, elevation, hr } = getCommonMetrics(activity);
+    const { distanceKm, timeMin, elevation, hr, weather } = getCommonMetrics(activity);
 
     // ラン専用の計算（ペース）
     const paceText = formatPace(activity.average_speed);
+    const weatherLine = weather ? `${weather}\n` : '';
 
     return `
 距離: ${distanceKm} km
@@ -26,7 +27,7 @@ function makeRunDescription(activity: StravaActivity): string {
 ペース: ${paceText}
 獲得標高: ${elevation} m
 平均心拍数: ${hr}
-
+${weatherLine}
 詳細: https://www.strava.com/activities/${activity.id}
   `.trim();
 }

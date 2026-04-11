@@ -23,6 +23,8 @@ interface StravaActivity {
     has_heartrate?: boolean;
     average_watts?: number;
     average_cadence?: number;
+    start_latlng?: [number, number]; // 追加: 開始地点の緯度経度 [lat, lng]
+    weatherText?: string;            // 追加: アプリ内で動的に付与する天気テキスト
     [key: string]: unknown;
 }
 
@@ -34,6 +36,7 @@ interface CommonMetrics {
     timeMin: number;
     elevation: number;
     hr: string;
+    weather?: string; // 追加
 }
 
 /**

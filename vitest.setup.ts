@@ -64,6 +64,19 @@ global.MailApp = {
     sendEmail: vi.fn()
 } as any;
 
+global.UrlFetchApp = {
+    fetch: vi.fn(() => ({
+        getResponseCode: vi.fn(() => 200),
+        getContentText: vi.fn(() => JSON.stringify({
+            hourly: {
+                temperature_2m: Array(24).fill(20),
+                weathercode: Array(24).fill(0),
+                windspeed_10m: Array(24).fill(2)
+            }
+        }))
+    }))
+} as any;
+
 // Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
 import * as DefaultFormatter from './formatters/DefaultFormatter.ts';
 global.getCommonMetrics = (DefaultFormatter as any).getCommonMetrics || (() => ({}));
@@ -89,3 +102,6 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription || (() =
 // Restore original functions
 global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
+
+import * as WeatherModule from './weather.ts';
+global.fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s");
