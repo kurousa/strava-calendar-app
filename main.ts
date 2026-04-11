@@ -52,6 +52,8 @@ function main(): void {
         }
     });
 
+    const successfulActivities: StravaActivity[] = [];
+    
     activities.forEach(activity => {
         const activityIdStr = String(activity.id);
         if (existingActivityIds.has(activityIdStr)) {
@@ -60,8 +62,15 @@ function main(): void {
         }
 
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
-        processActivityToCalendar(activity, calendar, undefined, true);
+        const result = processActivityToCalendar(activity, calendar, undefined, true);
+        if (result === 'success') {
+            successfulActivities.push(activity);
+        }
     });
+
+    if (typeof backupToSpreadsheet === 'function') {
+        backupToSpreadsheet(successfulActivities);
+    }
 }
 
 /**
@@ -184,6 +193,7 @@ function doGet(): GoogleAppsScript.HTML.HtmlOutput {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        main,
         sendErrorEmail,
         doGet,
         getTargetCalendar,
