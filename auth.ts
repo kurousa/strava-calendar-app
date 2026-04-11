@@ -6,16 +6,17 @@
 // OAuth2ライブラリはGAS標準型定義に含まれないため、グローバル宣言を追加
 declare const OAuth2: any;
 
-const scriptProps = PropertiesService.getScriptProperties();
-const CLIENT_ID = scriptProps.getProperty('STRAVA_CLIENT_ID');
-const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
-const STRAVA_SCOPE = scriptProps.getProperty('STRAVA_SCOPE');
+
 
 /**
  * Strava連携のためのOAuth2サービスを取得する
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getOAuthService(): any {
+    const scriptProps = PropertiesService.getScriptProperties();
+    const CLIENT_ID = scriptProps.getProperty('STRAVA_CLIENT_ID');
+    const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+    const STRAVA_SCOPE = scriptProps.getProperty('STRAVA_SCOPE');
     if (!CLIENT_ID || !CLIENT_SECRET) {
         throw new Error('STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET がスクリプトプロパティに設定されていません。');
     }
