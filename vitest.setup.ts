@@ -74,7 +74,7 @@ global.Utilities = {
 } as any;
 
 // athlete.ts のグローバル関数モック
-global.getAthleteWeight = vi.fn().mockReturnValue(null) as any;
+vi.stubGlobal('getAthleteWeight', vi.fn().mockReturnValue(null));
 
 
 // Globalize formatter functions for main.ts testing
