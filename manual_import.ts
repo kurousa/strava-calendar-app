@@ -111,6 +111,11 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
         backupToSpreadsheet(successfulActivities);
     }
 
+    // 同期結果を通知する
+    if (typeof sendSyncNotification === 'function') {
+        sendSyncNotification(successCount, skipCount, true);
+    }
+
     const resultMsg = `✅ 完了! 新規登録: ${successCount}件 / スキップ: ${skipCount}件`;
     Logger.log(resultMsg);
     return resultMsg;
