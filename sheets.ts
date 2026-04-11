@@ -49,8 +49,9 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             // Stravaの開始時間をスプレッドシートで扱いやすい形式に
             // start_date_local はローカル時刻だが、Strava APIが末尾に 'Z'（UTC）を
             // 付与するため、除去してGASのスクリプトタイムゾーンで正しく解釈させる
-            const localDateStr = (activity.start_date_local || activity.start_date).replace(/Z$/i, '');
-            const date = new Date(localDateStr);
+            const date = activity.start_date_local
+                ? new Date(activity.start_date_local.replace(/Z$/i, ''))
+                : new Date(activity.start_date);
             const weight = getAthleteWeight();
             const url = `https://www.strava.com/activities/${activity.id}`;
 
