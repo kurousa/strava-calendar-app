@@ -6,14 +6,15 @@ on:
     branches:
       - main
     paths:
-      - 'appsscript.json'
-      - 'main.ts'
-      - 'api.ts'
-      - 'auth.ts'
-      - 'formatters/*.ts'
-      - 'index.html'
-      - 'manual_import.ts'
-      - 'types.ts'
+      - "appsscript.json"
+      - "main.ts"
+      - "api.ts"
+      - "auth.ts"
+      - "formatters/*.ts"
+      - "index.html"
+      - "manual_import.ts"
+      - "sheets.ts"
+      - "types.ts"
 
 jobs:
   deploy:
@@ -28,7 +29,7 @@ jobs:
       - name: 2. Node.jsの準備
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: 3. pnpmのインストール
         uses: pnpm/action-setup@v5

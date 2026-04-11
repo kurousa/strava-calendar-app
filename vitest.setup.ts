@@ -19,6 +19,13 @@ global.CalendarApp = {
     },
 } as any;
 
+global.SpreadsheetApp = {
+    openById: vi.fn(() => ({
+        getSheetByName: vi.fn(),
+        insertSheet: vi.fn(),
+    }))
+} as any;
+
 global.PropertiesService = {
     getScriptProperties: vi.fn(() => ({
         getProperty: vi.fn((key: string) => {

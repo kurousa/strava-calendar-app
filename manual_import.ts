@@ -88,6 +88,8 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
 
     Logger.log(`[Import] 既にカレンダーにあるイベントを ${existingActivityIds.size} 件検出しました。`);
 
+    const successfulActivities: StravaActivity[] = [];
+
     activities.forEach(activity => {
         const activityIdStr = String(activity.id);
         if (existingActivityIds.has(activityIdStr)) {
@@ -99,8 +101,15 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
         const result = processActivityToCalendar(activity, calendar, undefined, true);
         if (result === 'skipped') skipCount++;
-        if (result === 'success') successCount++;
+        if (result === 'success') {
+            successCount++;
+            successfulActivities.push(activity);
+        }
     });
+
+    if (typeof backupToSpreadsheet === 'function') {
+        backupToSpreadsheet(successfulActivities);
+    }
 
     const resultMsg = `✅ 完了! 新規登録: ${successCount}件 / スキップ: ${skipCount}件`;
     Logger.log(resultMsg);
