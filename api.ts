@@ -75,7 +75,7 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
             Utilities.sleep(STRAVA_API_DELAY_MS);
 
         } catch (e) {
-            const errorMsg = 'アクティビティの取得中にStrava APIの呼び出しに失敗しました（ネットワークエラーまたは想定外の例外が発生しました）';
+            const errorMsg = 'Strava APIの呼び出しに失敗しました（アクティビティ取得時のネットワークエラーまたは例外）';
             Logger.log('エラー: ' + errorMsg);
             if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
             break;
@@ -118,7 +118,7 @@ function getStravaAthleteProfile(): StravaAthlete | null {
         return JSON.parse(response.getContentText());
 
     } catch (e) {
-        const errorMsg = 'プロフィールの取得中にStrava APIの呼び出しに失敗しました（ネットワークエラーまたは想定外の例外が発生しました）';
+        const errorMsg = 'Strava APIの呼び出しに失敗しました（プロフィール取得時のネットワークエラーまたは例外）';
         Logger.log('エラー: ' + errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         return null;
