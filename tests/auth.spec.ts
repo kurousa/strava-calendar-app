@@ -97,11 +97,11 @@ describe("auth", () => {
     vi.resetModules();
 
     // Temporarily modify the global PropertiesService mock to return null
-    const originalGetScriptProperties =
-      global.PropertiesService.getScriptProperties;
-    global.PropertiesService.getScriptProperties = vi.fn(() => ({
-      getProperty: vi.fn((key) => null),
-    }));
+    vi.stubGlobal("PropertiesService", {
+      getScriptProperties: vi.fn(() => ({
+        getProperty: vi.fn().mockReturnValue(null),
+      })),
+    });
 
     // Dynamically import the auth module so it picks up the modified mock
     const authModule = await import("../auth");
