@@ -6,7 +6,7 @@
         ],
         "module": "None",
         "ignoreDeprecations": "6.0",
-        "strict": false,
+        "strict": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "dist",
@@ -19,13 +19,7 @@
         ]
     },
     "include": [
-        "types.ts",
-        "auth.ts",
-        "api.ts",
-        "main.ts",
-        "manual_import.ts",
-        "sheets.ts",
-        "formatters/**/*.ts"
+        "**/*.ts"
     ],
     "exclude": [
         "node_modules",
