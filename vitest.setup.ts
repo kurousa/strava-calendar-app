@@ -93,5 +93,5 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription || (() =
 global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 
-// Make STRAVA_ACTIVITY_ID_REGEX available globally for tests
-global.STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/;
+const MainModule = await import('./main.ts');
+global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;

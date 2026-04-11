@@ -197,6 +197,7 @@ function doGet(): GoogleAppsScript.HTML.HtmlOutput {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        STRAVA_ACTIVITY_ID_REGEX,
         main,
         sendErrorEmail,
         doGet,
