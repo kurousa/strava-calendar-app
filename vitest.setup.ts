@@ -73,6 +73,9 @@ global.Utilities = {
     sleep: vi.fn(),
 } as any;
 
+// athlete.ts のグローバル関数モック
+global.getAthleteWeight = vi.fn().mockReturnValue(null) as any;
+
 
 // Globalize formatter functions for main.ts testing
 global.getActivityStyle = (DefaultFormatter as any).getActivityStyle || (() => ({ color: "BLUE" }));
