@@ -51,6 +51,7 @@ describe('manual_import', () => {
         vi.stubGlobal('getStravaActivities', vi.fn());
         vi.stubGlobal('getTargetCalendar', vi.fn());
         vi.stubGlobal('processActivityToCalendar', vi.fn());
+        vi.stubGlobal('backupToSpreadsheet', vi.fn());
     });
 
     it('should use default dates if not provided', () => {
@@ -124,6 +125,10 @@ describe('manual_import', () => {
         expect(global.processActivityToCalendar).toHaveBeenCalledTimes(2);
         expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(1, mockActivities[0], mockCalendar, undefined, true);
         expect(global.processActivityToCalendar).toHaveBeenNthCalledWith(2, mockActivities[2], mockCalendar, undefined, true);
+        
+        // Verify backupToSpreadsheet call
+        expect(global.backupToSpreadsheet).toHaveBeenCalledWith([mockActivities[0], mockActivities[2]]);
+        
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('完了!'));
     });
 });
