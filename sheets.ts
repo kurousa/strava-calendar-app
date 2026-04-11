@@ -30,10 +30,12 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         }
         
         // シートに既存のレコードがある場合は、既存のレコードを取得（重複登録を防止するため）
-        let existingIds: string[] = [];
+        const existingIds = new Set<string>();
         const lastRow = sheet.getLastRow();
         if (lastRow > 1) {
-            existingIds = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+            sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat().forEach(id => {
+                if (id) existingIds.add(String(id));
+            });
         }
 
         // アクティビティをスプレッドシートの「行 (配列)」の形式に変換
