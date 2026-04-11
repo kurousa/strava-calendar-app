@@ -118,7 +118,7 @@ function getStravaAthleteProfile(): StravaAthlete | null {
         return JSON.parse(response.getContentText());
 
     } catch (e) {
-        const errorMsg = 'Strava APIの呼び出しに失敗しました（ネットワークエラーまたは想定外の例外が発生しました）';
+        const errorMsg = 'プロフィールの取得中にStrava APIの呼び出しに失敗しました（ネットワークエラーまたは想定外の例外が発生しました）';
         Logger.log('エラー: ' + errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         return null;
