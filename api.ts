@@ -87,6 +87,35 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
 }
 
 /**
+ * Stravaから現在のアスリートの全プロフィール情報を取得する
+ */
+function getStravaAthleteProfile(): StravaAthlete | null {
+    const service = getOAuthService();
+    if (!service.hasAccess()) {
+        const errorMsg = '認証エラー: プロフィールを取得できません。';
+        Logger.log('エラー: ' + errorMsg);
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        return null;
+    }
+
+    const url = `${API_BASE}/athlete`;
+
+    try {
+        const response = UrlFetchApp.fetch(url, {
+            headers: {
+                Authorization: 'Bearer ' + service.getAccessToken()
+            },
+            muteHttpExceptions: true
+        });
+        return JSON.parse(response.getContentText());
+    } catch (e) {
+        const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + (e as Error).toString();
+        Logger.log('エラー: ' + errorMsg);
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        return null;
+    }
+}
+/**
  * アクティビティ取得のための検索パラメータを組み立てる
  */
 function getSearchParam(afterDate?: Date, beforeDate?: Date, perPage: number = 200): SearchParams {
