@@ -116,9 +116,10 @@ function processActivityToCalendar(
     // ⚡ Bolt: skipDuplicateCheck フラグで事前チェックをバイパスできるように変更
     if (!skipDuplicateCheck) {
         const existingEvents = calendar.getEvents(startTime, endTime);
+        const searchString = `strava.com/activities/${activity.id}`;
         const isDuplicate = existingEvents.some(event => {
             const desc = event.getDescription();
-            return desc && desc.includes(`strava.com/activities/${activity.id}`);
+            return desc && desc.includes(searchString);
         });
 
         if (isDuplicate) {
