@@ -4,7 +4,16 @@
 // カレンダーへの書き込みといった「このアプリのメインのお仕事」だけを残します。
 // ==========================================
 
-const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+let _CALENDAR_ID: string | null = null;
+let _CALENDAR_ID_LOADED = false;
+
+function getCalendarId(): string | null {
+    if (!_CALENDAR_ID_LOADED) {
+        _CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+        _CALENDAR_ID_LOADED = true;
+    }
+    return _CALENDAR_ID;
+}
 // カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
 const CALENDAR_API_DELAY_MS = 200;
 
@@ -171,8 +180,9 @@ function processActivityToCalendar(
 // カレンダー取得ユーティリティ
 // ==========================================
 function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
-    if (CALENDAR_ID) {
-        const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+    const calendarId = getCalendarId();
+    if (calendarId) {
+        const calendar = CalendarApp.getCalendarById(calendarId);
         if (!calendar) {
             Logger.log('エラー: 指定されたカレンダーが見つかりません。');
         }
@@ -200,5 +210,6 @@ if (typeof module !== 'undefined' && module.exports) {
         processActivityToCalendar,
         DISTANCE_ACTIVITIES,
         CALENDAR_API_DELAY_MS,
+        getCalendarId
     };
 }
