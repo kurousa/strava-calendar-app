@@ -1,3 +1,4 @@
+
 // ==========================================
 // 【Webアプリ用】画面から受け取った日付でインポートを実行
 // ==========================================
@@ -79,7 +80,7 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
+            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
             if (match && match[1]) {
                 existingActivityIds.add(match[1]);
             }
