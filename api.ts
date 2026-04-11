@@ -107,7 +107,16 @@ function getStravaAthleteProfile(): StravaAthlete | null {
             },
             muteHttpExceptions: true
         });
+
+        // muteHttpExceptions: true のため、200以外でも例外が発生しない。そのため、ステータスコードをチェックする
+        if (response.getResponseCode() !== 200) {
+            // セキュリティのため、生のエラーレスポンスはログに出力せず、ステータスコードのみ記録します
+            Logger.log(`[API Error] Status Code: ${response.getResponseCode()}`);
+            return null;
+        }
+
         return JSON.parse(response.getContentText());
+
     } catch (e) {
         const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + (e as Error).toString();
         Logger.log('エラー: ' + errorMsg);
