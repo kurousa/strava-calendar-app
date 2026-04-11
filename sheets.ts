@@ -40,7 +40,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
 
         // アクティビティをスプレッドシートの「行 (配列)」の形式に変換
         const rows = activities.map(activity => {
-            if (existingIds.includes(String(activity.id))) {
+            if (existingIds.has(String(activity.id))) {
                 Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
                 return;
             }
