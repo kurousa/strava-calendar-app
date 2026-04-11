@@ -18,8 +18,7 @@ export default defineConfig({
                 '.jules/**'
             ],
             include: [
-                '*.ts',
-                'formatters/**/*.ts'
+                "**/*.ts"
             ]
         }
     },

@@ -9,15 +9,17 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
+        "outDir": "dist",
+        "declaration": false,
+        "removeComments": false,
+        "isolatedModules": true,
         "types": [
             "google-apps-script",
             "node"
-        ],
-        "noEmit": true
+        ]
     },
     "include": [
-        "*.ts",
-        "formatters/**/*.ts"
+        "**/*.ts"
     ],
     "exclude": [
         "node_modules",

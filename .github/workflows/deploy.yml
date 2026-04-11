@@ -15,6 +15,7 @@ on:
       - "manual_import.ts"
       - "sheets.ts"
       - "types.ts"
+      - "tsconfig.json"
 
 jobs:
   deploy:
@@ -46,18 +47,21 @@ jobs:
       - name: 6. ユニットテストの実行
         run: pnpm test
 
-      - name: 7. claspのインストール
+      - name: 7. TypeScript → JavaScript ビルド
+        run: pnpm run build
+
+      - name: 8. claspのインストール
         run: npm install -g @google/clasp
 
-      - name: 8. 認証情報の作成（シークレットから復元）
+      - name: 9. 認証情報の作成（シークレットから復元）
         run: |
           echo "${{ secrets.CLASPRC_BASE64 }}" | base64 --decode > ~/.clasprc.json
 
-      - name: 9. プロジェクト設定ファイルの作成
+      - name: 10. プロジェクト設定ファイルの作成
         env:
           SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
         run: |
-          printf '{"scriptId":"%s","rootDir":"."}\n' "$SCRIPT_ID" > .clasp.json
+          printf '{"scriptId":"%s","rootDir":"dist"}\n' "$SCRIPT_ID" > .clasp.json
 
-      - name: 10. GASへプッシュ(自動デプロイ)
+      - name: 11. GASへプッシュ(自動デプロイ)
         run: clasp push -f
