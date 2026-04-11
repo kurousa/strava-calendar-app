@@ -408,6 +408,8 @@ describe('main function', () => {
         main();
 
         expect(global.Logger.log).toHaveBeenCalledWith('カレンダーの取得に失敗しました。');
+        expect(mockCalendar.createEvent).not.toHaveBeenCalled();
+        expect(global.backupToSpreadsheet).not.toHaveBeenCalled();
     });
 
 });
