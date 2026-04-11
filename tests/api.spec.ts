@@ -66,8 +66,8 @@ describe('api', () => {
         const result = getStravaActivities();
 
         expect(result).toEqual([]);
-        expect(global.sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('Network error'));
-        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Network error'));
+        expect(global.sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('ネットワークエラーまたは想定外の例外が発生しました'));
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('ネットワークエラーまたは想定外の例外が発生しました'));
     });
 
     it('should not crash if sendErrorEmail is undefined when fetch throws an error', () => {
@@ -83,7 +83,7 @@ describe('api', () => {
         const result = getStravaActivities();
 
         expect(result).toEqual([]);
-        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Network error'));
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('ネットワークエラーまたは想定外の例外が発生しました'));
     });
 
     it('should break loop and return empty array when response status is not 200', () => {
