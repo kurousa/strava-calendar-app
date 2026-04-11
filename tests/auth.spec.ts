@@ -112,8 +112,7 @@ describe("auth", () => {
       "STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET がスクリプトプロパティに設定されていません。",
     );
 
-    // Restore the original global mock
-    global.PropertiesService.getScriptProperties = originalGetScriptProperties;
+    vi.unstubAllGlobals();
 
     // Note: we can't easily undo the dynamic import's effect on subsequent tests
     // without another resetModules, but since this is the last test it doesn't matter.
