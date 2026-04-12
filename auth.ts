@@ -13,10 +13,10 @@ declare const OAuth2: any;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getOAuthService(): any {
-    const scriptProps = PropertiesService.getScriptProperties();
-    const CLIENT_ID = scriptProps.getProperty('STRAVA_CLIENT_ID');
-    const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
-    const STRAVA_SCOPE = scriptProps.getProperty('STRAVA_SCOPE');
+    const scriptProps = PropertiesService.getScriptProperties().getProperties();
+    const CLIENT_ID = scriptProps['STRAVA_CLIENT_ID'];
+    const CLIENT_SECRET = scriptProps['STRAVA_CLIENT_SECRET'];
+    const STRAVA_SCOPE = scriptProps['STRAVA_SCOPE'];
     if (!CLIENT_ID || !CLIENT_SECRET) {
         throw new Error('STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET がスクリプトプロパティに設定されていません。');
     }

@@ -32,7 +32,11 @@ global.PropertiesService = {
             if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
             if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
             return null;
-        })
+        }),
+        getProperties: vi.fn(() => ({
+            STRAVA_CLIENT_ID: 'fake_id',
+            STRAVA_CLIENT_SECRET: 'fake_secret'
+        }))
     })),
     getUserProperties: vi.fn(() => ({
         getProperty: vi.fn(),
