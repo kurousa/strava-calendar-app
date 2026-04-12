@@ -99,6 +99,11 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription || (() =
 global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 
+// Mock for getExistingActivityIds in tests
+global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
+
+// Globalize STRAVA_ACTIVITY_ID_REGEX for tests
+// global.STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/i;
 import * as NotifierModule from './notifier.ts';
 vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
 // We don't globalize DISCORD_WEBHOOK_URL_CACHE here because we want to test the module internal state
