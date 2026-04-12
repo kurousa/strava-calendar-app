@@ -35,11 +35,15 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
         }
         
         const data = JSON.parse(response.getContentText());
+        if (!data.hourly) {
+            return "";
+        }
         const temp = data.hourly.temperature_2m[hourIndex];
-        const code = data.hourly.weathercode[hourIndex];
-        const wind = data.hourly.windspeed_10m[hourIndex];
-
         if (temp === null || temp === undefined) return '';
+        const code = data.hourly.weathercode[hourIndex];
+        if (code === null || code === undefined) return '';
+        const wind = data.hourly.windspeed_10m[hourIndex];
+        if (wind === null || wind === undefined) return '';
 
         const weatherStr = getWeatherEmoji(code);
         return `天気: ${weatherStr} / 気温: ${temp}℃ / 風速: ${wind}km/h`;

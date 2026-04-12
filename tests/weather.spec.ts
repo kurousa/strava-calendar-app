@@ -115,14 +115,59 @@ describe('weather.ts', () => {
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Exception]'));
         });
 
-        it('should return empty string if temperature data is missing', () => {
+        it('should return empty string if temperature data is missing for the specific hour', () => {
              const mockResponse = {
                 getResponseCode: () => 200,
                 getContentText: () => JSON.stringify({
                     hourly: {
-                        temperature_2m: [],
-                        weathercode: [],
-                        windspeed_10m: []
+                        temperature_2m: new Array(24).fill(null),
+                        weathercode: new Array(24).fill(0),
+                        windspeed_10m: new Array(24).fill(0)
+                    }
+                })
+            };
+            (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
+
+            const result = fetchWeatherData(lat, lng, dateObj);
+            expect(result).toBe('');
+        });
+
+        it('should return empty string if hourly object is missing', () => {
+             const mockResponse = {
+                getResponseCode: () => 200,
+                getContentText: () => JSON.stringify({})
+            };
+            (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
+
+            const result = fetchWeatherData(lat, lng, dateObj);
+            expect(result).toBe('');
+        });
+
+        it('should return empty string if weathercode is null', () => {
+             const mockResponse = {
+                getResponseCode: () => 200,
+                getContentText: () => JSON.stringify({
+                    hourly: {
+                        temperature_2m: new Array(24).fill(20),
+                        weathercode: new Array(24).fill(null),
+                        windspeed_10m: new Array(24).fill(5)
+                    }
+                })
+            };
+            (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
+
+            const result = fetchWeatherData(lat, lng, dateObj);
+            expect(result).toBe('');
+        });
+
+        it('should return empty string if windspeed is null', () => {
+             const mockResponse = {
+                getResponseCode: () => 200,
+                getContentText: () => JSON.stringify({
+                    hourly: {
+                        temperature_2m: new Array(24).fill(20),
+                        weathercode: new Array(24).fill(0),
+                        windspeed_10m: new Array(24).fill(null)
                     }
                 })
             };
