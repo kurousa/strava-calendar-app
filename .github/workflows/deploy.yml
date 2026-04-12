@@ -58,4 +58,4 @@ jobs:
           printf '{"scriptId":"%s","rootDir":"dist"}\n' "$SCRIPT_ID" > .clasp.json
 
       - name: 9. ビルドおよびClaspでのデプロイ
-        run: pnpm run push
+        run: pnpm run push:prod
