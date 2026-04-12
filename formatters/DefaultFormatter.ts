@@ -6,7 +6,8 @@ function getCommonMetrics(activity: StravaActivity): CommonMetrics {
         distanceKm: ((activity.distance || 0) / 1000).toFixed(1),
         timeMin: Math.floor((activity.moving_time || 0) / 60),
         elevation: activity.total_elevation_gain || 0,
-        hr: activity.has_heartrate ? activity.average_heartrate + ' bpm' : '測定なし'
+        hr: activity.has_heartrate ? activity.average_heartrate + ' bpm' : '測定なし',
+        weather: activity.weatherText || ''
     };
 }
 
@@ -36,6 +37,11 @@ function makeDefaultDescription(activity: StravaActivity): string {
     // 平均心拍数 (心拍データがあれば追加)
     if (activity.has_heartrate && activity.average_heartrate) {
         descriptionLines.push(`平均心拍数: ${activity.average_heartrate} bpm`);
+    }
+
+    // 天気情報 (取得できていれば追加)
+    if (activity.weatherText) {
+        descriptionLines.push(activity.weatherText);
     }
 
     // 空行を挟んで詳細リンクを追加

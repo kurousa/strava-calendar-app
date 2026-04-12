@@ -152,6 +152,15 @@ function processActivityToCalendar(
 
     // ーーー ここから下は「新規」の時しか実行されない ーーー
 
+    // 【追加】天気情報の取得 (座標データがある場合のみ)
+    if (activity.start_latlng && activity.start_latlng.length === 2) {
+        if (typeof fetchWeatherData === 'function') {
+            // API制限回避のため少し待機してからリクエスト
+            Utilities.sleep(100);
+            activity.weatherText = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], startTime);
+        }
+    }
+
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
     const type = activity.type; // 種類（Run, Rideなど）
     const style = getActivityStyle(type);
