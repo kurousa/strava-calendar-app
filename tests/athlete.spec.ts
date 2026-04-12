@@ -7,6 +7,10 @@ describe('athlete', () => {
         vi.stubGlobal('Logger', { log: vi.fn() });
     });
 
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
     describe('getAthleteWeight', () => {
         it('should return weight when profile and weight are present', () => {
             vi.stubGlobal('getStravaAthleteProfile', vi.fn(() => ({ weight: 65.5 })));
