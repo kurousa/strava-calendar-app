@@ -71,21 +71,11 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
 
     // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
     // Fetch all events for the entire import period in one Calendar API call
-    const existingEvents = calendar.getEvents(startDate, endDate);
 
     // Create a Set of existing Strava activity IDs for O(1) lookup
     // Note: event.getDescription() does trigger a read in CalendarApp, but this is still
     // vastly faster than getEvents() for every single activity in the list.
-    const existingActivityIds = new Set<string>();
-    existingEvents.forEach(event => {
-        const desc = event.getDescription();
-        if (desc) {
-            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
-            if (match && match[1]) {
-                existingActivityIds.add(match[1]);
-            }
-        }
-    });
+    const existingActivityIds = getExistingActivityIds(calendar, startDate, endDate);
 
     Logger.log(`[Import] 既にカレンダーにあるイベントを ${existingActivityIds.size} 件検出しました。`);
 
@@ -110,6 +100,11 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
 
     if (typeof backupToSpreadsheet === 'function') {
         backupToSpreadsheet(successfulActivities);
+    }
+
+    // 同期結果を通知する
+    if (typeof sendSyncNotification === 'function') {
+        sendSyncNotification(successCount, skipCount, true);
     }
 
     const resultMsg = `✅ 完了! 新規登録: ${successCount}件 / スキップ: ${skipCount}件`;

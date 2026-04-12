@@ -30,6 +30,25 @@ const DISTANCE_ACTIVITIES = new Set([
 ]);
 
 /**
+ * Retrieves a set of Strava activity IDs that are already present in the given calendar
+ * within the specified date range.
+ */
+function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, startDate: Date, endDate: Date): Set<string> {
+    const existingEvents = calendar.getEvents(startDate, endDate);
+    const existingActivityIds = new Set<string>();
+    existingEvents.forEach(event => {
+        const desc = event.getDescription();
+        if (desc) {
+            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
+            if (match && match[1]) {
+                existingActivityIds.add(match[1]);
+            }
+        }
+    });
+    return existingActivityIds;
+}
+
+/**
  * 取得したアクティビティをGoogleカレンダーに登録する
  */
 function main(): void {
@@ -53,36 +72,37 @@ function main(): void {
     Logger.log(`[DEBUG]登録先calendar: ${calendar.getName()}`);
 
     // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
-    const existingEvents = calendar.getEvents(yesterday, now);
-    const existingActivityIds = new Set<string>();
-    existingEvents.forEach(event => {
-        const desc = event.getDescription();
-        if (desc) {
-            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
-            if (match && match[1]) {
-                existingActivityIds.add(match[1]);
-            }
-        }
-    });
+    const existingActivityIds = getExistingActivityIds(calendar, yesterday, now);
 
+    let successCount = 0;
+    let skipCount = 0;
     const successfulActivities: StravaActivity[] = [];
-    
+
     activities.forEach(activity => {
         const activityIdStr = String(activity.id);
         if (existingActivityIds.has(activityIdStr)) {
             Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+            skipCount++;
             return;
         }
 
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
         const result = processActivityToCalendar(activity, calendar, undefined, true);
         if (result === 'success') {
+            successCount++;
             successfulActivities.push(activity);
+        } else if (result === 'skipped') {
+            skipCount++;
         }
     });
 
     if (typeof backupToSpreadsheet === 'function') {
         backupToSpreadsheet(successfulActivities);
+    }
+
+    // 同期結果を通知する
+    if (typeof sendSyncNotification === 'function') {
+        sendSyncNotification(successCount, skipCount, false);
     }
 }
 
@@ -213,6 +233,7 @@ if (typeof module !== 'undefined' && module.exports) {
         doGet,
         getTargetCalendar,
         processActivityToCalendar,
+        getExistingActivityIds,
         DISTANCE_ACTIVITIES,
         CALENDAR_API_DELAY_MS,
         getCalendarId
