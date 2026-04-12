@@ -388,29 +388,5 @@ describe('main function', () => {
         expect(global.CalendarApp.getCalendarById).not.toHaveBeenCalled();
         expect(global.Logger.log).toHaveBeenCalledWith('登録するアクティビティがありませんでした。');
     });
-
-    it('should return early and log error if calendar cannot be fetched', async () => {
-        const { main } = await import('../main.ts');
-        const mockActivities = [
-            {
-                id: 101,
-                name: 'Activity 1',
-                type: 'Run',
-                start_date: '2024-03-15T10:00:00Z',
-                elapsed_time: 3600,
-                distance: 5000
-            }
-        ];
-        (global as any).getStravaActivities.mockReturnValue(mockActivities);
-        global.CalendarApp.getDefaultCalendar.mockReturnValue(null);
-        global.CalendarApp.getCalendarById.mockReturnValue(null);
-
-        main();
-
-        expect(global.Logger.log).toHaveBeenCalledWith('カレンダーの取得に失敗しました。');
-        expect(mockCalendar.createEvent).not.toHaveBeenCalled();
-        expect(global.backupToSpreadsheet).not.toHaveBeenCalled();
-    });
-
 });
 

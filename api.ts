@@ -75,7 +75,7 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
             Utilities.sleep(STRAVA_API_DELAY_MS);
 
         } catch (e) {
-            const errorMsg = 'Strava APIの呼び出しに失敗しました（アクティビティ取得時のネットワークエラーまたは例外）';
+            const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + (e as Error).toString();
             Logger.log('エラー: ' + errorMsg);
             if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
             break;
@@ -86,44 +86,6 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
     return allActivities;
 }
 
-/**
- * Stravaから現在のアスリートの全プロフィール情報を取得する
- */
-function getStravaAthleteProfile(): StravaAthlete | null {
-    const service = getOAuthService();
-    if (!service.hasAccess()) {
-        const errorMsg = '認証エラー: プロフィールを取得できません。';
-        Logger.log('エラー: ' + errorMsg);
-        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
-        return null;
-    }
-
-    const url = `${API_BASE}/athlete`;
-
-    try {
-        const response = UrlFetchApp.fetch(url, {
-            headers: {
-                Authorization: 'Bearer ' + service.getAccessToken()
-            },
-            muteHttpExceptions: true
-        });
-
-        // muteHttpExceptions: true のため、200以外でも例外が発生しない。そのため、ステータスコードをチェックする
-        if (response.getResponseCode() !== 200) {
-            // セキュリティのため、生のエラーレスポンスはログに出力せず、ステータスコードのみ記録します
-            Logger.log(`[API Error] Status Code: ${response.getResponseCode()}`);
-            return null;
-        }
-
-        return JSON.parse(response.getContentText());
-
-    } catch (e) {
-        const errorMsg = 'Strava APIの呼び出しに失敗しました（プロフィール取得時のネットワークエラーまたは例外）';
-        Logger.log('エラー: ' + errorMsg);
-        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
-        return null;
-    }
-}
 /**
  * アクティビティ取得のための検索パラメータを組み立てる
  */

@@ -9,7 +9,6 @@ declare const OAuth2: any;
 const scriptProps = PropertiesService.getScriptProperties();
 const CLIENT_ID = scriptProps.getProperty('STRAVA_CLIENT_ID');
 const CLIENT_SECRET = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
-const STRAVA_SCOPE = scriptProps.getProperty('STRAVA_SCOPE');
 
 /**
  * Strava連携のためのOAuth2サービスを取得する
@@ -26,7 +25,8 @@ function getOAuthService(): any {
         .setClientSecret(CLIENT_SECRET)
         .setCallbackFunction('authCallback')
         .setPropertyStore(PropertiesService.getUserProperties())
-        .setScope(STRAVA_SCOPE || 'activity:read_all,profile:read_all');
+        // activity:read_all で非公開アクティビティも含めて読み取り権限を要求します
+        .setScope('activity:read_all');
 }
 
 /**
