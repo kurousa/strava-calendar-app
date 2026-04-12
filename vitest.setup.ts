@@ -104,4 +104,4 @@ global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 
 import * as WeatherModule from './weather.ts';
-global.fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s");
+vi.stubGlobal('fetchWeatherData', (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s"));
