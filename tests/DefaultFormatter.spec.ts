@@ -169,9 +169,7 @@ describe('DefaultFormatter', () => {
                 average_heartrate: null
             };
             const metrics = getCommonMetrics(activity as any);
-            // Based on implementation: activity.average_heartrate + ' bpm'
-            // null + ' bpm' -> "null bpm"
-            expect(metrics.hr).toBe('null bpm');
+            expect(metrics.hr).toBe('測定なし');
         });
 
         it('should handle zero values for distance, time, and elevation', () => {
