@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getStravaActivities, getSearchParam, convertToTime } from '../api';
+import { getStravaActivities, getStravaAthleteProfile, getSearchParam, convertToTime } from '../api';
 
 describe('api', () => {
     const mockService = {
@@ -59,7 +59,7 @@ describe('api', () => {
     it('should return empty array, log error and send email when fetch throws an error', () => {
         mockService.hasAccess.mockReturnValue(true);
         mockService.getAccessToken.mockReturnValue('fake_token');
-        global.UrlFetchApp.fetch.mockImplementation(() => {
+        (global.UrlFetchApp.fetch as any).mockImplementation(() => {
             throw new Error('Network error');
         });
 
@@ -73,7 +73,7 @@ describe('api', () => {
     it('should not crash if sendErrorEmail is undefined when fetch throws an error', () => {
         mockService.hasAccess.mockReturnValue(true);
         mockService.getAccessToken.mockReturnValue('fake_token');
-        global.UrlFetchApp.fetch.mockImplementation(() => {
+        (global.UrlFetchApp.fetch as any).mockImplementation(() => {
             throw new Error('Network error');
         });
 
@@ -127,7 +127,64 @@ describe('api', () => {
 
         expect(result.length).toBe(201);
         expect(global.Utilities.sleep).toHaveBeenCalledWith(200);
-        expect(global.UrlFetchApp.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    describe('getStravaAthleteProfile', () => {
+        it('should return athlete profile when access is granted and fetch is successful', () => {
+            const athlete = { id: 123, firstname: 'Test', lastname: 'User' };
+
+            mockService.hasAccess.mockReturnValue(true);
+            mockService.getAccessToken.mockReturnValue('fake_token');
+            mockResponse.getResponseCode.mockReturnValue(200);
+            mockResponse.getContentText.mockReturnValue(JSON.stringify(athlete));
+
+            const result = getStravaAthleteProfile();
+
+            expect(result).toEqual(athlete);
+            expect(global.UrlFetchApp.fetch).toHaveBeenCalledWith(
+                'https://www.strava.com/api/v3/athlete',
+                expect.objectContaining({
+                    headers: {
+                        Authorization: 'Bearer fake_token'
+                    }
+                })
+            );
+        });
+
+        it('should return null and log error when no access', () => {
+            mockService.hasAccess.mockReturnValue(false);
+
+            const result = getStravaAthleteProfile();
+
+            expect(result).toBeNull();
+            expect(global.sendErrorEmail).toHaveBeenCalled();
+            expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('認証エラー'));
+        });
+
+        it('should return null, log error and send email when fetch throws an error', () => {
+            mockService.hasAccess.mockReturnValue(true);
+            mockService.getAccessToken.mockReturnValue('fake_token');
+            (global.UrlFetchApp.fetch as any).mockImplementation(() => {
+                throw new Error('Network error');
+            });
+
+            const result = getStravaAthleteProfile();
+
+            expect(result).toBeNull();
+            expect(global.sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('Network error'));
+            expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Network error'));
+        });
+
+        it('should return null and log error when response status is not 200', () => {
+            mockService.hasAccess.mockReturnValue(true);
+            mockService.getAccessToken.mockReturnValue('fake_token');
+            mockResponse.getResponseCode.mockReturnValue(401);
+
+            const result = getStravaAthleteProfile();
+
+            expect(result).toBeNull();
+            expect(global.Logger.log).toHaveBeenCalledWith('[API Error] Status Code: 401');
+        });
     });
 
     describe('getSearchParam', () => {

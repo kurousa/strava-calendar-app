@@ -160,6 +160,7 @@ function convertToTime(date: Date): number {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         getStravaActivities,
+        getStravaAthleteProfile,
         getSearchParam,
         convertToTime,
     };

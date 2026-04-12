@@ -24,6 +24,7 @@ describe('RideFormatter', () => {
 平均心拍数: 140 bpm
 平均パワー: 200 W
 平均ケイデンス: 90 rpm
+
 詳細: https://www.strava.com/activities/123456
         `.trim());
     });
@@ -39,13 +40,13 @@ describe('RideFormatter', () => {
         };
 
         const result = makeRideDescription(activity as any);
-        // Note: per current RideFormatter.ts, no blank line before "詳細" if watts/cadence are empty
         expect(result).toBe(`
 距離: 10.0 km
 時間: 30 分
 平均速度: 20.0 km/h
 獲得標高: 0 m
 平均心拍数: 測定なし
+
 詳細: https://www.strava.com/activities/789012
         `.trim());
     });

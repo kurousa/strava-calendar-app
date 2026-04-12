@@ -112,15 +112,18 @@ describe('DefaultFormatter', () => {
                 moving_time: 3675,
                 total_elevation_gain: 150,
                 has_heartrate: true,
-                average_heartrate: 145
+                average_heartrate: 145,
+                weatherText: "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s"
             };
             const metrics = getCommonMetrics(activity as any);
             expect(metrics).toEqual({
                 distanceKm: '12.3',
                 timeMin: 61,
                 elevation: 150,
-                hr: '145 bpm'
+                hr: '145 bpm',
+                weather: '天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s'
             });
+
         });
 
         it('should handle missing or null optional fields with defaults', () => {
@@ -128,15 +131,18 @@ describe('DefaultFormatter', () => {
                 distance: null,
                 moving_time: null,
                 total_elevation_gain: null,
-                has_heartrate: null
+                has_heartrate: null,
+                weather: null,
             };
             const metrics = getCommonMetrics(activity as any);
             expect(metrics).toEqual({
                 distanceKm: '0.0',
                 timeMin: 0,
                 elevation: 0,
-                hr: '測定なし'
+                hr: '測定なし',
+                weather: ''
             });
+
         });
 
         it('should handle heart rate when has_heartrate is false', () => {
@@ -163,9 +169,7 @@ describe('DefaultFormatter', () => {
                 average_heartrate: null
             };
             const metrics = getCommonMetrics(activity as any);
-            // Based on implementation: activity.average_heartrate + ' bpm'
-            // null + ' bpm' -> "null bpm"
-            expect(metrics.hr).toBe('null bpm');
+            expect(metrics.hr).toBe('測定なし');
         });
 
         it('should handle zero values for distance, time, and elevation', () => {
