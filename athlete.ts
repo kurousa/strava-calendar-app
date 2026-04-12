@@ -27,3 +27,11 @@ function __syncAthleteData(): void {
 
 }
 
+
+// Node.js環境（テスト時）のみエクスポートする
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        getAthleteWeight,
+        __syncAthleteData,
+    };
+}
