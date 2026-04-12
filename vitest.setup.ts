@@ -92,3 +92,6 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription || (() =
 // Restore original functions
 global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
+
+const MainModule = await import('./main.ts');
+global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;

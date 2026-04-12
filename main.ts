@@ -17,6 +17,10 @@ function getCalendarId(): string | null {
 // カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
 const CALENDAR_API_DELAY_MS = 200;
 
+// 正規表現をモジュールレベルで定義（ループ内の再コンパイルを防ぐ）
+const STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/;
+
+
 // 距離を表示するアクティビティのリスト
 const DISTANCE_ACTIVITIES = new Set([
     'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
@@ -54,7 +58,7 @@ function main(): void {
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
+            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
             if (match && match[1]) {
                 existingActivityIds.add(match[1]);
             }
@@ -203,6 +207,7 @@ function doGet(): GoogleAppsScript.HTML.HtmlOutput {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        STRAVA_ACTIVITY_ID_REGEX,
         main,
         sendErrorEmail,
         doGet,
