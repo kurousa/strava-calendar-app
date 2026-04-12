@@ -4,9 +4,22 @@
 // カレンダーへの書き込みといった「このアプリのメインのお仕事」だけを残します。
 // ==========================================
 
-const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+let _CALENDAR_ID: string | null = null;
+let _CALENDAR_ID_LOADED = false;
+
+function getCalendarId(): string | null {
+    if (!_CALENDAR_ID_LOADED) {
+        _CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
+        _CALENDAR_ID_LOADED = true;
+    }
+    return _CALENDAR_ID;
+}
 // カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
 const CALENDAR_API_DELAY_MS = 200;
+
+// 正規表現をモジュールレベルで定義（ループ内の再コンパイルを防ぐ）
+const STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/;
+
 
 // 距離を表示するアクティビティのリスト
 const DISTANCE_ACTIVITIES = new Set([
@@ -45,7 +58,7 @@ function main(): void {
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
+            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
             if (match && match[1]) {
                 existingActivityIds.add(match[1]);
             }
@@ -116,9 +129,10 @@ function processActivityToCalendar(
     // ⚡ Bolt: skipDuplicateCheck フラグで事前チェックをバイパスできるように変更
     if (!skipDuplicateCheck) {
         const existingEvents = calendar.getEvents(startTime, endTime);
+        const searchString = `strava.com/activities/${activity.id}`;
         const isDuplicate = existingEvents.some(event => {
             const desc = event.getDescription();
-            return desc && desc.includes(`strava.com/activities/${activity.id}`);
+            return desc && desc.includes(searchString);
         });
 
         if (isDuplicate) {
@@ -148,7 +162,6 @@ function processActivityToCalendar(
     Logger.log("[DEBUG]以下の情報がカレンダーに登録されます");
     Logger.log("[DEBUG]startTime -> " + startTime);
     Logger.log("[DEBUG]endTime -> " + endTime);
-    Logger.log("[DEBUG]title -> " + title);
 
     // カレンダーに予定として作成
     const event = calendar.createEvent(title, startTime, endTime, {
@@ -171,8 +184,9 @@ function processActivityToCalendar(
 // カレンダー取得ユーティリティ
 // ==========================================
 function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
-    if (CALENDAR_ID) {
-        const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+    const calendarId = getCalendarId();
+    if (calendarId) {
+        const calendar = CalendarApp.getCalendarById(calendarId);
         if (!calendar) {
             Logger.log('エラー: 指定されたカレンダーが見つかりません。');
         }
@@ -193,6 +207,7 @@ function doGet(): GoogleAppsScript.HTML.HtmlOutput {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        STRAVA_ACTIVITY_ID_REGEX,
         main,
         sendErrorEmail,
         doGet,
@@ -200,5 +215,6 @@ if (typeof module !== 'undefined' && module.exports) {
         processActivityToCalendar,
         DISTANCE_ACTIVITIES,
         CALENDAR_API_DELAY_MS,
+        getCalendarId
     };
 }
