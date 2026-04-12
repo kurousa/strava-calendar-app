@@ -64,24 +64,35 @@ function main(): void {
     // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
     const existingActivityIds = getExistingActivityIds(calendar, yesterday, now);
 
+    let successCount = 0;
+    let skipCount = 0;
     const successfulActivities: StravaActivity[] = [];
-    
+
     activities.forEach(activity => {
         const activityIdStr = String(activity.id);
         if (existingActivityIds.has(activityIdStr)) {
             Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+            skipCount++;
             return;
         }
 
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
         const result = processActivityToCalendar(activity, calendar, undefined, true);
         if (result === 'success') {
+            successCount++;
             successfulActivities.push(activity);
+        } else if (result === 'skipped') {
+            skipCount++;
         }
     });
 
     if (typeof backupToSpreadsheet === 'function') {
         backupToSpreadsheet(successfulActivities);
+    }
+
+    // 同期結果を通知する
+    if (typeof sendSyncNotification === 'function') {
+        sendSyncNotification(successCount, skipCount, false);
     }
 }
 

@@ -26,14 +26,16 @@ global.SpreadsheetApp = {
     }))
 } as any;
 
+const scriptPropertiesMock = {
+    getProperty: vi.fn((key: string) => {
+        if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
+        if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
+        return null;
+    })
+};
+
 global.PropertiesService = {
-    getScriptProperties: vi.fn(() => ({
-        getProperty: vi.fn((key: string) => {
-            if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
-            if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
-            return null;
-        })
-    })),
+    getScriptProperties: vi.fn(() => scriptPropertiesMock),
     getUserProperties: vi.fn(() => ({
         getProperty: vi.fn(),
         setProperty: vi.fn()
@@ -63,6 +65,10 @@ global.Session = {
 global.MailApp = {
     sendEmail: vi.fn()
 } as any;
+
+vi.stubGlobal('UrlFetchApp', {
+    fetch: vi.fn(),
+});
 
 // Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
 import * as DefaultFormatter from './formatters/DefaultFormatter.ts';
@@ -97,4 +103,9 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
 
 // Globalize STRAVA_ACTIVITY_ID_REGEX for tests
-global.STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/i;
+// global.STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/i;
+import * as NotifierModule from './notifier.ts';
+vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
+// We don't globalize DISCORD_WEBHOOK_URL_CACHE here because we want to test the module internal state
+const MainModule = await import('./main.ts');
+global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
