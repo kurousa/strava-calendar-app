@@ -66,9 +66,9 @@ global.MailApp = {
     sendEmail: vi.fn()
 } as any;
 
-global.UrlFetchApp = {
+vi.stubGlobal('UrlFetchApp', {
     fetch: vi.fn(),
-} as any;
+});
 
 // Globalize DefaultFormatter for testing so that formatters can access it as they would in GAS environment
 import * as DefaultFormatter from './formatters/DefaultFormatter.ts';
