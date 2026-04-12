@@ -97,5 +97,5 @@ global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 
 import * as NotifierModule from './notifier.ts';
-global.sendSyncNotification = (NotifierModule as any).sendSyncNotification || vi.fn();
+vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
 // We don't globalize DISCORD_WEBHOOK_URL_CACHE here because we want to test the module internal state
