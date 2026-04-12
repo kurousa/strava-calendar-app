@@ -15,7 +15,13 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "build": "tsc && shx cp appsscript.json index.html dist/",
-    "push": "pnpm run build && clasp push"
+    "clean": "shx rm -rf dist",
+    "build": "pnpm run clean && tsc && shx cp appsscript.json index.html dist/",
+    "push:dev": "pnpm run build && clasp push --project .clasp-dev.json",
+    "push:prod": "pnpm run build && clasp push --project .clasp-prod.json",
+    "open:dev": "clasp open --project .clasp-dev.json",
+    "open:prod": "clasp open --project .clasp-prod.json",
+    "pull:dev": "clasp pull --project .clasp-dev.json",
+    "pull:prod": "clasp pull --project .clasp-prod.json"
   }
 }
