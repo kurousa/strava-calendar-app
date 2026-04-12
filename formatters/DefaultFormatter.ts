@@ -6,7 +6,7 @@ function getCommonMetrics(activity: StravaActivity): CommonMetrics {
         distanceKm: ((activity.distance || 0) / 1000).toFixed(1),
         timeMin: Math.floor((activity.moving_time || 0) / 60),
         elevation: activity.total_elevation_gain || 0,
-        hr: activity.has_heartrate ? activity.average_heartrate + ' bpm' : '測定なし',
+        hr: activity.has_heartrate && activity.average_heartrate != null ? activity.average_heartrate + ' bpm' : '測定なし',
         weather: activity.weatherText || ''
     };
 }
