@@ -27,6 +27,38 @@ interface StravaActivity {
 }
 
 /**
+ * Strava API アスリート情報の詳細型定義
+ */
+interface StravaAthlete {
+    id: number;
+    username: string;
+    firstname: string;
+    lastname: string;
+    bio: string;
+    city: string;
+    state: string;
+    country: string;
+    sex: 'M' | 'F' | null;
+    premium: boolean;
+    summit: boolean;
+    created_at: string;
+    updated_at: string;
+    weight: number | null;
+    ftp: number | null;
+    measurement_preference: 'feet' | 'meters';
+    bikes: StravaGear[];
+    shoes: StravaGear[];
+    [key: string]: unknown;
+}
+
+interface StravaGear {
+    id: string;
+    primary: boolean;
+    name: string;
+    resource_state: number;
+    distance: number; // 単位: メートル
+}
+/**
  * 共通メトリクスの型定義
  */
 interface CommonMetrics {

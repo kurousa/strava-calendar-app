@@ -79,6 +79,9 @@ global.Utilities = {
     sleep: vi.fn(),
 } as any;
 
+// athlete.ts のグローバル関数モック
+vi.stubGlobal('getAthleteWeight', vi.fn().mockReturnValue(null));
+
 
 // Globalize formatter functions for main.ts testing
 global.getActivityStyle = (DefaultFormatter as any).getActivityStyle || (() => ({ color: "BLUE" }));
@@ -99,3 +102,5 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 import * as NotifierModule from './notifier.ts';
 vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
 // We don't globalize DISCORD_WEBHOOK_URL_CACHE here because we want to test the module internal state
+const MainModule = await import('./main.ts');
+global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;

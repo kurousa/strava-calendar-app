@@ -80,7 +80,7 @@ describe('sheets.ts', () => {
 
         expect(mockSpreadsheet.getSheetByName).toHaveBeenCalledWith('Activities');
         expect(mockSpreadsheet.insertSheet).toHaveBeenCalledWith('Activities');
-        expect(mockSheet.appendRow).toHaveBeenCalledWith(expect.arrayContaining(['ID', '日付', '種類', '名前']));
+        expect(mockSheet.appendRow).toHaveBeenCalledWith(expect.arrayContaining(['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '体重(kg)', 'URL']));
         expect(mockSheet.setFrozenRows).toHaveBeenCalledWith(1);
     });
 
@@ -107,7 +107,8 @@ describe('sheets.ts', () => {
         backupToSpreadsheet(activities as any);
 
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
-        expect(mockSheet.getRange).toHaveBeenCalledWith(3, 1, 1, 9); // lastRow + 1
+        expect(mockSheet.getRange).toHaveBeenNthCalledWith(1, 2, 1, 1, 1); // 既存ID取得用
+        expect(mockSheet.getRange).toHaveBeenNthCalledWith(2, 3, 1, 1, 10); // データ書き込み用 (lastRow + 1)
         expect(mockRange.setValues).toHaveBeenCalledWith([
             [
                 67890,
@@ -118,6 +119,7 @@ describe('sheets.ts', () => {
                 60,
                 100,
                 140,
+                null,
                 'https://www.strava.com/activities/67890'
             ]
         ]);
