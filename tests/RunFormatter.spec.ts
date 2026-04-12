@@ -58,8 +58,9 @@ describe("formatPace", () => {
         expect(formatPace(2.5)).toBe("6'40\" /km"); // 400 sec
     });
 
-    it('should return "測定なし" when averageSpeed is 0 or missing', () => {
+    it('should return "測定なし" when averageSpeed is <= 0 or missing', () => {
         expect(formatPace(0)).toBe("測定なし");
+        expect(formatPace(-1)).toBe("測定なし");
         expect(formatPace(undefined)).toBe("測定なし");
         expect(formatPace(null as any)).toBe("測定なし");
     });
