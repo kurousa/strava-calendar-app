@@ -21,7 +21,11 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
     const hourIndex = parseInt(Utilities.formatDate(dateObj, "Asia/Tokyo", "H"), 10);
 
     // 過去92日まで取得可能な forecast エンドポイントを使用
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo`;
+    // https://open-meteo.com/en/docs#api-reference
+    // hourly=temperature_2m,weathercode,windspeed_10m で気温、天気コード、風速を取得
+    // timezone=Asia%2FTokyo で東京のタイムゾーンを指定
+    // windspeed_unit=kmh で風速をkm/h単位で取得
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo&windspeed_unit=kmh`;
 
     try {
         const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
@@ -38,7 +42,7 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
         if (temp === null || temp === undefined) return '';
 
         const weatherStr = getWeatherEmoji(code);
-        return `天気: ${weatherStr} / 気温: ${temp}℃ / 風速: ${wind}m/s`;
+        return `天気: ${weatherStr} / 気温: ${temp}℃ / 風速: ${wind}km/h`;
         
     } catch (e) {
         Logger.log(`[Weather API Exception] ${e}`);
