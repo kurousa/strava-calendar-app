@@ -19,8 +19,8 @@
     "build": "pnpm run clean && tsc && shx cp appsscript.json index.html dist/",
     "push:dev": "pnpm run build && shx cp .clasp-dev.json .clasp.json && clasp push",
     "push:prod": "pnpm run build && shx cp .clasp-prod.json .clasp.json && clasp push",
-    "open:dev": "shx cp .clasp-dev.json .clasp.json && clasp open",
-    "open:prod": "shx cp .clasp-prod.json .clasp.json && clasp open",
+    "open:dev": "shx cp .clasp-dev.json .clasp.json && clasp open-script",
+    "open:prod": "shx cp .clasp-prod.json .clasp.json && clasp open-script",
     "pull:dev": "shx cp .clasp-dev.json .clasp.json && clasp pull",
     "pull:prod": "shx cp .clasp-prod.json .clasp.json && clasp pull"
   }
