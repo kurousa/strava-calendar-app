@@ -1,5 +1,0 @@
-test: add unit tests for athlete.ts
-
-- Added conditional export block to `athlete.ts` to expose `getAthleteWeight` and `__syncAthleteData` for Vitest tests.
-- Created `tests/athlete.spec.ts` to cover different branches of athlete data sync and weight retrieval.
-- Verified passing tests.
