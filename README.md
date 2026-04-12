@@ -170,7 +170,9 @@ clasp login
 
 ```bash
 # テストの実行
-pnpm test
+pnpm run test
+# カバレッジの確認
+pnpm run test:coverage
 ```
 
 - テスト対象の関数を `*.spec.js` から呼び出すため、各ファイルの末尾で以下のように export してください。
