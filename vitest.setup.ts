@@ -95,5 +95,6 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 
 // Mock for getExistingActivityIds in tests
 global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
-const MainModule = await import('./main.ts');
-global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
+
+// Globalize STRAVA_ACTIVITY_ID_REGEX for tests
+global.STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/i;

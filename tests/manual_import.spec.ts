@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { importPastActivities, importPastActivitiesFromWeb } from '../manual_import';
 
 describe('manual_import', () => {
@@ -10,6 +10,10 @@ describe('manual_import', () => {
             vi.stubGlobal('getStravaActivities', vi.fn());
             vi.stubGlobal('getTargetCalendar', vi.fn());
         });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
 
         it('should correctly parse dates and pass them to importPastActivities', () => {
             global.getStravaActivities.mockReturnValue([]);
