@@ -1,3 +1,4 @@
+
 // ==========================================
 // 【Webアプリ用】画面から受け取った日付でインポートを実行
 // ==========================================
@@ -79,7 +80,7 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
+            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
             if (match && match[1]) {
                 existingActivityIds.add(match[1]);
             }
@@ -109,6 +110,11 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
 
     if (typeof backupToSpreadsheet === 'function') {
         backupToSpreadsheet(successfulActivities);
+    }
+
+    // 同期結果を通知する
+    if (typeof sendSyncNotification === 'function') {
+        sendSyncNotification(successCount, skipCount, true);
     }
 
     const resultMsg = `✅ 完了! 新規登録: ${successCount}件 / スキップ: ${skipCount}件`;

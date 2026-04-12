@@ -26,14 +26,16 @@ global.SpreadsheetApp = {
     }))
 } as any;
 
+const scriptPropertiesMock = {
+    getProperty: vi.fn((key: string) => {
+        if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
+        if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
+        return null;
+    })
+};
+
 global.PropertiesService = {
-    getScriptProperties: vi.fn(() => ({
-        getProperty: vi.fn((key: string) => {
-            if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
-            if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
-            return null;
-        })
-    })),
+    getScriptProperties: vi.fn(() => scriptPropertiesMock),
     getUserProperties: vi.fn(() => ({
         getProperty: vi.fn(),
         setProperty: vi.fn()
@@ -86,6 +88,9 @@ global.Utilities = {
     sleep: vi.fn(),
 } as any;
 
+// athlete.ts のグローバル関数モック
+vi.stubGlobal('getAthleteWeight', vi.fn().mockReturnValue(null));
+
 
 // Globalize formatter functions for main.ts testing
 global.getActivityStyle = (DefaultFormatter as any).getActivityStyle || (() => ({ color: "BLUE" }));
@@ -105,3 +110,8 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 
 import * as WeatherModule from './weather.ts';
 vi.stubGlobal('fetchWeatherData', (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s"));
+import * as NotifierModule from './notifier.ts';
+vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
+// We don't globalize DISCORD_WEBHOOK_URL_CACHE here because we want to test the module internal state
+const MainModule = await import('./main.ts');
+global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
