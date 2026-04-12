@@ -92,3 +92,6 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription || (() =
 // Restore original functions
 global.makeRunDescription = (RunFormatter as any).makeRunDescription;
 global.makeRideDescription = (RideFormatter as any).makeRideDescription;
+
+// Mock for getExistingActivityIds in tests
+global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());

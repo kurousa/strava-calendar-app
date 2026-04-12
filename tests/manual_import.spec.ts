@@ -50,7 +50,8 @@ describe('manual_import', () => {
         // Mock dependencies from other files
         vi.stubGlobal('getStravaActivities', vi.fn());
         vi.stubGlobal('getTargetCalendar', vi.fn());
-        vi.stubGlobal('processActivityToCalendar', vi.fn());
+        vi.stubGlobal('getExistingActivityIds', vi.fn().mockReturnValue(new Set(['102'])));
+        vi.stubGlobal('processActivityToCalendar', vi.fn().mockReturnValue('success'));
         vi.stubGlobal('backupToSpreadsheet', vi.fn());
     });
 

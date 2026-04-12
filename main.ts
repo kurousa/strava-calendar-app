@@ -8,6 +8,9 @@ const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDA
 // カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
 const CALENDAR_API_DELAY_MS = 200;
 
+// Regex to extract Strava activity IDs from calendar event descriptions
+const STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/;
+
 // 距離を表示するアクティビティのリスト
 const DISTANCE_ACTIVITIES = new Set([
     'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
@@ -19,6 +22,26 @@ const DISTANCE_ACTIVITIES = new Set([
 /**
  * 取得したアクティビティをGoogleカレンダーに登録する
  */
+
+/**
+ * Retrieves a set of Strava activity IDs that are already present in the given calendar
+ * within the specified date range.
+ */
+function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, startDate: Date, endDate: Date): Set<string> {
+    const existingEvents = calendar.getEvents(startDate, endDate);
+    const existingActivityIds = new Set<string>();
+    existingEvents.forEach(event => {
+        const desc = event.getDescription();
+        if (desc) {
+            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
+            if (match && match[1]) {
+                existingActivityIds.add(match[1]);
+            }
+        }
+    });
+    return existingActivityIds;
+}
+
 function main(): void {
     // 実行時刻の1日前から現在時刻までのアクティビティを取得
     const now = new Date();
@@ -40,17 +63,7 @@ function main(): void {
     Logger.log(`[DEBUG]登録先calendar: ${calendar.getName()}`);
 
     // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
-    const existingEvents = calendar.getEvents(yesterday, now);
-    const existingActivityIds = new Set<string>();
-    existingEvents.forEach(event => {
-        const desc = event.getDescription();
-        if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
-            if (match && match[1]) {
-                existingActivityIds.add(match[1]);
-            }
-        }
-    });
+    const existingActivityIds = getExistingActivityIds(calendar, yesterday, now);
 
     const successfulActivities: StravaActivity[] = [];
     
@@ -198,6 +211,7 @@ if (typeof module !== 'undefined' && module.exports) {
         doGet,
         getTargetCalendar,
         processActivityToCalendar,
+        getExistingActivityIds,
         DISTANCE_ACTIVITIES,
         CALENDAR_API_DELAY_MS,
     };

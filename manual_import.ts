@@ -70,21 +70,11 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
 
     // ⚡ Bolt Optimization: Batch load existing events to avoid N+1 queries
     // Fetch all events for the entire import period in one Calendar API call
-    const existingEvents = calendar.getEvents(startDate, endDate);
 
     // Create a Set of existing Strava activity IDs for O(1) lookup
     // Note: event.getDescription() does trigger a read in CalendarApp, but this is still
     // vastly faster than getEvents() for every single activity in the list.
-    const existingActivityIds = new Set<string>();
-    existingEvents.forEach(event => {
-        const desc = event.getDescription();
-        if (desc) {
-            const match = desc.match(/strava\.com\/activities\/(\d+)/);
-            if (match && match[1]) {
-                existingActivityIds.add(match[1]);
-            }
-        }
-    });
+    const existingActivityIds = getExistingActivityIds(calendar, startDate, endDate);
 
     Logger.log(`[Import] 既にカレンダーにあるイベントを ${existingActivityIds.size} 件検出しました。`);
 
