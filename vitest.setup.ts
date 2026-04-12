@@ -74,6 +74,31 @@ vi.hoisted(() => {
     // Utilitiesのモック
     (global as any).Utilities = {
         sleep: vi.fn(),
+        formatDate: (date: Date, timeZone: string, format: string) => {
+            // 簡易的な formatDate モック (テストで必要な形式のみ対応)
+            const d = new Intl.DateTimeFormat('en-US', {
+                timeZone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                hour12: false
+            }).formatToParts(date);
+            const p: any = {};
+            d.forEach(part => p[part.type] = part.value);
+
+            let result = format;
+            result = result.replace('yyyy', p.year);
+            result = result.replace('MM', p.month);
+            result = result.replace('dd', p.day);
+            if (p.hour) {
+                // hour12: false with en-US can return "24" for midnight in some Node versions.
+                const h = parseInt(p.hour, 10) % 24;
+                result = result.replace('HH', String(h).padStart(2, '0'));
+                result = result.replace('H', String(h));
+            }
+            return result;
+        }
     };
 });
 

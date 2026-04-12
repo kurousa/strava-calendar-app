@@ -16,11 +16,9 @@ function getWeatherEmoji(code: number): string {
 }
 
 function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
-    // YYYY-MM-DD 形式の文字列を作成 (JST基準)
-    const dateString = dateObj.getFullYear() + '-' + 
-        String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
-        String(dateObj.getDate()).padStart(2, '0');
-    const hourIndex = dateObj.getHours();
+    // Asia/Tokyo タイムゾーン基準で日付と時間を取得 (GitHub ActionsなどのUTC環境でも正しく動作させるため)
+    const dateString = Utilities.formatDate(dateObj, "Asia/Tokyo", "yyyy-MM-dd");
+    const hourIndex = parseInt(Utilities.formatDate(dateObj, "Asia/Tokyo", "H"), 10);
 
     // 過去92日まで取得可能な forecast エンドポイントを使用
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo`;
