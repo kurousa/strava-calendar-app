@@ -223,21 +223,11 @@ function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
     return CalendarApp.getDefaultCalendar();
 }
 
-// ==========================================
-// 【Webアプリ用】インポート画面（HTML）を表示する
-// ==========================================
-function doGet(): GoogleAppsScript.HTML.HtmlOutput {
-    // 'index' という名前のHTMLファイルを読み込んで表示する
-    return HtmlService.createHtmlOutputFromFile('index')
-        .setTitle('Strava カレンダーインポート');
-}
-
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         main,
         sendErrorEmail,
-        doGet,
         getTargetCalendar,
         processActivityToCalendar,
         getExistingActivityIds,

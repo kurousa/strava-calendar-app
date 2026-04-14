@@ -58,6 +58,13 @@ vi.hoisted(() => {
         })
     };
 
+    (global as any).ContentService = {
+        createTextOutput: vi.fn((content) => ({
+            getContent: () => content,
+            setMimeType: vi.fn().mockReturnThis(),
+        })),
+    };
+
     (global as any).Session = {
         getEffectiveUser: vi.fn(() => ({
             getEmail: vi.fn(() => 'test@example.com')
