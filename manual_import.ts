@@ -1,6 +1,7 @@
-// ==========================================
-// 【Webアプリ用】画面から受け取った日付でインポートを実行
-// ==========================================
+/**
+ * Web画面 (index.html) のボタンから呼び出される関数
+ * 指定した期間の過去データを取り込む
+ */
 function importPastActivitiesFromWeb(startStr: string, endStr: string): string {
     // Validate input format YYYY-MM-DD
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,9 +37,12 @@ function importPastActivitiesFromWeb(startStr: string, endStr: string): string {
         return msg;
     }
 
-    return importPastActivities(startDate, endDate);
+    // manual_import.ts にある処理を呼び出す
+    if (typeof (global as any).importPastActivities === 'function') {
+        return (global as any).importPastActivities(startDate, endDate);
+    }
+    return "エラー: インポート関数が見つかりません";
 }
-
 
 // ==========================================
 // 指定した期間の過去データを取り込む (画面からの実行用)

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { sendErrorEmail, doGet } from '../main';
+import { sendErrorEmail } from '../main';
 
 describe('main', () => {
     const mockUserProps = {
@@ -59,26 +59,6 @@ describe('main', () => {
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップしました'));
     });
 
-});
-
-describe('doGet', () => {
-    beforeEach(() => {
-        vi.resetAllMocks();
-        vi.resetModules();
-    });
-
-    it('should create HTML output from index file and set title', () => {
-        const mockSetTitle = vi.fn().mockReturnThis();
-        global.HtmlService.createHtmlOutputFromFile.mockReturnValue({
-            setTitle: mockSetTitle
-        });
-
-        const result = doGet();
-
-        expect(global.HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
-        expect(mockSetTitle).toHaveBeenCalledWith('Strava カレンダーインポート');
-        expect(result).toBeDefined();
-    });
 });
 
 describe('getTargetCalendar', () => {

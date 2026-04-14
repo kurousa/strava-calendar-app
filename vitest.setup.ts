@@ -64,6 +64,21 @@ vi.hoisted(() => {
         })
     };
 
+    (global as any).ContentService = {
+        createTextOutput: vi.fn((content) => ({
+            getContent: () => content,
+            setMimeType: vi.fn().mockReturnThis(),
+        })),
+        MimeType: {
+            JSON: 'JSON',
+            CSV: 'CSV',
+            HTML: 'HTML',
+            JAVASCRIPT: 'JAVASCRIPT',
+            TEXT: 'TEXT',
+            XML: 'XML'
+        }
+    };
+
     (global as any).Session = {
         getEffectiveUser: vi.fn(() => ({
             getEmail: vi.fn(() => 'test@example.com')
@@ -175,11 +190,27 @@ global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
 
 // Globalize STRAVA_ACTIVITY_ID_REGEX for tests
 import * as NotifierModule from './notifier.ts';
-vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
-
-// Globalize STRAVA_ACTIVITY_ID_REGEX for tests
+// Globalize main functions for tests
 import * as MainModule from './main.ts';
 global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
+vi.stubGlobal('getTargetCalendar', (MainModule as any).getTargetCalendar || vi.fn());
+vi.stubGlobal('processActivityToCalendar', (MainModule as any).processActivityToCalendar || vi.fn());
+vi.stubGlobal('getExistingActivityIds', (MainModule as any).getExistingActivityIds || vi.fn(() => new Set()));
+vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
+
+// Globalize getStravaActivities and other API functions
+vi.stubGlobal('getStravaActivities', vi.fn(() => []));
+vi.stubGlobal('getStravaAthleteProfile', vi.fn());
+vi.stubGlobal('getStravaActivity', vi.fn());
+vi.stubGlobal('createStravaWebhookSubscription', vi.fn());
+vi.stubGlobal('viewStravaWebhookSubscriptions', vi.fn(() => []));
+vi.stubGlobal('deleteStravaWebhookSubscription', vi.fn());
+
+// Globalize Auth functions
+vi.stubGlobal('getOAuthService', vi.fn());
+
+// Globalize Sheets functions
+vi.stubGlobal('backupToSpreadsheet', vi.fn());
 
 // Globalize fetchWeatherData for tests
 import * as WeatherModule from './weather.ts';
