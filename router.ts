@@ -4,70 +4,55 @@
 // ==========================================
 
 /**
- * WebアプリのURLにアクセスがあった時に呼ばれる (画面の表示)
+ * GETリクエストハンドラー
+ * - Strava Webhook のバリデーションリクエスト (GET) に対応する
+ * - 通常のアクセス（インポート画面）を表示する
  */
-function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutput {
-    // index.html を読み込んで画面を表示する
+function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Content.TextOutput {
+    // Strava Webhook のバリデーションリクエスト (GET) の場合
+    if (e && e.parameter && e.parameter['hub.mode'] === 'subscribe') {
+        const verifyToken = PropertiesService.getScriptProperties().getProperty('STRAVA_WEBHOOK_VERIFY_TOKEN');
+        if (!verifyToken) {
+            Logger.log('エラー: STRAVA_WEBHOOK_VERIFY_TOKEN が設定されていません。');
+            return HtmlService.createHtmlOutput('Internal Server Error: Missing Verify Token');
+        }
+
+        if (e.parameter['hub.verify_token'] === verifyToken) {
+            const challenge = e.parameter['hub.challenge'];
+            return ContentService.createTextOutput(JSON.stringify({ "hub.challenge": challenge }))
+                .setMimeType(ContentService.MimeType.JSON);
+        } else {
+            Logger.log('エラー: Webhook検証トークンが一致しません。');
+            return HtmlService.createHtmlOutput('Forbidden: Invalid Verify Token');
+        }
+    }
+
+    // 通常のアクセス（インポート画面）を表示する
     return HtmlService.createHtmlOutputFromFile('index')
         .setTitle('Strava カレンダーインポート');
 }
 
 /**
- * Strava等からのWebhookを受信した時に呼ばれる (将来的な拡張用)
+ * POSTリクエストハンドラー
+ * - Strava Webhook からの通知 (POST) を受け取る
  */
-function doPost(e: GoogleAppsScript.Events.DoPost): GoogleAppsScript.Content.TextOutput {
-    // 例: リクエストボディの解析
-    // const postData = JSON.parse(e.postData.contents);
+function doPost(e: any): GoogleAppsScript.Content.TextOutput {
+    try {
+        const event: StravaWebhookEvent = JSON.parse(e.postData.contents);
+        Logger.log(`[Webhook] Received event: ${event.aspect_type} for ${event.object_type} (ID: ${event.object_id})`);
 
-    // ... 将来、リアルタイム同期を実装する際はこちらに処理を書きます ...
+        // 非同期的に処理を行う（GASの制限上、実際にはこの中で完結させる）
+        // Stravaは2秒以内のレスポンスを求めているため、重い処理は工夫が必要な場合もあるが、
+        // 単発のアクティビティ取得とカレンダー登録であれば通常2秒以内に収まる。
+        (global as any).handleStravaWebhook(event);
 
-    return ContentService.createTextOutput("OK");
-}
-
-/**
- * Web画面 (index.html) のボタンから呼び出される関数
- * 指定した期間の過去データを取り込む
- */
-function importPastActivitiesFromWeb(startStr: string, endStr: string): string {
-    // Validate input format YYYY-MM-DD
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!startStr || !endStr || !dateRegex.test(startStr) || !dateRegex.test(endStr)) {
-        const msg = 'エラー: 日付の形式が正しくありません (YYYY-MM-DD)。';
-        Logger.log(msg);
-        return msg;
+        return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
+            .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+        Logger.log(`[Webhook Error] ${(err as Error).toString()}`);
+        return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
+            .setMimeType(ContentService.MimeType.JSON);
     }
-
-    // Helper to validate date components to prevent rollover (e.g., 2024-02-31 -> 2024-03-02)
-    function isValidDateComponents(dateStr: string, dateObj: Date): boolean {
-        if (isNaN(dateObj.getTime())) return false;
-        const [y, m, d] = dateStr.split('-');
-        return dateObj.getFullYear() === parseInt(y, 10) &&
-            dateObj.getMonth() + 1 === parseInt(m, 10) &&
-            dateObj.getDate() === parseInt(d, 10);
-    }
-
-    // 画面からの文字列(YYYY-MM-DD)をDateオブジェクトに変換
-    const startDate = new Date(`${startStr}T00:00:00`);
-    const endDate = new Date(`${endStr}T23:59:59`);
-
-    // Check if dates are valid
-    if (!isValidDateComponents(startStr, startDate) || !isValidDateComponents(endStr, endDate)) {
-        const msg = 'エラー: 無効な日付が指定されました。';
-        Logger.log(msg);
-        return msg;
-    }
-
-    if (startDate > endDate) {
-        const msg = 'エラー: 開始日は終了日より前の日付を指定してください。';
-        Logger.log(msg);
-        return msg;
-    }
-
-    // manual_import.ts にある処理を呼び出す
-    if (typeof importPastActivities === 'function') {
-        return importPastActivities(startDate, endDate);
-    }
-    return "エラー: インポート関数が見つかりません";
 }
 
 // Node.js環境（テスト時）のみエクスポートする
@@ -75,6 +60,5 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         doGet,
         doPost,
-        importPastActivitiesFromWeb,
     };
 }
