@@ -8,7 +8,7 @@ function getCommonMetrics(activity: StravaActivity): CommonMetrics {
         elevation: activity.total_elevation_gain || 0,
         hr: activity.has_heartrate && activity.average_heartrate != null ? activity.average_heartrate + ' bpm' : '測定なし',
         weather: activity.weatherText || '',
-        mapUrl: activity.mapUrl || ''
+        mapUrl: activity.mapUrl || '',
         aiComment: activity.aiComment || ''
     };
 }
