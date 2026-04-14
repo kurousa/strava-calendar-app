@@ -254,6 +254,6 @@ if (typeof module !== 'undefined' && module.exports) {
         getExistingActivityIds,
         DISTANCE_ACTIVITIES,
         CALENDAR_API_DELAY_MS,
-            STRAVA_ACTIVITY_ID_REGEX,
+        STRAVA_ACTIVITY_ID_REGEX,
     };
 }
