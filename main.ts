@@ -203,7 +203,7 @@ function processActivityToCalendar(
         const folder = getOrCreateMapFolder();
         const files = folder.getFilesByName(fileName);
         if (files.hasNext()) {
-            event.addAttachment(files.next());
+            (event as any).addAttachment(files.next());
         }
     }
 
