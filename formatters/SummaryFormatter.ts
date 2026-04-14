@@ -7,7 +7,7 @@
  */
 function formatSummaryReport(summary: SummaryData, period: 'weekly' | 'monthly'): string {
     const periodText = period === 'weekly' ? '今週' : '今月';
-    const dateRangeText = `${Utilities.formatDate(summary.startDate, 'Asia/Tokyo', 'MM/dd')} 〜 ${Utilities.formatDate(summary.endDate, 'Asia/Tokyo', 'MM/dd')}`;
+    const dateRangeText = Utilities.formatDate(summary.startDate, Session.getScriptTimeZone(), "MM/dd") + " 〜 " + Utilities.formatDate(summary.endDate, Session.getScriptTimeZone(), "MM/dd");
 
     const title = `📊 **${periodText}のサマリーレポート (${dateRangeText})**`;
 
