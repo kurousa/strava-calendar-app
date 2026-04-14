@@ -78,3 +78,12 @@ function unregisterStravaWebhook(): void {
         }
     });
 }
+// Node.js環境（テスト時）のみエクスポートする
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        handleStravaWebhook,
+        registerStravaWebhook,
+        manageStravaWebhooks,
+        unregisterStravaWebhook,
+    };
+}

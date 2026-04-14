@@ -31,8 +31,8 @@ vi.stubGlobal('processActivityToCalendar', processActivityToCalendarMock);
 vi.stubGlobal('sendSyncNotification', sendSyncNotificationMock);
 
 
-import * as Main from '../main';
-const { doGet, doPost } = Main;
+import { doGet, doPost } from '../router';
+import { handleStravaWebhook } from '../webhook';
 
 describe('Strava Webhook Handling', () => {
     beforeEach(() => {
@@ -105,10 +105,7 @@ describe('Strava Webhook Handling', () => {
             const handleStravaWebhookMock = vi.fn();
             vi.stubGlobal('handleStravaWebhook', handleStravaWebhookMock);
 
-            vi.resetModules();
-            const MainModule = await import('../main.ts');
-
-            MainModule.doPost(e);
+            doPost(e);
 
             expect(handleStravaWebhookMock).toHaveBeenCalledWith(event);
             expect(ContentServiceMock.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
@@ -148,9 +145,7 @@ describe('Strava Webhook Handling', () => {
             vi.stubGlobal('processActivityToCalendar', processActivityToCalendarMock);
             vi.stubGlobal('sendSyncNotification', sendSyncNotificationMock);
 
-            vi.resetModules();
-            const MainModule = await import('../main.ts');
-            MainModule.handleStravaWebhook(event);
+            handleStravaWebhook(event);
 
             expect(getStravaActivityMock).toHaveBeenCalledWith(12345);
             expect(getTargetCalendarMock).toHaveBeenCalled();
@@ -165,7 +160,7 @@ describe('Strava Webhook Handling', () => {
                 object_id: 12345
             };
 
-            Main.handleStravaWebhook(event);
+            handleStravaWebhook(event);
 
             expect(getStravaActivityMock).not.toHaveBeenCalled();
         });

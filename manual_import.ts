@@ -38,8 +38,8 @@ function importPastActivitiesFromWeb(startStr: string, endStr: string): string {
     }
 
     // manual_import.ts にある処理を呼び出す
-    if (typeof importPastActivities === 'function') {
-        return importPastActivities(startDate, endDate);
+    if (typeof (global as any).importPastActivities === 'function') {
+        return (global as any).importPastActivities(startDate, endDate);
     }
     return "エラー: インポート関数が見つかりません";
 }
@@ -119,5 +119,6 @@ function importPastActivities(startDate?: Date, endDate?: Date, perPage: number 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         importPastActivities,
+        importPastActivitiesFromWeb,
     };
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { doGet, doPost, importPastActivitiesFromWeb } from '../router';
+import { doGet, doPost } from '../router';
+import { importPastActivitiesFromWeb } from '../manual_import';
 
 describe('router', () => {
 
@@ -28,10 +29,20 @@ describe('router', () => {
         });
 
         it('should return OK text output', () => {
-            const result = doPost({} as any);
+            const e = {
+                postData: {
+                    contents: JSON.stringify({
+                        aspect_type: 'create',
+                        object_type: 'activity',
+                        object_id: 12345
+                    })
+                }
+            };
+            vi.stubGlobal('handleStravaWebhook', vi.fn());
+            const result = doPost(e as any);
 
-            expect(global.ContentService.createTextOutput).toHaveBeenCalledWith('OK');
-            expect(result.getContent()).toBe('OK');
+            expect(global.ContentService.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
+            expect(result.getContent()).toBe(JSON.stringify({ status: 'ok' }));
         });
     });
 
@@ -42,9 +53,7 @@ describe('router', () => {
             vi.stubGlobal('importPastActivities', vi.fn());
         });
 
-        afterEach(() => {
-            vi.unstubAllGlobals();
-        });
+
 
         it('should reject invalid date formats', () => {
             const result1 = importPastActivitiesFromWeb('2024/01/01', '2024-01-31');
