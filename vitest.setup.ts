@@ -31,6 +31,7 @@ vi.hoisted(() => {
         getProperty: vi.fn((key: string) => {
             if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
             if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
+            if (key === 'GEMINI_API_KEY') return 'fake_gemini_key';
             return null;
         })
     };
@@ -142,3 +143,7 @@ global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
 // Globalize fetchWeatherData for tests
 import * as WeatherModule from './weather.ts';
 global.fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s");
+
+// Globalize generateAiComment for tests
+import * as AiModule from './ai.ts';
+global.generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ナイスラン！");

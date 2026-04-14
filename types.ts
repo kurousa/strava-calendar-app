@@ -25,6 +25,7 @@ interface StravaActivity {
     average_cadence?: number;
     start_latlng?: [number, number]; // 追加: 開始地点の緯度経度 [lat, lng]
     weatherText?: string;            // 追加: アプリ内で動的に付与する天気テキスト
+    aiComment?: string;              // 追加: AIによる労いのコメント
     [key: string]: unknown;
 }
 
@@ -69,6 +70,7 @@ interface CommonMetrics {
     elevation: number;
     hr: string;
     weather?: string; // 追加
+    aiComment?: string; // 追加
 }
 
 /**
