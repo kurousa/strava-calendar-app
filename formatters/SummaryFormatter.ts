@@ -32,7 +32,7 @@ function formatSummaryReport(summary: SummaryData, period: 'weekly' | 'monthly')
     let longestActivityText = '';
     if (summary.longestActivity) {
         const longest = summary.longestActivity;
-        const style = getActivityStyle(longest.type);
+        const style = getActivityStyle(longest.type) || { emoji: "🏅" };
         longestActivityText = `\n\n**最長のアクティビティ:**\n${style.emoji} ${longest.name} (${(longest.distance / 1000).toFixed(1)} km / ${formatDuration(longest.moving_time)})`;
     }
 
