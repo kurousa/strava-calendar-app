@@ -119,11 +119,13 @@ describe('processActivityToCalendar', () => {
         vi.resetModules();
 
         mockEvent = {
+            getId: vi.fn().mockReturnValue('event_id@google.com'),
             getDescription: vi.fn(),
             setColor: vi.fn(),
         };
 
         mockCalendar = {
+            getId: vi.fn().mockReturnValue('calendar_id'),
             getEvents: vi.fn().mockReturnValue([]),
             createEvent: vi.fn().mockReturnValue(mockEvent)
         };
@@ -173,6 +175,54 @@ describe('processActivityToCalendar', () => {
             expect.any(Object)
         );
         expect(global.Utilities.sleep).toHaveBeenCalledWith(CALENDAR_API_DELAY_MS);
+        expect(result).toBe('success');
+    });
+
+    it('should call Calendar.Events.patch when mapUrl is present and file is found', async () => {
+        const { processActivityToCalendar, DISTANCE_ACTIVITIES } = await import('../main.ts');
+
+        const activity = {
+            id: 12345,
+            start_date: '2023-01-01T10:00:00Z',
+            elapsed_time: 3600,
+            type: 'Run',
+            name: 'Morning Run',
+            distance: 5200,
+            mapUrl: 'https://maps.google.com/map'
+        };
+
+        const mockFile = {
+            getUrl: vi.fn().mockReturnValue('https://maps.google.com/map'),
+            getName: vi.fn().mockReturnValue('strava_map_12345.png'),
+            getMimeType: vi.fn().mockReturnValue('image/png')
+        };
+
+        const mockFiles = {
+            hasNext: vi.fn().mockReturnValue(true),
+            next: vi.fn().mockReturnValue(mockFile)
+        };
+
+        const mockFolder = {
+            getFilesByName: vi.fn().mockReturnValue(mockFiles)
+        };
+
+        vi.stubGlobal('saveMapToDrive', vi.fn().mockReturnValue({}));
+        vi.stubGlobal('getOrCreateMapFolder', vi.fn().mockReturnValue(mockFolder));
+
+        const result = processActivityToCalendar(activity, mockCalendar, DISTANCE_ACTIVITIES, true);
+
+        expect(global.Calendar.Events.patch).toHaveBeenCalledWith(
+            {
+                attachments: [{
+                    fileUrl: 'https://maps.google.com/map',
+                    title: 'strava_map_12345.png',
+                    mimeType: 'image/png'
+                }]
+            },
+            'calendar_id',
+            'event_id',
+            { supportsAttachments: true }
+        );
         expect(result).toBe('success');
     });
 

@@ -207,6 +207,37 @@ function processActivityToCalendar(
         description: description
     });
 
+    // 【追加】マップ画像をカレンダーに添付する
+    if (activity.mapUrl && typeof saveMapToDrive === 'function') {
+        const fileName = `strava_map_${activity.id}.png`;
+        const folder = getOrCreateMapFolder();
+        const files = folder.getFilesByName(fileName);
+
+        if (files.hasNext()) {
+            const file = files.next();
+            // Google Calendar API (v3) を使って添付ファイルを追加
+            // 標準のIDは "xxxx@google.com" 形式なので、ID部分のみ抽出
+            const eventId = event.getId().split('@')[0];
+            try {
+                // global の Calendar オブジェクト (Advanced Service) を使用
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.Events.patch({
+                        attachments: [{
+                            fileUrl: file.getUrl(),
+                            title: file.getName(),
+                            mimeType: file.getMimeType()
+                        }]
+                    }, calendar.getId(), eventId, {
+                        supportsAttachments: true
+                    });
+                    Logger.log(`添付ファイルを追加しました: ${fileName}`);
+                }
+            } catch (e) {
+                Logger.log(`添付ファイルの追加に失敗しました: ${e}`);
+            }
+        }
+    }
+
     // イベントに色を設定する
     if (style.color) {
         event.setColor(style.color);

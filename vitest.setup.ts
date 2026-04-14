@@ -20,6 +20,12 @@ vi.hoisted(() => {
         },
     };
 
+    (global as any).Calendar = {
+        Events: {
+            patch: vi.fn(),
+        },
+    };
+
     (global as any).SpreadsheetApp = {
         openById: vi.fn(() => ({
             getSheetByName: vi.fn(),

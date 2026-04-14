@@ -1,6 +1,13 @@
 {
   "timeZone": "Asia/Tokyo",
   "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "Calendar",
+        "serviceId": "calendar",
+        "version": "v3"
+      }
+    ],
     "libraries": [
       {
         "userSymbol": "OAuth2",
