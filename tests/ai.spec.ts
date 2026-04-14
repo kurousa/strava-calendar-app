@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateAiComment } from '../ai';
+import { generateAiComment, resetAiCache } from '../ai';
 
 describe('generateAiComment', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        resetAiCache();
     });
 
     it('should generate an AI comment when API key is present', () => {
@@ -45,21 +46,13 @@ describe('generateAiComment', () => {
 
     it('should return an empty string when GEMINI_API_KEY is missing', () => {
         const scriptPropertiesMock = (global as any).PropertiesService.getScriptProperties();
-        scriptPropertiesMock.getProperty.mockImplementation((key: string) => {
+        scriptPropertiesMock.getProperty.mockImplementationOnce((key: string) => {
             if (key === 'GEMINI_API_KEY') return null;
             return 'fake';
         });
 
         const comment = generateAiComment({ type: 'Run' } as any);
         expect(comment).toBe('');
-
-        // Restore mock
-        scriptPropertiesMock.getProperty.mockImplementation((key: string) => {
-            if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
-            if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
-            if (key === 'GEMINI_API_KEY') return 'fake_gemini_key';
-            return null;
-        });
     });
 
     it('should handle API errors gracefully', () => {

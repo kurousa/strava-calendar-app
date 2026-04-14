@@ -3,13 +3,19 @@
 // Google Gemini API を利用して、アクティビティへの労いコメントを生成します。
 // ==========================================
 
+let cachedAiApiKey: string | null = null;
+
 /**
  * アクティビティデータに基づいてAIコメントを生成する
  * @param activity Stravaアクティビティデータ
  * @returns AIによるコメント
  */
 function generateAiComment(activity: StravaActivity): string {
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    if (cachedAiApiKey === null) {
+        cachedAiApiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || '';
+    }
+    const apiKey = cachedAiApiKey;
+
     if (!apiKey) {
         Logger.log('GEMINI_API_KEY が設定されていないため、AIコメント生成をスキップします。');
         return '';
@@ -70,5 +76,8 @@ function generateAiComment(activity: StravaActivity): string {
 
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { generateAiComment };
+    module.exports = {
+        generateAiComment,
+        resetAiCache: () => { cachedAiApiKey = null; }
+    };
 }
