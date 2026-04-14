@@ -94,8 +94,8 @@ describe('maps.ts', () => {
             expect(mockFolder.createFile).toHaveBeenCalled();
             expect(mockFile.setName).toHaveBeenCalledWith('strava_map_12345.png');
             expect(mockFile.setSharing).toHaveBeenCalledWith(
-                DriveApp.Access.ANYONE_WITH_LINK,
-                DriveApp.Permission.VIEW
+                DriveApp.Access.PRIVATE,
+                DriveApp.Permission.EDIT
             );
         });
     });
