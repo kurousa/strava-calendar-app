@@ -169,7 +169,7 @@ function createStravaWebhookSubscription(callbackUrl: string, verifyToken: strin
     const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
-        Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
+        Logger.log("エラー: " + PROP_STRAVA_CLIENT_ID + " または " + PROP_STRAVA_CLIENT_SECRET + " が設定されていません。");
         return null;
     }
 
