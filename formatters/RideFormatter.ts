@@ -3,13 +3,14 @@
 // ==========================================
 function makeRideDescription(activity: StravaActivity): string {
     // 共通のメトリクス計算 (DefaultFormatter.ts で定義、GAS環境/vitestでグローバル解決)
-    const { distanceKm, timeMin, elevation, hr, weather, aiComment } = getCommonMetrics(activity);
+    const { distanceKm, timeMin, elevation, hr, weather, aiComment, mapUrl } = getCommonMetrics(activity);
 
     // 自転車専用の計算（時速、パワー、ケイデンス）
     const speedKmh = activity.average_speed ? (activity.average_speed * 3.6).toFixed(1) : 0;
     const wattsText = activity.average_watts ? `平均パワー: ${activity.average_watts} W` : '';
     const cadenceText = activity.average_cadence ? `平均ケイデンス: ${activity.average_cadence} rpm` : '';
     const weatherLine = weather ? `${weather}` : '';
+    const mapLine = mapUrl ? `ルート地図: ${mapUrl}` : '';
 
     const descriptionLines = [
         `距離: ${distanceKm} km`,
@@ -20,6 +21,7 @@ function makeRideDescription(activity: StravaActivity): string {
         wattsText,
         cadenceText,
         weatherLine,
+        mapLine,
     ].filter(Boolean);
 
     if (aiComment) {
