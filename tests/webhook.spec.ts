@@ -97,6 +97,10 @@ describe('Strava Webhook Handling', () => {
             vi.stubGlobal('processActivityToCalendar', processActivityToCalendarMock);
             vi.stubGlobal('sendSyncNotification', sendSyncNotificationMock);
 
+            // Mock getStravaActivity to return something so handleStravaWebhook doesn't fail
+            getStravaActivityMock.mockReturnValue({ id: 12345, name: 'Test Activity' });
+            getTargetCalendarMock.mockReturnValue({});
+
             // handleStravaWebhook is now called via global
             const handleStravaWebhookMock = vi.fn();
             vi.stubGlobal('handleStravaWebhook', handleStravaWebhookMock);
