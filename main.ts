@@ -251,7 +251,7 @@ function doPost(e: any): GoogleAppsScript.Content.TextOutput {
         // 非同期的に処理を行う（GASの制限上、実際にはこの中で完結させる）
         // Stravaは2秒以内のレスポンスを求めているため、重い処理は工夫が必要な場合もあるが、
         // 単発のアクティビティ取得とカレンダー登録であれば通常2秒以内に収まる。
-        (global as any).handleStravaWebhook(event);
+        handleStravaWebhook(event);
 
         return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
             .setMimeType(ContentService.MimeType.JSON);
