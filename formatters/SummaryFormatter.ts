@@ -23,7 +23,7 @@ function formatSummaryReport(summary: SummaryData, period: 'weekly' | 'monthly')
     const sortedTypes = Object.entries(summary.typeStats).sort((a, b) => b[1].distance - a[1].distance);
     if (sortedTypes.length > 0) {
         typeBreakdown = '\n\n**種目別内訳:**\n' + sortedTypes.map(([type, stats]) => {
-            const style = getActivityStyle(type);
+            const style = getActivityStyle(type) || { emoji: "🏅" };
             const distText = stats.distance > 0 ? ` / ${(stats.distance / 1000).toFixed(1)} km` : '';
             return `${style.emoji} ${type}: ${stats.count} 回${distText}`;
         }).join('\n');
