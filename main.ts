@@ -166,6 +166,11 @@ function processActivityToCalendar(
         }
     }
 
+    // 【追加】AIコメントの生成
+    if (typeof generateAiComment === 'function') {
+        activity.aiComment = generateAiComment(activity);
+    }
+
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
     const type = activity.type; // 種類（Run, Rideなど）
     const style = getActivityStyle(type);
