@@ -48,10 +48,16 @@ vi.hoisted(() => {
     };
 
     (global as any).HtmlService = {
-        createHtmlOutput: vi.fn(),
+        createHtmlOutput: vi.fn(() => {
+            const mockOutput = {
+                setStatusCode: vi.fn().mockReturnThis(),
+            };
+            return mockOutput;
+        }),
         createHtmlOutputFromFile: vi.fn(() => {
             const mockOutput = {
                 setTitle: vi.fn().mockReturnThis(),
+                setStatusCode: vi.fn().mockReturnThis(),
             };
             return mockOutput;
         })

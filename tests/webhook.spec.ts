@@ -79,7 +79,7 @@ describe('Strava Webhook Handling', () => {
     });
 
     describe('doPost', () => {
-        it('should parse webhook event and call handleStravaWebhook', () => {
+        it('should parse webhook event and call handleStravaWebhook', async () => {
             const event = {
                 aspect_type: 'create',
                 object_type: 'activity',
@@ -91,13 +91,22 @@ describe('Strava Webhook Handling', () => {
                 }
             };
 
-            // Mock getStravaActivity to return something so handleStravaWebhook doesn't fail
-            getStravaActivityMock.mockReturnValue({ id: 12345, name: 'Test Activity' });
-            getTargetCalendarMock.mockReturnValue({});
+            // Set up globals as they are used in main.ts
+            vi.stubGlobal('getStravaActivity', getStravaActivityMock);
+            vi.stubGlobal('getTargetCalendar', getTargetCalendarMock);
+            vi.stubGlobal('processActivityToCalendar', processActivityToCalendarMock);
+            vi.stubGlobal('sendSyncNotification', sendSyncNotificationMock);
 
-            Main.doPost(e);
+            // handleStravaWebhook is now called via global
+            const handleStravaWebhookMock = vi.fn();
+            vi.stubGlobal('handleStravaWebhook', handleStravaWebhookMock);
 
-            expect(getStravaActivityMock).toHaveBeenCalledWith(12345);
+            vi.resetModules();
+            const MainModule = await import('../main.ts');
+
+            MainModule.doPost(e);
+
+            expect(handleStravaWebhookMock).toHaveBeenCalledWith(event);
             expect(ContentServiceMock.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
         });
 
@@ -115,7 +124,7 @@ describe('Strava Webhook Handling', () => {
     });
 
     describe('handleStravaWebhook', () => {
-        it.skip('should process new activity creation', () => {
+        it('should process new activity creation', async () => {
             const event: any = {
                 aspect_type: 'create',
                 object_type: 'activity',
@@ -127,13 +136,17 @@ describe('Strava Webhook Handling', () => {
 
             getStravaActivityMock.mockReturnValue(mockActivity);
             getTargetCalendarMock.mockReturnValue(mockCalendar);
+            processActivityToCalendarMock.mockReturnValue('success');
 
+            // Set up globals as they are used in main.ts
             vi.stubGlobal('getStravaActivity', getStravaActivityMock);
             vi.stubGlobal('getTargetCalendar', getTargetCalendarMock);
             vi.stubGlobal('processActivityToCalendar', processActivityToCalendarMock);
             vi.stubGlobal('sendSyncNotification', sendSyncNotificationMock);
 
-            Main.handleStravaWebhook(event);
+            vi.resetModules();
+            const MainModule = await import('../main.ts');
+            MainModule.handleStravaWebhook(event);
 
             expect(getStravaActivityMock).toHaveBeenCalledWith(12345);
             expect(getTargetCalendarMock).toHaveBeenCalled();
