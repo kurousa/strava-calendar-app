@@ -94,6 +94,11 @@ function main(): void {
     if (typeof sendSyncNotification === 'function') {
         sendSyncNotification(successCount, skipCount, false);
     }
+
+    // 機材アラートのチェック
+    if (typeof checkGearAlerts === 'function') {
+        checkGearAlerts();
+    }
 }
 
 /**
@@ -159,6 +164,11 @@ function processActivityToCalendar(
             Utilities.sleep(100);
             activity.weatherText = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], startTime);
         }
+    }
+
+    // 【追加】AIコメントの生成
+    if (typeof generateAiComment === 'function') {
+        activity.aiComment = generateAiComment(activity);
     }
 
     // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
