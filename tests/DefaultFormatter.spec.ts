@@ -122,8 +122,8 @@ describe('DefaultFormatter', () => {
                 elevation: 150,
                 hr: '145 bpm',
                 weather: '天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s',
-                mapUrl: '',
-                aiComment: ''
+                aiComment: '',
+                mapUrl: ''
             });
 
         });
@@ -143,8 +143,8 @@ describe('DefaultFormatter', () => {
                 elevation: 0,
                 hr: '測定なし',
                 weather: '',
-                mapUrl: '',
-                aiComment: ''
+                aiComment: '',
+                mapUrl: ''
             });
 
         });

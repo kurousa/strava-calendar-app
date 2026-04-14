@@ -74,8 +74,8 @@ interface CommonMetrics {
     elevation: number;
     hr: string;
     weather?: string; // 追加
-    mapUrl?: string;  // 追加
     aiComment?: string; // 追加
+    mapUrl?: string;  // 追加
 }
 
 /**

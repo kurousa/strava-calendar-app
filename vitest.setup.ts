@@ -179,10 +179,11 @@ global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
 import * as WeatherModule from './weather.ts';
 global.fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s");
 
+// Globalize generateAiComment for tests
+import * as AiModule from './ai.ts';
+global.generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ナイスラン！");
+
 // Globalize Maps functions for tests
 import * as MapsModule from './maps.ts';
 global.saveMapToDrive = (MapsModule as any).saveMapToDrive || vi.fn();
 global.getOrCreateMapFolder = (MapsModule as any).getOrCreateMapFolder || vi.fn();
-// Globalize generateAiComment for tests
-import * as AiModule from './ai.ts';
-global.generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ナイスラン！");
