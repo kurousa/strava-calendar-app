@@ -1,0 +1,102 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { saveMapToDrive, getOrCreateMapFolder } from '../maps';
+
+describe('maps.ts', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    describe('getOrCreateMapFolder', () => {
+        it('should return existing folder if it exists', () => {
+            const mockFolder = { name: 'Strava_Route_Maps' };
+            const mockFolders = {
+                hasNext: vi.fn().mockReturnValue(true),
+                next: vi.fn().mockReturnValue(mockFolder)
+            };
+            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+
+            const folder = getOrCreateMapFolder();
+            expect(folder).toBe(mockFolder);
+            expect(DriveApp.getFoldersByName).toHaveBeenCalledWith('Strava_Route_Maps');
+        });
+
+        it('should create new folder if it does not exist', () => {
+            const mockFolder = { name: 'Strava_Route_Maps' };
+            const mockFolders = {
+                hasNext: vi.fn().mockReturnValue(false)
+            };
+            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            (global as any).DriveApp.createFolder.mockReturnValue(mockFolder);
+
+            const folder = getOrCreateMapFolder();
+            expect(folder).toBe(mockFolder);
+            expect(DriveApp.createFolder).toHaveBeenCalledWith('Strava_Route_Maps');
+        });
+    });
+
+    describe('saveMapToDrive', () => {
+        const mockActivity = {
+            id: 12345,
+            map: {
+                summary_polyline: 'abc'
+            }
+        };
+
+        it('should return null if activity has no polyline', () => {
+            const result = saveMapToDrive({ id: 1 } as any);
+            expect(result).toBeNull();
+        });
+
+        it('should return existing file if it already exists', () => {
+            const mockFile = { getUrl: () => 'http://map' };
+            const mockFiles = {
+                hasNext: vi.fn().mockReturnValue(true),
+                next: vi.fn().mockReturnValue(mockFile)
+            };
+            const mockFolder = {
+                getFilesByName: vi.fn().mockReturnValue(mockFiles)
+            };
+
+            // Mock getOrCreateMapFolder indirectly by mocking DriveApp calls it makes
+            const mockFolders = {
+                hasNext: vi.fn().mockReturnValue(true),
+                next: vi.fn().mockReturnValue(mockFolder)
+            };
+            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+
+            const result = saveMapToDrive(mockActivity as any);
+            expect(result).toBe(mockFile);
+            expect(mockFolder.getFilesByName).toHaveBeenCalledWith('strava_map_12345.png');
+        });
+
+        it('should create and return new file if it does not exist', () => {
+            const mockFile = {
+                setName: vi.fn().mockReturnThis(),
+                setSharing: vi.fn().mockReturnThis(),
+                getUrl: () => 'http://new-map'
+            };
+            const mockFiles = {
+                hasNext: vi.fn().mockReturnValue(false)
+            };
+            const mockFolder = {
+                getFilesByName: vi.fn().mockReturnValue(mockFiles),
+                createFile: vi.fn().mockReturnValue(mockFile)
+            };
+
+            const mockFolders = {
+                hasNext: vi.fn().mockReturnValue(true),
+                next: vi.fn().mockReturnValue(mockFolder)
+            };
+            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+
+            const result = saveMapToDrive(mockActivity as any);
+            expect(result).toBe(mockFile);
+            expect(mockFolder.createFile).toHaveBeenCalled();
+            expect(mockFile.setName).toHaveBeenCalledWith('strava_map_12345.png');
+            expect(mockFile.setSharing).toHaveBeenCalledWith(
+                DriveApp.Access.PRIVATE,
+                DriveApp.Permission.EDIT
+            );
+        });
+    });
+});

@@ -122,7 +122,8 @@ describe('DefaultFormatter', () => {
                 elevation: 150,
                 hr: '145 bpm',
                 weather: '天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s',
-                aiComment: ''
+                aiComment: '',
+                mapUrl: ''
             });
 
         });
@@ -142,7 +143,8 @@ describe('DefaultFormatter', () => {
                 elevation: 0,
                 hr: '測定なし',
                 weather: '',
-                aiComment: ''
+                aiComment: '',
+                mapUrl: ''
             });
 
         });
@@ -207,6 +209,18 @@ describe('DefaultFormatter', () => {
 
 詳細: https://www.strava.com/activities/123456789
   `.trim());
+        });
+
+        it('should include map link in default description if mapUrl is present', () => {
+            const activity = {
+                name: 'テストアクティビティ',
+                distance: 10000,
+                id: 12345,
+                mapUrl: 'https://drive.google.com/map'
+            };
+
+            const result = makeDefaultDescription(activity as any);
+            expect(result).toContain('ルート地図: https://drive.google.com/map');
         });
     });
 

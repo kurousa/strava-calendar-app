@@ -79,6 +79,41 @@ vi.hoisted(() => {
         fetch: vi.fn(),
     };
 
+    (global as any).Maps = {
+        newStaticMap: vi.fn(() => ({
+            setSize: vi.fn().mockReturnThis(),
+            setLanguage: vi.fn().mockReturnThis(),
+            addPath: vi.fn().mockReturnThis(),
+            getBlob: vi.fn(() => ({
+                setName: vi.fn().mockReturnThis(),
+            })),
+        })),
+    };
+
+    (global as any).DriveApp = {
+        getFoldersByName: vi.fn(() => ({
+            hasNext: vi.fn(),
+            next: vi.fn(),
+        })),
+        createFolder: vi.fn(() => ({
+            createFile: vi.fn(() => ({
+                setName: vi.fn().mockReturnThis(),
+                setSharing: vi.fn().mockReturnThis(),
+                getUrl: vi.fn(() => 'https://drive.google.com/map_file'),
+            })),
+            getFilesByName: vi.fn(() => ({
+                hasNext: vi.fn(),
+                next: vi.fn(),
+            })),
+        })),
+        Access: {
+            ANYONE_WITH_LINK: 'ANYONE_WITH_LINK',
+        },
+        Permission: {
+            VIEW: 'VIEW',
+        },
+    };
+
     // Utilitiesのモック
     (global as any).Utilities = {
         sleep: vi.fn(),
@@ -154,3 +189,8 @@ global.fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() =>
 // Globalize generateAiComment for tests
 import * as AiModule from './ai.ts';
 global.generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ナイスラン！");
+
+// Globalize Maps functions for tests
+import * as MapsModule from './maps.ts';
+global.saveMapToDrive = (MapsModule as any).saveMapToDrive || vi.fn();
+global.getOrCreateMapFolder = (MapsModule as any).getOrCreateMapFolder || vi.fn();

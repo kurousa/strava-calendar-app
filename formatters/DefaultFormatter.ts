@@ -8,7 +8,8 @@ function getCommonMetrics(activity: StravaActivity): CommonMetrics {
         elevation: activity.total_elevation_gain || 0,
         hr: activity.has_heartrate && activity.average_heartrate != null ? activity.average_heartrate + ' bpm' : '測定なし',
         weather: activity.weatherText || '',
-        aiComment: activity.aiComment || ''
+        aiComment: activity.aiComment || '',
+        mapUrl: activity.mapUrl || ''
     };
 }
 
@@ -49,6 +50,11 @@ function makeDefaultDescription(activity: StravaActivity): string {
     if (activity.aiComment) {
         descriptionLines.push('');
         descriptionLines.push(`🤖 AIコーチ: ${activity.aiComment}`);
+    }
+
+    // ルートマップ (取得できていれば追加)
+    if (activity.mapUrl) {
+        descriptionLines.push(`ルート地図: ${activity.mapUrl}`);
     }
 
     // 空行を挟んで詳細リンクを追加

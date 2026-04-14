@@ -121,6 +121,7 @@ describe('processActivityToCalendar', () => {
         mockEvent = {
             getDescription: vi.fn(),
             setColor: vi.fn(),
+            addAttachment: vi.fn(),
         };
 
         mockCalendar = {
@@ -254,7 +255,8 @@ describe('main function', () => {
             getEvents: vi.fn().mockReturnValue([]),
             createEvent: vi.fn().mockReturnValue({
                 setColor: vi.fn(),
-                getDescription: vi.fn()
+                getDescription: vi.fn(),
+                addAttachment: vi.fn()
             })
         };
 
