@@ -123,6 +123,7 @@ describe('DefaultFormatter', () => {
                 hr: '145 bpm',
                 weather: '天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s',
                 mapUrl: ''
+                aiComment: ''
             });
 
         });
@@ -143,6 +144,7 @@ describe('DefaultFormatter', () => {
                 hr: '測定なし',
                 weather: '',
                 mapUrl: ''
+                aiComment: ''
             });
 
         });

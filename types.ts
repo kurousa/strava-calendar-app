@@ -29,6 +29,7 @@ interface StravaActivity {
     };                               // 追加: ルートのポリラインデータ
     mapUrl?: string;                 // 追加: 生成されたマップ画像のURL
     weatherText?: string;            // 追加: アプリ内で動的に付与する天気テキスト
+    aiComment?: string;              // 追加: AIによる労いのコメント
     [key: string]: unknown;
 }
 
@@ -74,6 +75,7 @@ interface CommonMetrics {
     hr: string;
     weather?: string; // 追加
     mapUrl?: string;  // 追加
+    aiComment?: string; // 追加
 }
 
 /**

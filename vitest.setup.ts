@@ -31,6 +31,7 @@ vi.hoisted(() => {
         getProperty: vi.fn((key: string) => {
             if (key === 'STRAVA_CLIENT_ID') return 'fake_id';
             if (key === 'STRAVA_CLIENT_SECRET') return 'fake_secret';
+            if (key === 'GEMINI_API_KEY') return 'fake_gemini_key';
             return null;
         })
     };
@@ -182,3 +183,6 @@ global.fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() =>
 import * as MapsModule from './maps.ts';
 global.saveMapToDrive = (MapsModule as any).saveMapToDrive || vi.fn();
 global.getOrCreateMapFolder = (MapsModule as any).getOrCreateMapFolder || vi.fn();
+// Globalize generateAiComment for tests
+import * as AiModule from './ai.ts';
+global.generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ナイスラン！");

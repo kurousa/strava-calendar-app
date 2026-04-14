@@ -9,6 +9,7 @@ function getCommonMetrics(activity: StravaActivity): CommonMetrics {
         hr: activity.has_heartrate && activity.average_heartrate != null ? activity.average_heartrate + ' bpm' : '測定なし',
         weather: activity.weatherText || '',
         mapUrl: activity.mapUrl || ''
+        aiComment: activity.aiComment || ''
     };
 }
 
@@ -48,6 +49,10 @@ function makeDefaultDescription(activity: StravaActivity): string {
     // ルートマップ (取得できていれば追加)
     if (activity.mapUrl) {
         descriptionLines.push(`ルート地図: ${activity.mapUrl}`);
+    // AIコメント (取得できていれば追加)
+    if (activity.aiComment) {
+        descriptionLines.push('');
+        descriptionLines.push(`🤖 AIコーチ: ${activity.aiComment}`);
     }
 
     // 空行を挟んで詳細リンクを追加

@@ -15,7 +15,7 @@ function formatPace(averageSpeed: number | undefined): string {
 
 function makeRunDescription(activity: StravaActivity): string {
     // 共通のメトリクス計算 (DefaultFormatter.ts で定義、GAS環境/vitestでグローバル解決)
-    const { distanceKm, timeMin, elevation, hr, weather, mapUrl } = getCommonMetrics(activity);
+    const { distanceKm, timeMin, elevation, hr, weather, mapUrl, aiComment } = getCommonMetrics(activity);
 
     // ラン専用の計算（ペース）
     const paceText = formatPace(activity.average_speed);
@@ -31,6 +31,10 @@ function makeRunDescription(activity: StravaActivity): string {
         weatherLine,
         mapLine,
     ].filter(Boolean);
+
+    if (aiComment) {
+        descriptionLines.push('', `🤖 AIコーチ: ${aiComment}`);
+    }
 
     descriptionLines.push('', `詳細: https://www.strava.com/activities/${activity.id}`);
 

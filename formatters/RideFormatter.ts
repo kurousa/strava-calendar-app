@@ -3,7 +3,7 @@
 // ==========================================
 function makeRideDescription(activity: StravaActivity): string {
     // 共通のメトリクス計算 (DefaultFormatter.ts で定義、GAS環境/vitestでグローバル解決)
-    const { distanceKm, timeMin, elevation, hr, weather, mapUrl } = getCommonMetrics(activity);
+    const { distanceKm, timeMin, elevation, hr, weather, mapUrl, aiComment } = getCommonMetrics(activity);
 
     // 自転車専用の計算（時速、パワー、ケイデンス）
     const speedKmh = activity.average_speed ? (activity.average_speed * 3.6).toFixed(1) : 0;
@@ -23,6 +23,10 @@ function makeRideDescription(activity: StravaActivity): string {
         weatherLine,
         mapLine,
     ].filter(Boolean);
+
+    if (aiComment) {
+        descriptionLines.push('', `🤖 AIコーチ: ${aiComment}`);
+    }
 
     descriptionLines.push('', `詳細: https://www.strava.com/activities/${activity.id}`);
 
