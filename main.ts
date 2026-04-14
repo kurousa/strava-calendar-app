@@ -207,16 +207,6 @@ function processActivityToCalendar(
         description: description
     });
 
-    // 【追加】マップ画像をカレンダーに添付する
-    if (activity.mapUrl && typeof saveMapToDrive === 'function') {
-        const fileName = `strava_map_${activity.id}.png`;
-        const folder = getOrCreateMapFolder();
-        const files = folder.getFilesByName(fileName);
-        if (files.hasNext()) {
-            (event as any).addAttachment(files.next());
-        }
-    }
-
     // イベントに色を設定する
     if (style.color) {
         event.setColor(style.color);
