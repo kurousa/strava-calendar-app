@@ -7,7 +7,8 @@
  */
 function formatSummaryReport(summary: SummaryData, period: 'weekly' | 'monthly'): string {
     const periodText = period === 'weekly' ? '今週' : '今月';
-    const dateRangeText = Utilities.formatDate(summary.startDate, Session.getScriptTimeZone(), "MM/dd") + " 〜 " + Utilities.formatDate(summary.endDate, Session.getScriptTimeZone(), "MM/dd");
+    const tz = Session.getScriptTimeZone();
+    const dateRangeText = `${Utilities.formatDate(summary.startDate, tz, 'MM/dd')} 〜 ${Utilities.formatDate(summary.endDate, tz, 'MM/dd')}`;
 
     const title = `📊 **${periodText}のサマリーレポート (${dateRangeText})**`;
 
@@ -23,7 +24,7 @@ function formatSummaryReport(summary: SummaryData, period: 'weekly' | 'monthly')
     const sortedTypes = Object.entries(summary.typeStats).sort((a, b) => b[1].distance - a[1].distance);
     if (sortedTypes.length > 0) {
         typeBreakdown = '\n\n**種目別内訳:**\n' + sortedTypes.map(([type, stats]) => {
-            const style = getActivityStyle(type) || { emoji: "🏅" };
+            const style = getActivityStyle(type);
             const distText = stats.distance > 0 ? ` / ${(stats.distance / 1000).toFixed(1)} km` : '';
             return `${style.emoji} ${type}: ${stats.count} 回${distText}`;
         }).join('\n');
@@ -32,7 +33,7 @@ function formatSummaryReport(summary: SummaryData, period: 'weekly' | 'monthly')
     let longestActivityText = '';
     if (summary.longestActivity) {
         const longest = summary.longestActivity;
-        const style = getActivityStyle(longest.type) || { emoji: "🏅" };
+        const style = getActivityStyle(longest.type);
         longestActivityText = `\n\n**最長のアクティビティ:**\n${style.emoji} ${longest.name} (${(longest.distance / 1000).toFixed(1)} km / ${formatDuration(longest.moving_time)})`;
     }
 
