@@ -214,12 +214,120 @@ function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
 }
 
 // ==========================================
-// 【Webアプリ用】インポート画面（HTML）を表示する
+// 【Webアプリ用】インポート画面（HTML）を表示、またはWebhookのバリデーションに対応する
 // ==========================================
-function doGet(): GoogleAppsScript.HTML.HtmlOutput {
-    // 'index' という名前のHTMLファイルを読み込んで表示する
+function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Content.TextOutput {
+    // Strava Webhook のバリデーションリクエスト (GET) の場合
+    if (e && e.parameter && e.parameter['hub.mode'] === 'subscribe') {
+        const verifyToken = PropertiesService.getScriptProperties().getProperty('STRAVA_WEBHOOK_VERIFY_TOKEN') || 'STRAVA';
+        if (e.parameter['hub.verify_token'] === verifyToken) {
+            const challenge = e.parameter['hub.challenge'];
+            return ContentService.createTextOutput(JSON.stringify({ "hub.challenge": challenge }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+
+    // 通常のアクセス（インポート画面）を表示する
     return HtmlService.createHtmlOutputFromFile('index')
         .setTitle('Strava カレンダーインポート');
+}
+
+/**
+ * Strava Webhook からの通知 (POST) を受け取る
+ */
+function doPost(e: any): GoogleAppsScript.Content.TextOutput {
+    try {
+        const event: StravaWebhookEvent = JSON.parse(e.postData.contents);
+        Logger.log(`[Webhook] Received event: ${event.aspect_type} for ${event.object_type} (ID: ${event.object_id})`);
+
+        // 非同期的に処理を行う（GASの制限上、実際にはこの中で完結させる）
+        // Stravaは2秒以内のレスポンスを求めているため、重い処理は工夫が必要な場合もあるが、
+        // 単発のアクティビティ取得とカレンダー登録であれば通常2秒以内に収まる。
+        handleStravaWebhook(event);
+
+        return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
+            .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+        Logger.log(`[Webhook Error] ${(err as Error).toString()}`);
+        return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
+            .setMimeType(ContentService.MimeType.JSON);
+    }
+}
+
+/**
+ * Webhookイベントの内容を解析して処理を振り分ける
+ */
+function handleStravaWebhook(event: StravaWebhookEvent): void {
+    Logger.log(`[Webhook] Handling activity ${event.object_id}`);
+    if (event.object_type === 'activity') {
+        if (event.aspect_type === 'create') {
+            // 新規作成時のみカレンダーに登録
+            const activity = getStravaActivity(event.object_id);
+            if (activity) {
+                const calendar = getTargetCalendar();
+                if (calendar) {
+                    processActivityToCalendar(activity, calendar);
+                    // 必要に応じて通知を飛ばす
+                    if (typeof sendSyncNotification === 'function') {
+                        sendSyncNotification(1, 0, false);
+                    }
+                }
+            }
+        }
+        // update, delete は現状未対応（必要に応じて実装）
+    }
+}
+
+/**
+ * 手動実行用：WebhookをStravaに登録する
+ * スクリプトプロパティ 'WEB_APP_URL' に公開したURLを設定しておく必要があります。
+ */
+function registerStravaWebhook(): void {
+    const scriptProps = PropertiesService.getScriptProperties();
+    const webAppUrl = scriptProps.getProperty('WEB_APP_URL');
+    const verifyToken = scriptProps.getProperty('STRAVA_WEBHOOK_VERIFY_TOKEN') || 'STRAVA';
+
+    if (!webAppUrl) {
+        Logger.log('エラー: WEB_APP_URL が設定されていません。WebアプリとしてデプロイしたURLを設定してください。');
+        return;
+    }
+
+    const result = createStravaWebhookSubscription(webAppUrl, verifyToken);
+    if (result) {
+        Logger.log(`Webhookを登録しました。Subscription ID: ${result.id}`);
+    } else {
+        Logger.log('Webhookの登録に失敗しました。Loggerを確認してください。');
+    }
+}
+
+/**
+ * 手動実行用：登録されているWebhookを確認・削除する
+ */
+function manageStravaWebhooks(): void {
+    const subscriptions = viewStravaWebhookSubscriptions();
+    if (subscriptions.length === 0) {
+        Logger.log('登録されているWebhookはありません。');
+        return;
+    }
+
+    subscriptions.forEach(sub => {
+        Logger.log(`ID: ${sub.id}, Callback: ${sub.callback_url}, Created: ${sub.created_at}`);
+    });
+}
+
+function unregisterStravaWebhook(): void {
+    const subscriptions = viewStravaWebhookSubscriptions();
+    if (subscriptions.length === 0) {
+        Logger.log('削除するWebhookが見つかりません。');
+        return;
+    }
+
+    subscriptions.forEach(sub => {
+        const success = deleteStravaWebhookSubscription(sub.id);
+        if (success) {
+            Logger.log(`Webhook (ID: ${sub.id}) を削除しました。`);
+        }
+    });
 }
 
 // Node.js環境（テスト時）のみエクスポートする
@@ -231,6 +339,11 @@ if (typeof module !== 'undefined' && module.exports) {
         getTargetCalendar,
         processActivityToCalendar,
         getExistingActivityIds,
+        doPost,
+        handleStravaWebhook,
+        registerStravaWebhook,
+        manageStravaWebhooks,
+        unregisterStravaWebhook,
         DISTANCE_ACTIVITIES,
         CALENDAR_API_DELAY_MS,
             STRAVA_ACTIVITY_ID_REGEX,

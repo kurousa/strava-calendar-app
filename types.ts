@@ -88,3 +88,33 @@ interface SearchParams {
     before?: number;
     page?: number;
 }
+
+/**
+ * Strava Webhook イベントの型定義
+ */
+interface StravaWebhookEvent {
+    object_type: 'activity' | 'athlete';
+    object_id: number;
+    aspect_type: 'create' | 'update' | 'delete';
+    updates: {
+        title?: string;
+        type?: string;
+        private?: 'true' | 'false';
+        authorized?: 'false';
+    };
+    owner_id: number;
+    subscription_id: number;
+    event_time: number;
+}
+
+/**
+ * Strava Webhook 購読情報の型定義
+ */
+interface StravaWebhookSubscription {
+    id: number;
+    resource_state: number;
+    application_id: number;
+    callback_url: string;
+    created_at: string;
+    updated_at: string;
+}

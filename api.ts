@@ -124,6 +124,150 @@ function getStravaAthleteProfile(): StravaAthlete | null {
         return null;
     }
 }
+
+/**
+ * Stravaから特定のアクティビティ詳細を取得する
+ */
+function getStravaActivity(id: number): StravaActivity | null {
+    const service = getOAuthService();
+    if (!service.hasAccess()) {
+        const errorMsg = '認証エラー: アクティビティを取得できません。';
+        Logger.log('エラー: ' + errorMsg);
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        return null;
+    }
+
+    const url = `${API_BASE}/activities/${id}`;
+
+    try {
+        const response = UrlFetchApp.fetch(url, {
+            headers: {
+                Authorization: 'Bearer ' + service.getAccessToken()
+            },
+            muteHttpExceptions: true
+        });
+
+        if (response.getResponseCode() !== 200) {
+            Logger.log(`[API Error] Status Code: ${response.getResponseCode()}`);
+            return null;
+        }
+
+        return JSON.parse(response.getContentText());
+
+    } catch (e) {
+        const errorMsg = `Strava API (Activity ID: ${id}) の呼び出しに失敗しました: ` + (e as Error).toString();
+        Logger.log('エラー: ' + errorMsg);
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        return null;
+    }
+}
+
+/**
+ * Strava Webhook サブスクリプションを作成する
+ */
+function createStravaWebhookSubscription(callbackUrl: string, verifyToken: string): StravaWebhookSubscription | null {
+    const url = `${API_BASE}/push_subscriptions`;
+    const scriptProps = PropertiesService.getScriptProperties();
+    const clientId = scriptProps.getProperty('STRAVA_CLIENT_ID');
+    const clientSecret = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+
+    if (!clientId || !clientSecret) {
+        Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
+        return null;
+    }
+
+    const payload = {
+        client_id: clientId,
+        client_secret: clientSecret,
+        callback_url: callbackUrl,
+        verify_token: verifyToken
+    };
+
+    try {
+        const response = UrlFetchApp.fetch(url, {
+            method: 'post',
+            payload: payload,
+            muteHttpExceptions: true
+        });
+
+        if (response.getResponseCode() !== 201 && response.getResponseCode() !== 200) {
+            Logger.log(`[API Error] Webhook作成失敗 Status: ${response.getResponseCode()}, Body: ${response.getContentText()}`);
+            return null;
+        }
+
+        return JSON.parse(response.getContentText());
+    } catch (e) {
+        Logger.log('Webhook作成中にエラーが発生しました: ' + (e as Error).toString());
+        return null;
+    }
+}
+
+/**
+ * Strava Webhook サブスクリプション一覧を取得する
+ */
+function viewStravaWebhookSubscriptions(): StravaWebhookSubscription[] {
+    const scriptProps = PropertiesService.getScriptProperties();
+    const clientId = scriptProps.getProperty('STRAVA_CLIENT_ID');
+    const clientSecret = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+
+    if (!clientId || !clientSecret) {
+        Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
+        return [];
+    }
+
+    const url = `${API_BASE}/push_subscriptions?client_id=${clientId}&client_secret=${clientSecret}`;
+
+    try {
+        const response = UrlFetchApp.fetch(url, {
+            method: 'get',
+            muteHttpExceptions: true
+        });
+
+        if (response.getResponseCode() !== 200) {
+            Logger.log(`[API Error] Webhook取得失敗 Status: ${response.getResponseCode()}`);
+            return [];
+        }
+
+        return JSON.parse(response.getContentText());
+    } catch (e) {
+        Logger.log('Webhook取得中にエラーが発生しました: ' + (e as Error).toString());
+        return [];
+    }
+}
+
+/**
+ * Strava Webhook サブスクリプションを削除する
+ */
+function deleteStravaWebhookSubscription(id: number): boolean {
+    const scriptProps = PropertiesService.getScriptProperties();
+    const clientId = scriptProps.getProperty('STRAVA_CLIENT_ID');
+    const clientSecret = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+
+    if (!clientId || !clientSecret) {
+        Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
+        return false;
+    }
+
+    const url = `${API_BASE}/push_subscriptions/${id}?client_id=${clientId}&client_secret=${clientSecret}`;
+
+    try {
+        const response = UrlFetchApp.fetch(url, {
+            method: 'delete',
+            muteHttpExceptions: true
+        });
+
+        if (response.getResponseCode() !== 204) {
+            Logger.log(`[API Error] Webhook削除失敗 Status: ${response.getResponseCode()}`);
+            return false;
+        }
+
+        return true;
+    } catch (e) {
+        Logger.log('Webhook削除中にエラーが発生しました: ' + (e as Error).toString());
+        return false;
+    }
+}
+
 /**
  * アクティビティ取得のための検索パラメータを組み立てる
  */
@@ -161,6 +305,10 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         getStravaActivities,
         getStravaAthleteProfile,
+        getStravaActivity,
+        createStravaWebhookSubscription,
+        viewStravaWebhookSubscriptions,
+        deleteStravaWebhookSubscription,
         getSearchParam,
         convertToTime,
     };
