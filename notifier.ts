@@ -80,7 +80,7 @@ function sendGearAlert(gearName: string, currentDistanceKm: number, thresholdKm:
     try {
         const response = UrlFetchApp.fetch(DISCORD_WEBHOOK_URL_CACHE, options);
         if (response.getResponseCode() !== 200 && response.getResponseCode() !== 204) {
-            Logger.log(`[Gear Alert Notification Error] ${response.getContentText()}`);
+            Logger.log("[Gear Alert Notification Error] Status: " + response.getResponseCode());
         } else {
             Logger.log('機材アラートをDiscordに通知しました。');
         }
