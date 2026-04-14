@@ -188,13 +188,9 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 // Mock for getExistingActivityIds in tests
 global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
 
-// Globalize STRAVA_ACTIVITY_ID_REGEX for tests
-import * as NotifierModule from './notifier.ts';
 // Globalize constants for tests
-import * as ConstModule from './const.ts';
-Object.keys(ConstModule).forEach(key => {
-    (global as any)[key] = (ConstModule as any)[key];
-});
+import * as NotifierModule from './notifier.ts';
+import './const.ts';
 
 // Globalize main functions for tests
 import * as MainModule from './main.ts';
