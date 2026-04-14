@@ -49,6 +49,8 @@ function makeDefaultDescription(activity: StravaActivity): string {
     // ルートマップ (取得できていれば追加)
     if (activity.mapUrl) {
         descriptionLines.push(`ルート地図: ${activity.mapUrl}`);
+    }
+
     // AIコメント (取得できていれば追加)
     if (activity.aiComment) {
         descriptionLines.push('');
