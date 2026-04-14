@@ -134,6 +134,11 @@ global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
 // Globalize STRAVA_ACTIVITY_ID_REGEX for tests
 import * as NotifierModule from './notifier.ts';
 vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
+vi.stubGlobal('sendDiscordMessage', (NotifierModule as any).sendDiscordMessage || vi.fn());
+
+// Globalize SummaryFormatter functions
+import * as SummaryFormatter from './formatters/SummaryFormatter.ts';
+vi.stubGlobal('formatSummaryReport', (SummaryFormatter as any).formatSummaryReport || vi.fn());
 
 // Globalize STRAVA_ACTIVITY_ID_REGEX for tests
 import * as MainModule from './main.ts';

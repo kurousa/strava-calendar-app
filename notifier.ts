@@ -6,9 +6,9 @@
 let DISCORD_WEBHOOK_URL_CACHE: string | null = null;
 
 /**
- * 同期結果を外部サービスへ通知する
+ * Discordにメッセージを送信する
  */
-function sendSyncNotification(successCount: number, skipCount: number, isManual: boolean = false): void {
+function sendDiscordMessage(message: string): void {
     if (DISCORD_WEBHOOK_URL_CACHE === null) {
         DISCORD_WEBHOOK_URL_CACHE = PropertiesService.getScriptProperties().getProperty('DISCORD_WEBHOOK_URL') || '';
     }
@@ -17,14 +17,6 @@ function sendSyncNotification(successCount: number, skipCount: number, isManual:
         Logger.log('DISCORD_WEBHOOK_URL が設定されていないため、通知をスキップします。');
         return;
     }
-
-    // 処理件数が0件の場合は通知しない（不要であればコメントアウトしてください）
-    if (successCount === 0 && skipCount === 0) {
-        return;
-    }
-
-    const modeText = isManual ? "手動インポート" : "定期同期";
-    const message = `✅ **Strava カレンダー${modeText}完了**\n新規登録: ${successCount}件 / スキップ: ${skipCount}件`;
 
     const payload = {
         content: message
@@ -50,9 +42,25 @@ function sendSyncNotification(successCount: number, skipCount: number, isManual:
     }
 }
 
+/**
+ * 同期結果を外部サービスへ通知する
+ */
+function sendSyncNotification(successCount: number, skipCount: number, isManual: boolean = false): void {
+    // 処理件数が0件の場合は通知しない
+    if (successCount === 0 && skipCount === 0) {
+        return;
+    }
+
+    const modeText = isManual ? "手動インポート" : "定期同期";
+    const message = `✅ **Strava カレンダー${modeText}完了**\n新規登録: ${successCount}件 / スキップ: ${skipCount}件`;
+
+    sendDiscordMessage(message);
+}
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        sendDiscordMessage,
         sendSyncNotification,
         get DISCORD_WEBHOOK_URL_CACHE() { return DISCORD_WEBHOOK_URL_CACHE; },
         set DISCORD_WEBHOOK_URL_CACHE(val) { DISCORD_WEBHOOK_URL_CACHE = val; },

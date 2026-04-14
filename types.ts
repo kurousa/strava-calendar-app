@@ -23,6 +23,7 @@ interface StravaActivity {
     has_heartrate?: boolean;
     average_watts?: number;
     average_cadence?: number;
+    calories?: number;               // 追加: 消費カロリー
     start_latlng?: [number, number]; // 追加: 開始地点の緯度経度 [lat, lng]
     weatherText?: string;            // 追加: アプリ内で動的に付与する天気テキスト
     [key: string]: unknown;
@@ -87,4 +88,25 @@ interface SearchParams {
     after?: number;
     before?: number;
     page?: number;
+}
+
+/**
+ * サマリーレポート用のデータ型定義
+ */
+interface SummaryData {
+    totalDistance: number;
+    totalMovingTime: number;
+    totalElevationGain: number;
+    totalCalories: number;
+    activityCount: number;
+    longestActivity: StravaActivity | null;
+    typeStats: Record<string, ActivityTypeStats>;
+    startDate: Date;
+    endDate: Date;
+}
+
+interface ActivityTypeStats {
+    count: number;
+    distance: number;
+    movingTime: number;
 }
