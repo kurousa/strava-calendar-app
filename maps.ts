@@ -39,7 +39,7 @@ function saveMapToDrive(activity: StravaActivity): GoogleAppsScript.Drive.File |
         const file = folder.createFile(blob);
         file.setName(fileName);
         // カレンダーから参照できるように閲覧権限を設定
-        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.EDIT);
 
         return file;
     } catch (e) {
