@@ -19,12 +19,22 @@ function checkGearAlerts(): void {
 
     const gears = [...profile.bikes, ...profile.shoes];
     const props = PropertiesService.getScriptProperties();
+    // ⚡ Bolt Optimization: Fetch all properties once to avoid multiple API calls in the loop
+    const allProps = props.getProperties();
 
     gears.forEach(gear => {
-        const configStr = props.getProperty(GEAR_CONFIG_PREFIX + gear.id);
+        const configStr = allProps[GEAR_CONFIG_PREFIX + gear.id];
         if (!configStr) return;
 
-        const config: GearConfig = JSON.parse(configStr);
+        let config: GearConfig;
+        try {
+            config = JSON.parse(configStr);
+        } catch (e) {
+            // 🔒 Security: Do not log the raw error or config string to prevent PII/internal detail leakage
+            Logger.log(`[Gear Alert Error] Failed to parse configuration for gear ID: ${gear.id}`);
+            return;
+        }
+
         const currentKm = gear.distance / 1000;
 
         let shouldAlert = false;
@@ -41,7 +51,8 @@ function checkGearAlerts(): void {
         }
 
         if (shouldAlert) {
-            Logger.log("[Gear Alert] ID: " + gear.id + " (" + currentKm.toFixed(1) + "km / Threshold: " + config.thresholdKm + "km)");
+            // 🔒 Security: Only log gear ID and numeric data, avoid gear names in debug logs
+            Logger.log(`[Gear Alert] Gear ID: ${gear.id} reached ${currentKm.toFixed(1)}km (Threshold: ${config.thresholdKm}km)`);
             if (typeof sendGearAlert === 'function') {
                 sendGearAlert(gear.name, currentKm, config.thresholdKm, config.isPeriodic);
             }
@@ -66,6 +77,7 @@ function listGears(): void {
     Logger.log('--- 登録されている機材一覧 ---');
     [...profile.bikes, ...profile.shoes].forEach(gear => {
         const type = profile.bikes.includes(gear) ? 'Bike' : 'Shoes';
+        // listGearsは管理者が意図的に呼び出すユーティリティのため、名前を含めて出力します
         Logger.log(`[${type}] 名前: ${gear.name}, ID: ${gear.id}, 距離: ${(gear.distance / 1000).toFixed(1)}km`);
     });
 }
@@ -82,8 +94,12 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
 
     let lastAlertedKm = 0;
     if (currentConfigStr) {
-        const currentConfig: GearConfig = JSON.parse(currentConfigStr);
-        lastAlertedKm = currentConfig.lastAlertedKm;
+        try {
+            const currentConfig: GearConfig = JSON.parse(currentConfigStr);
+            lastAlertedKm = currentConfig.lastAlertedKm;
+        } catch (e) {
+            Logger.log(`[Gear Alert Error] Existing configuration for gear ID: ${gearId} was corrupted. resetting lastAlertedKm to 0.`);
+        }
     }
 
     const config: GearConfig = {

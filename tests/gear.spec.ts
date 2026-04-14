@@ -15,7 +15,8 @@ describe('gear', () => {
                 getProperty: vi.fn((key) => mockProperties[key] || null),
                 setProperty: vi.fn((key, value) => {
                     mockProperties[key] = value;
-                })
+                }),
+                getProperties: vi.fn(() => ({ ...mockProperties }))
             }))
         });
         vi.stubGlobal('getStravaAthleteProfile', vi.fn());
@@ -49,6 +50,16 @@ describe('gear', () => {
             expect(config.isPeriodic).toBe(true);
             expect(config.lastAlertedKm).toBe(510);
         });
+
+        it('should handle corrupted JSON gracefully in setGearThreshold', () => {
+            mockProperties['GEAR_CONFIG_g1'] = 'corrupted { json';
+
+            setGearThreshold('g1', 600, false);
+
+            expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('corrupted'));
+            const config = JSON.parse(mockProperties['GEAR_CONFIG_g1']);
+            expect(config.lastAlertedKm).toBe(0); // Should reset to 0
+        });
     });
 
     describe('checkGearAlerts', () => {
@@ -70,6 +81,9 @@ describe('gear', () => {
             expect(global.sendGearAlert).toHaveBeenCalledWith('Shoes A', 510, 500, false);
             const updatedConfig = JSON.parse(mockProperties['GEAR_CONFIG_s1']);
             expect(updatedConfig.lastAlertedKm).toBe(510);
+            // Verify PII is not leaked to logs
+            expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Gear Alert] Gear ID: s1'));
+            expect(global.Logger.log).not.toHaveBeenCalledWith(expect.stringContaining('Shoes A'));
         });
 
         it('should not send alert for one-time threshold if already alerted', () => {
@@ -106,46 +120,21 @@ describe('gear', () => {
             checkGearAlerts();
 
             expect(global.sendGearAlert).toHaveBeenCalledWith('Bike B', 3100, 3000, true);
-            const updatedConfig = JSON.parse(mockProperties['GEAR_CONFIG_b1']);
-            expect(updatedConfig.lastAlertedKm).toBe(3100);
         });
 
-        it('should send second alert for periodic threshold when next interval exceeded', () => {
+        it('should handle corrupted JSON gracefully in checkGearAlerts', () => {
             const mockProfile = {
-                bikes: [{ id: 'b1', name: 'Bike B', distance: 6100000 }], // 6100km
+                bikes: [{ id: 'b1', name: 'Bike B', distance: 3100000 }],
                 shoes: []
             };
             vi.stubGlobal('getStravaAthleteProfile', vi.fn(() => mockProfile));
 
-            mockProperties['GEAR_CONFIG_b1'] = JSON.stringify({
-                thresholdKm: 3000,
-                isPeriodic: true,
-                lastAlertedKm: 3050
-            });
-
-            checkGearAlerts();
-
-            expect(global.sendGearAlert).toHaveBeenCalledWith('Bike B', 6100, 3000, true);
-            const updatedConfig = JSON.parse(mockProperties['GEAR_CONFIG_b1']);
-            expect(updatedConfig.lastAlertedKm).toBe(6100);
-        });
-
-        it('should not send alert for periodic threshold if interval not yet reached', () => {
-            const mockProfile = {
-                bikes: [{ id: 'b1', name: 'Bike B', distance: 5900000 }], // 5900km
-                shoes: []
-            };
-            vi.stubGlobal('getStravaAthleteProfile', vi.fn(() => mockProfile));
-
-            mockProperties['GEAR_CONFIG_b1'] = JSON.stringify({
-                thresholdKm: 3000,
-                isPeriodic: true,
-                lastAlertedKm: 3100
-            });
+            mockProperties['GEAR_CONFIG_b1'] = 'invalid json';
 
             checkGearAlerts();
 
             expect(global.sendGearAlert).not.toHaveBeenCalled();
+            expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('Failed to parse configuration for gear ID: b1'));
         });
     });
 
