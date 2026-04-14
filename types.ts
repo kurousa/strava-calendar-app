@@ -24,6 +24,10 @@ interface StravaActivity {
     average_watts?: number;
     average_cadence?: number;
     start_latlng?: [number, number]; // 追加: 開始地点の緯度経度 [lat, lng]
+    map?: {
+        summary_polyline: string;
+    };                               // 追加: ルートのポリラインデータ
+    mapUrl?: string;                 // 追加: 生成されたマップ画像のURL
     weatherText?: string;            // 追加: アプリ内で動的に付与する天気テキスト
     [key: string]: unknown;
 }
@@ -69,6 +73,7 @@ interface CommonMetrics {
     elevation: number;
     hr: string;
     weather?: string; // 追加
+    mapUrl?: string;  // 追加
 }
 
 /**

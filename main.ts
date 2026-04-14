@@ -174,6 +174,16 @@ function processActivityToCalendar(
         `[${emoji} ${type}] ${activity.name} - ${distanceKm}km` :
         `[${emoji} ${type}] ${activity.name}`;
 
+    // 【追加】ルートマップの生成と保存
+    if (activity.map && activity.map.summary_polyline) {
+        if (typeof saveMapToDrive === 'function') {
+            const mapFile = saveMapToDrive(activity);
+            if (mapFile) {
+                activity.mapUrl = mapFile.getUrl();
+            }
+        }
+    }
+
     // カレンダーに登録する詳細メモ
     const description = makeDescription(activity);
 
@@ -186,6 +196,17 @@ function processActivityToCalendar(
     const event = calendar.createEvent(title, startTime, endTime, {
         description: description
     });
+
+    // 【追加】マップ画像をカレンダーに添付する
+    if (activity.mapUrl && typeof saveMapToDrive === 'function') {
+        const fileName = `strava_map_${activity.id}.png`;
+        const folder = getOrCreateMapFolder();
+        const files = folder.getFilesByName(fileName);
+        if (files.hasNext()) {
+            event.addAttachment(files.next());
+        }
+    }
+
     // イベントに色を設定する
     if (style.color) {
         event.setColor(style.color);
