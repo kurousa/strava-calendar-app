@@ -237,6 +237,10 @@ function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Cont
  */
 function doPost(e: any): GoogleAppsScript.Content.TextOutput {
     try {
+        if (!e.postData || !e.postData.contents) {
+            return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'No post data' }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
         const event: StravaWebhookEvent = JSON.parse(e.postData.contents);
         Logger.log(`[Webhook] Received event: ${event.aspect_type} for ${event.object_type} (ID: ${event.object_id})`);
 
