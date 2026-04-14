@@ -94,6 +94,11 @@ function main(): void {
     if (typeof sendSyncNotification === 'function') {
         sendSyncNotification(successCount, skipCount, false);
     }
+
+    // 機材アラートのチェック
+    if (typeof checkGearAlerts === 'function') {
+        checkGearAlerts();
+    }
 }
 
 /**
