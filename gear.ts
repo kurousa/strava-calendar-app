@@ -41,7 +41,7 @@ function checkGearAlerts(): void {
         }
 
         if (shouldAlert) {
-            Logger.log(`[Gear Alert] ${gear.name} (${currentKm.toFixed(1)}km / Threshold: ${config.thresholdKm}km)`);
+            Logger.log("[Gear Alert] ID: " + gear.id + " (" + currentKm.toFixed(1) + "km / Threshold: " + config.thresholdKm + "km)");
             if (typeof sendGearAlert === 'function') {
                 sendGearAlert(gear.name, currentKm, config.thresholdKm, config.isPeriodic);
             }
