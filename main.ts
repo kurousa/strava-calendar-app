@@ -323,7 +323,7 @@ function manageStravaWebhooks(): void {
         return;
     }
 
-    subscriptions.forEach(sub => {
+    subscriptions.forEach((sub: StravaWebhookSubscription) => {
         Logger.log(`ID: ${sub.id}, Callback: ${sub.callback_url}, Created: ${sub.created_at}`);
     });
 }
@@ -335,7 +335,7 @@ function unregisterStravaWebhook(): void {
         return;
     }
 
-    subscriptions.forEach(sub => {
+    subscriptions.forEach((sub: StravaWebhookSubscription) => {
         const success = (global as any).deleteStravaWebhookSubscription(sub.id);
         if (success) {
             Logger.log(`Webhook (ID: ${sub.id}) を削除しました。`);
