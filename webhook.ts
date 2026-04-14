@@ -28,16 +28,16 @@ function handleStravaWebhook(event: StravaWebhookEvent): void {
  */
 function registerStravaWebhook(): void {
     const scriptProps = PropertiesService.getScriptProperties();
-    const webAppUrl = scriptProps.getProperty(PROP_WEB_APP_URL);
-    const verifyToken = scriptProps.getProperty(PROP_STRAVA_VERIFY_TOKEN);
+    const webAppUrl = scriptProps.getProperty(Config.PROP_WEB_APP_URL);
+    const verifyToken = scriptProps.getProperty(Config.PROP_STRAVA_VERIFY_TOKEN);
 
     if (!verifyToken) {
-        Logger.log(`エラー: ${PROP_STRAVA_VERIFY_TOKEN} が設定されていません。`);
+        Logger.log(`エラー: ${Config.PROP_STRAVA_VERIFY_TOKEN} が設定されていません。`);
         return;
     }
 
     if (!webAppUrl) {
-        Logger.log(`エラー: ${PROP_WEB_APP_URL} が設定されていません。WebアプリとしてデプロイしたURLを設定してください。`);
+        Logger.log(`エラー: ${Config.PROP_WEB_APP_URL} が設定されていません。WebアプリとしてデプロイしたURLを設定してください。`);
         return;
     }
 

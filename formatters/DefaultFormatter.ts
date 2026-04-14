@@ -87,7 +87,7 @@ let DEFAULT_ACTIVITY_STYLE_CACHE: Readonly<ActivityStyle> | null = null;
 
 function initStyles(): void {
     const styles: Record<string, ActivityStyle> = {};
-    for (const [key, value] of Object.entries(ACTIVITY_STYLE_DATA)) {
+    for (const [key, value] of Object.entries(Config.ACTIVITY_STYLE_DATA)) {
         styles[key] = {
             emoji: value.emoji,
             color: (CalendarApp.EventColor as any)[value.colorName]
@@ -96,8 +96,8 @@ function initStyles(): void {
     ACTIVITY_STYLES_CACHE = deepFreeze(styles);
 
     DEFAULT_ACTIVITY_STYLE_CACHE = Object.freeze({
-        emoji: DEFAULT_ACTIVITY_STYLE_DATA.emoji,
-        color: (CalendarApp.EventColor as any)[DEFAULT_ACTIVITY_STYLE_DATA.colorName]
+        emoji: Config.DEFAULT_ACTIVITY_STYLE_DATA.emoji,
+        color: (CalendarApp.EventColor as any)[Config.DEFAULT_ACTIVITY_STYLE_DATA.colorName]
     });
 }
 

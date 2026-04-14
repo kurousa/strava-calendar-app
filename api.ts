@@ -33,7 +33,7 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
             .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(String(currentParams[key])))
             .join('&');
 
-        const url = `${STRAVA_API_BASE}/athlete/activities?${queryString}`;
+        const url = `${Config.STRAVA_API_BASE}/athlete/activities?${queryString}`;
         Logger.log(`[API Request] URL: ${url}`);
 
         try {
@@ -69,7 +69,7 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
             page++;
 
             // Strava APIのレート制限（連続アクセス制限）対策
-            Utilities.sleep(STRAVA_API_DELAY_MS);
+            Utilities.sleep(Config.STRAVA_API_DELAY_MS);
 
         } catch (e) {
             const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + (e as Error).toString();
@@ -95,7 +95,7 @@ function getStravaAthleteProfile(): StravaAthlete | null {
         return null;
     }
 
-    const url = `${STRAVA_API_BASE}/athlete`;
+    const url = `${Config.STRAVA_API_BASE}/athlete`;
 
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -134,7 +134,7 @@ function getStravaActivity(id: number): StravaActivity | null {
         return null;
     }
 
-    const url = `${STRAVA_API_BASE}/activities/${id}`;
+    const url = `${Config.STRAVA_API_BASE}/activities/${id}`;
 
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -163,13 +163,13 @@ function getStravaActivity(id: number): StravaActivity | null {
  * Strava Webhook サブスクリプションを作成する
  */
 function createStravaWebhookSubscription(callbackUrl: string, verifyToken: string): StravaWebhookSubscription | null {
-    const url = `${STRAVA_API_BASE}/push_subscriptions`;
+    const url = `${Config.STRAVA_API_BASE}/push_subscriptions`;
     const scriptProps = PropertiesService.getScriptProperties();
-    const clientId = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
-    const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
+    const clientId = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_ID);
+    const clientSecret = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
-        Logger.log("エラー: " + PROP_STRAVA_CLIENT_ID + " または " + PROP_STRAVA_CLIENT_SECRET + " が設定されていません。");
+        Logger.log("エラー: " + Config.PROP_STRAVA_CLIENT_ID + " または " + Config.PROP_STRAVA_CLIENT_SECRET + " が設定されていません。");
         return null;
     }
 
@@ -204,15 +204,15 @@ function createStravaWebhookSubscription(callbackUrl: string, verifyToken: strin
  */
 function viewStravaWebhookSubscriptions(): StravaWebhookSubscription[] {
     const scriptProps = PropertiesService.getScriptProperties();
-    const clientId = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
-    const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
+    const clientId = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_ID);
+    const clientSecret = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
-        Logger.log(`エラー: ${PROP_STRAVA_CLIENT_ID} または ${PROP_STRAVA_CLIENT_SECRET} が設定されていません。`);
+        Logger.log(`エラー: ${Config.PROP_STRAVA_CLIENT_ID} または ${Config.PROP_STRAVA_CLIENT_SECRET} が設定されていません。`);
         return [];
     }
 
-    const url = `${STRAVA_API_BASE}/push_subscriptions?client_id=${clientId}&client_secret=${clientSecret}`;
+    const url = `${Config.STRAVA_API_BASE}/push_subscriptions?client_id=${clientId}&client_secret=${clientSecret}`;
 
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -237,15 +237,15 @@ function viewStravaWebhookSubscriptions(): StravaWebhookSubscription[] {
  */
 function deleteStravaWebhookSubscription(id: number): boolean {
     const scriptProps = PropertiesService.getScriptProperties();
-    const clientId = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
-    const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
+    const clientId = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_ID);
+    const clientSecret = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
-        Logger.log(`エラー: ${PROP_STRAVA_CLIENT_ID} または ${PROP_STRAVA_CLIENT_SECRET} が設定されていません。`);
+        Logger.log(`エラー: ${Config.PROP_STRAVA_CLIENT_ID} または ${Config.PROP_STRAVA_CLIENT_SECRET} が設定されていません。`);
         return false;
     }
 
-    const url = `${STRAVA_API_BASE}/push_subscriptions/${id}?client_id=${clientId}&client_secret=${clientSecret}`;
+    const url = `${Config.STRAVA_API_BASE}/push_subscriptions/${id}?client_id=${clientId}&client_secret=${clientSecret}`;
 
     try {
         const response = UrlFetchApp.fetch(url, {

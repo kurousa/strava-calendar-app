@@ -4,8 +4,6 @@
 // カレンダーへの書き込みといった「このアプリのメインのお仕事」だけを残します。
 // ==========================================
 
-const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty(PROP_CALENDAR_ID);
-
 /**
  * Retrieves a set of Strava activity IDs that are already present in the given calendar
  * within the specified date range.
@@ -16,7 +14,7 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
     existingEvents.forEach(event => {
         const desc = event.getDescription();
         if (desc) {
-            const match = desc.match(STRAVA_ACTIVITY_ID_REGEX);
+            const match = desc.match(Config.STRAVA_ACTIVITY_ID_REGEX);
             if (match && match[1]) {
                 existingActivityIds.add(match[1]);
             }
@@ -100,7 +98,7 @@ function sendErrorEmail(message: string): void {
     }
 
     const props = PropertiesService.getUserProperties();
-    const lastNotified = props.getProperty(PROP_LAST_ERROR_NOTIFIED_AT);
+    const lastNotified = props.getProperty(Config.PROP_LAST_ERROR_NOTIFIED_AT);
     const now = new Date().getTime();
     if (lastNotified && now - parseInt(lastNotified) < 24 * 60 * 60 * 1000) {
         return;
@@ -110,7 +108,7 @@ function sendErrorEmail(message: string): void {
     const body = 'Stravaとの連携でエラーが発生しました。\n\nエラー内容:\n' + message;
 
     MailApp.sendEmail(email, subject, body);
-    props.setProperty(PROP_LAST_ERROR_NOTIFIED_AT, now.toString());
+    props.setProperty(Config.PROP_LAST_ERROR_NOTIFIED_AT, now.toString());
     Logger.log('エラーメールを送信しました: ' + email);
 }
 
@@ -120,7 +118,7 @@ function sendErrorEmail(message: string): void {
 function processActivityToCalendar(
     activity: StravaActivity,
     calendar: GoogleAppsScript.Calendar.Calendar,
-    distanceActivities: Set<string> = DISTANCE_ACTIVITIES,
+    distanceActivities: Set<string> = Config.DISTANCE_ACTIVITIES,
     skipDuplicateCheck: boolean = false
 ): string | undefined {
     // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
@@ -232,7 +230,7 @@ function processActivityToCalendar(
 
     // カレンダーAPIの連続作成制限を回避しつつ、GASの実行時間制限(6分)に配慮
     // 重複スキップ時は待機せず、カレンダーへの新規書き込みが行われた直後のみ短時間待機する
-    Utilities.sleep(CALENDAR_API_DELAY_MS);
+    Utilities.sleep(Config.CALENDAR_API_DELAY_MS);
 
     Logger.log(`カレンダーに登録しました: ID ${activity.id}`);
     return 'success';
@@ -242,8 +240,9 @@ function processActivityToCalendar(
 // カレンダー取得ユーティリティ
 // ==========================================
 function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
-    if (CALENDAR_ID) {
-        const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+    const calendarId = PropertiesService.getScriptProperties().getProperty(Config.PROP_CALENDAR_ID);
+    if (calendarId) {
+        const calendar = CalendarApp.getCalendarById(calendarId);
         if (!calendar) {
             Logger.log('エラー: 指定されたカレンダーが見つかりません。');
         }
