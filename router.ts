@@ -11,9 +11,9 @@
 function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Content.TextOutput {
     // Strava Webhook のバリデーションリクエスト (GET) の場合
     if (e && e.parameter && e.parameter['hub.mode'] === 'subscribe') {
-        const verifyToken = PropertiesService.getScriptProperties().getProperty('STRAVA_WEBHOOK_VERIFY_TOKEN');
+        const verifyToken = PropertiesService.getScriptProperties().getProperty(PROP_STRAVA_VERIFY_TOKEN);
         if (!verifyToken) {
-            Logger.log('エラー: STRAVA_WEBHOOK_VERIFY_TOKEN が設定されていません。');
+            Logger.log(`エラー: ${PROP_STRAVA_VERIFY_TOKEN} が設定されていません。`);
             return HtmlService.createHtmlOutput('Internal Server Error: Missing Verify Token');
         }
 

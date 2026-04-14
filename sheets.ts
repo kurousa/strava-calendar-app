@@ -2,26 +2,25 @@
 // スプレッドシートへのバックアップ処理 (sheets.ts)
 // ==========================================
 
-const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
-const SHEET_NAME = 'Activities'; // バックアップ先のシート名
+const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty(PROP_SPREADSHEET_ID);
 
 /**
  * 成功したアクティビティを一括でスプレッドシートに追記する
  */
 function backupToSpreadsheet(activities: StravaActivity[]): void {
     if (!SPREADSHEET_ID) {
-        Logger.log('SPREADSHEET_ID が設定されていないため、バックアップをスキップします。');
+        Logger.log(`${PROP_SPREADSHEET_ID} が設定されていないため、バックアップをスキップします。`);
         return;
     }
     if (activities.length === 0) return;
 
     try {
         const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-        let sheet = ss.getSheetByName(SHEET_NAME);
+        let sheet = ss.getSheetByName(BACKUP_SHEET_NAME);
         
         // シートが存在しない場合は新規作成し、ヘッダーを設定
         if (!sheet) {
-            sheet = ss.insertSheet(SHEET_NAME);
+            sheet = ss.insertSheet(BACKUP_SHEET_NAME);
             const headers = ['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '体重(kg)', 'URL'];
             sheet.appendRow(headers);
             // ヘッダー行を固定し、太字にする装飾

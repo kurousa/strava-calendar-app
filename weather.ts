@@ -25,7 +25,7 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
     // hourly=temperature_2m,weathercode,windspeed_10m で気温、天気コード、風速を取得
     // timezone=Asia%2FTokyo で東京のタイムゾーンを指定
     // windspeed_unit=kmh で風速をkm/h単位で取得
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo&windspeed_unit=kmh`;
+    const url = `${OPEN_METEO_API_BASE}?latitude=${lat}&longitude=${lng}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo&windspeed_unit=kmh`;
 
     try {
         const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });

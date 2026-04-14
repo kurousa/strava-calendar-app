@@ -86,20 +86,19 @@ let ACTIVITY_STYLES_CACHE: Readonly<Record<string, ActivityStyle>> | null = null
 let DEFAULT_ACTIVITY_STYLE_CACHE: Readonly<ActivityStyle> | null = null;
 
 function initStyles(): void {
-    ACTIVITY_STYLES_CACHE = deepFreeze({
-        'Walk': { emoji: '🚶', color: CalendarApp.EventColor.GREEN },
-        'Run': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
-        'VirtualRun': { emoji: '🏃', color: CalendarApp.EventColor.BLUE },
-        'Ride': { emoji: '🚴', color: CalendarApp.EventColor.RED },
-        'VirtualRide': { emoji: '🚴', color: CalendarApp.EventColor.RED },
-        'Swim': { emoji: '🏊', color: CalendarApp.EventColor.CYAN },
-        'Hike': { emoji: '🥾', color: CalendarApp.EventColor.PALE_GREEN },
-        'Workout': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
-        'WeightTraining': { emoji: '🏋️', color: CalendarApp.EventColor.ORANGE },
-        'Yoga': { emoji: '🧘', color: CalendarApp.EventColor.GREEN },
-    } as Record<string, ActivityStyle>);
+    const styles: Record<string, ActivityStyle> = {};
+    for (const [key, value] of Object.entries(ACTIVITY_STYLE_DATA)) {
+        styles[key] = {
+            emoji: value.emoji,
+            color: (CalendarApp.EventColor as any)[value.colorName]
+        };
+    }
+    ACTIVITY_STYLES_CACHE = deepFreeze(styles);
 
-    DEFAULT_ACTIVITY_STYLE_CACHE = Object.freeze({ emoji: '🏅', color: CalendarApp.EventColor.GRAY });
+    DEFAULT_ACTIVITY_STYLE_CACHE = Object.freeze({
+        emoji: DEFAULT_ACTIVITY_STYLE_DATA.emoji,
+        color: (CalendarApp.EventColor as any)[DEFAULT_ACTIVITY_STYLE_DATA.colorName]
+    });
 }
 
 // ==========================================

@@ -8,7 +8,6 @@ interface GearConfig {
     lastAlertedKm: number;
 }
 
-const GEAR_CONFIG_PREFIX = 'GEAR_CONFIG_';
 
 /**
  * 登録されている機材のアラートをチェックする

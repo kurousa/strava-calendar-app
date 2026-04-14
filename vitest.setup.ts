@@ -188,11 +188,12 @@ global.makeRideDescription = (RideFormatter as any).makeRideDescription;
 // Mock for getExistingActivityIds in tests
 global.getExistingActivityIds = vi.fn().mockReturnValue(new Set());
 
-// Globalize STRAVA_ACTIVITY_ID_REGEX for tests
+// Globalize constants for tests
 import * as NotifierModule from './notifier.ts';
+import './const.ts';
+
 // Globalize main functions for tests
 import * as MainModule from './main.ts';
-global.STRAVA_ACTIVITY_ID_REGEX = (MainModule as any).STRAVA_ACTIVITY_ID_REGEX;
 vi.stubGlobal('getTargetCalendar', (MainModule as any).getTargetCalendar || vi.fn());
 vi.stubGlobal('processActivityToCalendar', (MainModule as any).processActivityToCalendar || vi.fn());
 vi.stubGlobal('getExistingActivityIds', (MainModule as any).getExistingActivityIds || vi.fn(() => new Set()));

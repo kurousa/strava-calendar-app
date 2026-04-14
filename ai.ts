@@ -12,12 +12,12 @@ let cachedAiApiKey: string | null = null;
  */
 function generateAiComment(activity: StravaActivity): string {
     if (cachedAiApiKey === null) {
-        cachedAiApiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || '';
+        cachedAiApiKey = PropertiesService.getScriptProperties().getProperty(PROP_GEMINI_API_KEY) || '';
     }
     const apiKey = cachedAiApiKey;
 
     if (!apiKey) {
-        Logger.log('GEMINI_API_KEY が設定されていないため、AIコメント生成をスキップします。');
+        Logger.log(`${PROP_GEMINI_API_KEY} が設定されていないため、AIコメント生成をスキップします。`);
         return '';
     }
 
@@ -42,7 +42,7 @@ function generateAiComment(activity: StravaActivity): string {
 - 余計な挨拶や解説は省き、コメント本体のみを出力してください。
 `.trim();
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `${GEMINI_API_BASE}?key=${apiKey}`;
 
     const payload = {
         contents: [{
