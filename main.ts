@@ -4,20 +4,7 @@
 // カレンダーへの書き込みといった「このアプリのメインのお仕事」だけを残します。
 // ==========================================
 
-const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty('CALENDAR_ID');
-// カレンダーAPIの連続作成制限を回避するための待機時間 (ms)
-const CALENDAR_API_DELAY_MS = 200;
-
-// Regex to extract Strava activity IDs from calendar event descriptions
-const STRAVA_ACTIVITY_ID_REGEX = /strava\.com\/activities\/(\d+)/i;
-
-// 距離を表示するアクティビティのリスト
-const DISTANCE_ACTIVITIES = new Set([
-    'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
-    'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
-    'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
-    'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
-]);
+const CALENDAR_ID = PropertiesService.getScriptProperties().getProperty(PROP_CALENDAR_ID);
 
 /**
  * Retrieves a set of Strava activity IDs that are already present in the given calendar
@@ -113,7 +100,7 @@ function sendErrorEmail(message: string): void {
     }
 
     const props = PropertiesService.getUserProperties();
-    const lastNotified = props.getProperty('LAST_ERROR_NOTIFIED_AT');
+    const lastNotified = props.getProperty(PROP_LAST_ERROR_NOTIFIED_AT);
     const now = new Date().getTime();
     if (lastNotified && now - parseInt(lastNotified) < 24 * 60 * 60 * 1000) {
         return;
@@ -123,7 +110,7 @@ function sendErrorEmail(message: string): void {
     const body = 'Stravaとの連携でエラーが発生しました。\n\nエラー内容:\n' + message;
 
     MailApp.sendEmail(email, subject, body);
-    props.setProperty('LAST_ERROR_NOTIFIED_AT', now.toString());
+    props.setProperty(PROP_LAST_ERROR_NOTIFIED_AT, now.toString());
     Logger.log('エラーメールを送信しました: ' + email);
 }
 

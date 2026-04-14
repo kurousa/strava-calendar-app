@@ -10,11 +10,11 @@ let DISCORD_WEBHOOK_URL_CACHE: string | null = null;
  */
 function sendSyncNotification(successCount: number, skipCount: number, isManual: boolean = false): void {
     if (DISCORD_WEBHOOK_URL_CACHE === null) {
-        DISCORD_WEBHOOK_URL_CACHE = PropertiesService.getScriptProperties().getProperty('DISCORD_WEBHOOK_URL') || '';
+        DISCORD_WEBHOOK_URL_CACHE = PropertiesService.getScriptProperties().getProperty(PROP_DISCORD_WEBHOOK_URL) || '';
     }
 
     if (!DISCORD_WEBHOOK_URL_CACHE) {
-        Logger.log('DISCORD_WEBHOOK_URL が設定されていないため、通知をスキップします。');
+        Logger.log(`${PROP_DISCORD_WEBHOOK_URL} が設定されていないため、通知をスキップします。`);
         return;
     }
 
@@ -55,11 +55,11 @@ function sendSyncNotification(successCount: number, skipCount: number, isManual:
  */
 function sendGearAlert(gearName: string, currentDistanceKm: number, thresholdKm: number, isPeriodic: boolean): void {
     if (DISCORD_WEBHOOK_URL_CACHE === null) {
-        DISCORD_WEBHOOK_URL_CACHE = PropertiesService.getScriptProperties().getProperty('DISCORD_WEBHOOK_URL') || '';
+        DISCORD_WEBHOOK_URL_CACHE = PropertiesService.getScriptProperties().getProperty(PROP_DISCORD_WEBHOOK_URL) || '';
     }
 
     if (!DISCORD_WEBHOOK_URL_CACHE) {
-        Logger.log('DISCORD_WEBHOOK_URL が設定されていないため、機材アラートをスキップします。');
+        Logger.log(`${PROP_DISCORD_WEBHOOK_URL} が設定されていないため、機材アラートをスキップします。`);
         return;
     }
 

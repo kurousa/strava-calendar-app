@@ -3,9 +3,6 @@
 // Stravaのサーバーとお話をして、データを取ってくる役割だけを持ったファイルです。
 // ==========================================
 
-const API_BASE = "https://www.strava.com/api/v3";
-// Strava APIのレート制限（連続アクセス制限）対策の待機時間 (ms)
-const STRAVA_API_DELAY_MS = 200;
 
 /**
  * Stravaから指定期間のアクティビティを全件取得する（ページネーション対応）
@@ -36,7 +33,7 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
             .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(String(currentParams[key])))
             .join('&');
 
-        const url = `${API_BASE}/athlete/activities?${queryString}`;
+        const url = `${STRAVA_API_BASE}/athlete/activities?${queryString}`;
         Logger.log(`[API Request] URL: ${url}`);
 
         try {
@@ -98,7 +95,7 @@ function getStravaAthleteProfile(): StravaAthlete | null {
         return null;
     }
 
-    const url = `${API_BASE}/athlete`;
+    const url = `${STRAVA_API_BASE}/athlete`;
 
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -137,7 +134,7 @@ function getStravaActivity(id: number): StravaActivity | null {
         return null;
     }
 
-    const url = `${API_BASE}/activities/${id}`;
+    const url = `${STRAVA_API_BASE}/activities/${id}`;
 
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -166,10 +163,10 @@ function getStravaActivity(id: number): StravaActivity | null {
  * Strava Webhook サブスクリプションを作成する
  */
 function createStravaWebhookSubscription(callbackUrl: string, verifyToken: string): StravaWebhookSubscription | null {
-    const url = `${API_BASE}/push_subscriptions`;
+    const url = `${STRAVA_API_BASE}/push_subscriptions`;
     const scriptProps = PropertiesService.getScriptProperties();
-    const clientId = scriptProps.getProperty('STRAVA_CLIENT_ID');
-    const clientSecret = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+    const clientId = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
+    const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
         Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
@@ -207,15 +204,15 @@ function createStravaWebhookSubscription(callbackUrl: string, verifyToken: strin
  */
 function viewStravaWebhookSubscriptions(): StravaWebhookSubscription[] {
     const scriptProps = PropertiesService.getScriptProperties();
-    const clientId = scriptProps.getProperty('STRAVA_CLIENT_ID');
-    const clientSecret = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+    const clientId = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
+    const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
-        Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
+        Logger.log(`エラー: ${PROP_STRAVA_CLIENT_ID} または ${PROP_STRAVA_CLIENT_SECRET} が設定されていません。`);
         return [];
     }
 
-    const url = `${API_BASE}/push_subscriptions?client_id=${clientId}&client_secret=${clientSecret}`;
+    const url = `${STRAVA_API_BASE}/push_subscriptions?client_id=${clientId}&client_secret=${clientSecret}`;
 
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -240,15 +237,15 @@ function viewStravaWebhookSubscriptions(): StravaWebhookSubscription[] {
  */
 function deleteStravaWebhookSubscription(id: number): boolean {
     const scriptProps = PropertiesService.getScriptProperties();
-    const clientId = scriptProps.getProperty('STRAVA_CLIENT_ID');
-    const clientSecret = scriptProps.getProperty('STRAVA_CLIENT_SECRET');
+    const clientId = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
+    const clientSecret = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
 
     if (!clientId || !clientSecret) {
-        Logger.log('エラー: STRAVA_CLIENT_ID または STRAVA_CLIENT_SECRET が設定されていません。');
+        Logger.log(`エラー: ${PROP_STRAVA_CLIENT_ID} または ${PROP_STRAVA_CLIENT_SECRET} が設定されていません。`);
         return false;
     }
 
-    const url = `${API_BASE}/push_subscriptions/${id}?client_id=${clientId}&client_secret=${clientSecret}`;
+    const url = `${STRAVA_API_BASE}/push_subscriptions/${id}?client_id=${clientId}&client_secret=${clientSecret}`;
 
     try {
         const response = UrlFetchApp.fetch(url, {

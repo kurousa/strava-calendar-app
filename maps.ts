@@ -2,12 +2,11 @@
  * マップ画像を保存するフォルダを取得または作成する
  */
 function getOrCreateMapFolder(): GoogleAppsScript.Drive.Folder {
-    const FOLDER_NAME = 'Strava_Route_Maps';
-    const folders = DriveApp.getFoldersByName(FOLDER_NAME);
+    const folders = DriveApp.getFoldersByName(MAP_FOLDER_NAME);
     if (folders.hasNext()) {
         return folders.next();
     }
-    return DriveApp.createFolder(FOLDER_NAME);
+    return DriveApp.createFolder(MAP_FOLDER_NAME);
 }
 
 /**
