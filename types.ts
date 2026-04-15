@@ -30,6 +30,7 @@ interface StravaActivity {
     mapUrl?: string;                 // 追加: 生成されたマップ画像のURL
     weatherText?: string;            // 追加: アプリ内で動的に付与する天気テキスト
     aiComment?: string;              // 追加: AIによる労いのコメント
+    calories?: number;               // 追加: 消費カロリー
     [key: string]: unknown;
 }
 
@@ -124,4 +125,18 @@ interface StravaWebhookSubscription {
     callback_url: string;
     created_at: string;
     updated_at: string;
+}
+
+/**
+ * サマリーデータの型定義
+ */
+interface SummaryData {
+    totalDistanceKm: number;
+    totalMovingTimeMin: number;
+    totalElevationGain: number;
+    totalCalories: number;
+    longestActivity: StravaActivity | null;
+    activityCount: number;
+    startDate: Date;
+    endDate: Date;
 }
