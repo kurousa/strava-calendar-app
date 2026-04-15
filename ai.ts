@@ -12,12 +12,12 @@ let cachedAiApiKey: string | null = null;
  */
 function generateAiComment(activity: StravaActivity): string {
     if (cachedAiApiKey === null) {
-        cachedAiApiKey = PropertiesService.getScriptProperties().getProperty(PROP_GEMINI_API_KEY) || '';
+        cachedAiApiKey = PropertiesService.getScriptProperties().getProperty(Config.PROP_GEMINI_API_KEY) || '';
     }
     const apiKey = cachedAiApiKey;
 
     if (!apiKey) {
-        Logger.log(`${PROP_GEMINI_API_KEY} が設定されていないため、AIコメント生成をスキップします。`);
+        Logger.log(`${Config.PROP_GEMINI_API_KEY} が設定されていないため、AIコメント生成をスキップします。`);
         return '';
     }
 
@@ -42,7 +42,7 @@ function generateAiComment(activity: StravaActivity): string {
 - 余計な挨拶や解説は省き、コメント本体のみを出力してください。
 `.trim();
 
-    const url = `${GEMINI_API_BASE}?key=${apiKey}`;
+    const url = `${Config.GEMINI_API_BASE}?key=${apiKey}`;
 
     const payload = {
         contents: [{

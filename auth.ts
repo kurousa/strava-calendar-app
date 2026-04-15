@@ -6,18 +6,27 @@
 // OAuth2ライブラリはGAS標準型定義に含まれないため、グローバル宣言を追加
 declare const OAuth2: any;
 
-const scriptProps = PropertiesService.getScriptProperties();
-const CLIENT_ID = scriptProps.getProperty(PROP_STRAVA_CLIENT_ID);
-const CLIENT_SECRET = scriptProps.getProperty(PROP_STRAVA_CLIENT_SECRET);
-const STRAVA_SCOPE = scriptProps.getProperty(PROP_STRAVA_SCOPE);
+let cachedStravaClientId: string | null = null;
+let cachedStravaClientSecret: string | null = null;
+let cachedStravaScope: string | null = null;
 
 /**
  * Strava連携のためのOAuth2サービスを取得する
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getOAuthService(): any {
+    if (cachedStravaClientId === null) {
+        const scriptProps = PropertiesService.getScriptProperties();
+        cachedStravaClientId = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_ID) || '';
+        cachedStravaClientSecret = scriptProps.getProperty(Config.PROP_STRAVA_CLIENT_SECRET) || '';
+        cachedStravaScope = scriptProps.getProperty(Config.PROP_STRAVA_SCOPE) || '';
+    }
+    const CLIENT_ID = cachedStravaClientId;
+    const CLIENT_SECRET = cachedStravaClientSecret;
+    const STRAVA_SCOPE = cachedStravaScope;
+
     if (!CLIENT_ID || !CLIENT_SECRET) {
-        throw new Error(`${PROP_STRAVA_CLIENT_ID} または ${PROP_STRAVA_CLIENT_SECRET} がスクリプトプロパティに設定されていません。`);
+        throw new Error(`${Config.PROP_STRAVA_CLIENT_ID} または ${Config.PROP_STRAVA_CLIENT_SECRET} がスクリプトプロパティに設定されていません。`);
     }
     return OAuth2.createService('Strava')
         .setAuthorizationBaseUrl('https://www.strava.com/oauth/authorize')

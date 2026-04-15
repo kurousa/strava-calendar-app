@@ -22,7 +22,7 @@ function checkGearAlerts(): void {
     const allProps = props.getProperties();
 
     gears.forEach(gear => {
-        const configStr = allProps[GEAR_CONFIG_PREFIX + gear.id];
+        const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
         if (!configStr) return;
 
         let config: GearConfig;
@@ -58,7 +58,7 @@ function checkGearAlerts(): void {
 
             // アラート済み距離を更新
             config.lastAlertedKm = currentKm;
-            props.setProperty(GEAR_CONFIG_PREFIX + gear.id, JSON.stringify(config));
+            props.setProperty(Config.GEAR_CONFIG_PREFIX + gear.id, JSON.stringify(config));
         }
     });
 }
@@ -89,7 +89,7 @@ function listGears(): void {
  */
 function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boolean = false): void {
     const props = PropertiesService.getScriptProperties();
-    const currentConfigStr = props.getProperty(GEAR_CONFIG_PREFIX + gearId);
+    const currentConfigStr = props.getProperty(Config.GEAR_CONFIG_PREFIX + gearId);
 
     let lastAlertedKm = 0;
     if (currentConfigStr) {
@@ -107,7 +107,7 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
         lastAlertedKm: lastAlertedKm
     };
 
-    props.setProperty(GEAR_CONFIG_PREFIX + gearId, JSON.stringify(config));
+    props.setProperty(Config.GEAR_CONFIG_PREFIX + gearId, JSON.stringify(config));
     Logger.log(`機材ID: ${gearId} にしきい値 ${thresholdKm}km (${isPeriodic ? '定期' : '1回限り'}) を設定しました。`);
 }
 

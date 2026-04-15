@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { deepFreeze, getCommonMetrics, makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
+import { getCommonMetrics, makeDefaultDescription, getActivityStyle, makeDescription } from '../formatters/DefaultFormatter';
 
 // Mock Google Apps Script global CalendarApp
 global.CalendarApp = {

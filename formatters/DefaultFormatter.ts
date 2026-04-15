@@ -65,19 +65,6 @@ function makeDefaultDescription(activity: StravaActivity): string {
     return descriptionLines.join('\n').trim();
 }
 
-/**
- * Object.freeze をネストされたオブジェクトにも適用するヘルパー関数
- */
-function deepFreeze<T extends Record<string, unknown>>(object: T): Readonly<T> {
-    const propNames = Object.getOwnPropertyNames(object);
-    for (const name of propNames) {
-        const value = object[name];
-        if (value && typeof value === 'object') {
-            deepFreeze(value as Record<string, unknown>);
-        }
-    }
-    return Object.freeze(object);
-}
 
 // アクティビティごとの絵文字と色の定義
 // CalendarApp.EventColor への参照は、Node.js環境での ReferenceError 回避のため
@@ -87,7 +74,7 @@ let DEFAULT_ACTIVITY_STYLE_CACHE: Readonly<ActivityStyle> | null = null;
 
 function initStyles(): void {
     const styles: Record<string, ActivityStyle> = {};
-    for (const [key, value] of Object.entries(ACTIVITY_STYLE_DATA)) {
+    for (const [key, value] of Object.entries(Config.ACTIVITY_STYLE_DATA)) {
         styles[key] = {
             emoji: value.emoji,
             color: (CalendarApp.EventColor as any)[value.colorName]
@@ -96,8 +83,8 @@ function initStyles(): void {
     ACTIVITY_STYLES_CACHE = deepFreeze(styles);
 
     DEFAULT_ACTIVITY_STYLE_CACHE = Object.freeze({
-        emoji: DEFAULT_ACTIVITY_STYLE_DATA.emoji,
-        color: (CalendarApp.EventColor as any)[DEFAULT_ACTIVITY_STYLE_DATA.colorName]
+        emoji: Config.DEFAULT_ACTIVITY_STYLE_DATA.emoji,
+        color: (CalendarApp.EventColor as any)[Config.DEFAULT_ACTIVITY_STYLE_DATA.colorName]
     });
 }
 
@@ -130,7 +117,6 @@ function makeDescription(activity: StravaActivity): string {
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        deepFreeze,
         initStyles,
         get ACTIVITY_STYLES_CACHE() { return ACTIVITY_STYLES_CACHE; },
         get DEFAULT_ACTIVITY_STYLE_CACHE() { return DEFAULT_ACTIVITY_STYLE_CACHE; },
