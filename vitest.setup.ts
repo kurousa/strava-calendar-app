@@ -231,3 +231,14 @@ global.generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ã
 import * as MapsModule from './maps.ts';
 global.saveMapToDrive = (MapsModule as any).saveMapToDrive || vi.fn();
 global.getOrCreateMapFolder = (MapsModule as any).getOrCreateMapFolder || vi.fn();
+
+// Globalize Summary functions
+import * as SummaryFormatterModule from './formatters/SummaryFormatter.ts';
+import * as SummaryModule from './summary.ts';
+import * as NotifierModuleExtension from './notifier.ts';
+
+global.formatSummaryReport = (SummaryFormatterModule as any).formatSummaryReport;
+global.generateSummary = (SummaryModule as any).generateSummary;
+global.sendWeeklySummary = (SummaryModule as any).sendWeeklySummary;
+global.sendMonthlySummary = (SummaryModule as any).sendMonthlySummary;
+global.sendDiscordMessage = (NotifierModuleExtension as any).sendDiscordMessage;
