@@ -18,6 +18,9 @@ function deepFreeze<T extends Record<string, any>>(object: T): Readonly<T> {
     return Object.freeze(object);
 }
 
+const _GEMINI_VERSION = '2.5';
+const _GEMINI_MODEL = 'flash-lite';
+
 // 1つの var オブジェクトとして定義する（GASのグローバルスコープ共有のため）
 var Config = {
     // プロパティキー
@@ -35,7 +38,7 @@ var Config = {
     // API エンドポイント
     STRAVA_API_BASE: 'https://www.strava.com/api/v3',
     OPEN_METEO_API_BASE: 'https://api.open-meteo.com/v1/forecast',
-    GEMINI_API_BASE: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+    GEMINI_API_BASE: `https://generativelanguage.googleapis.com/v1beta/models/gemini-${_GEMINI_VERSION}-${_GEMINI_MODEL}:generateContent`,
 
     // 設定定数
     CALENDAR_API_DELAY_MS: 200,
