@@ -118,9 +118,10 @@ function sendErrorEmail(message: string): void {
 function processActivityToCalendar(
     activity: StravaActivity,
     calendar: GoogleAppsScript.Calendar.Calendar,
-    distanceActivities: Set<string> = Config.DISTANCE_ACTIVITIES,
+    distanceActivitiesArg?: Set<string>,
     skipDuplicateCheck: boolean = false
 ): string | undefined {
+    const distanceActivities = distanceActivitiesArg || new Set(Config.DISTANCE_ACTIVITIES);
     // 時間の計算（Stravaは世界標準時なので、日本時間に合わせる必要があります）
     const startTime = new Date(activity.start_date);
     const endTime = new Date(startTime.getTime() + (activity.elapsed_time * 1000));
@@ -259,7 +260,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getTargetCalendar,
         processActivityToCalendar,
         getExistingActivityIds,
-        DISTANCE_ACTIVITIES: Config.DISTANCE_ACTIVITIES,
+        DISTANCE_ACTIVITIES: new Set(Config.DISTANCE_ACTIVITIES),
         CALENDAR_API_DELAY_MS: Config.CALENDAR_API_DELAY_MS,
         STRAVA_ACTIVITY_ID_REGEX: Config.STRAVA_ACTIVITY_ID_REGEX,
     };

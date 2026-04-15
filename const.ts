@@ -42,12 +42,12 @@ var Config = {
     STRAVA_API_DELAY_MS: 200,
     STRAVA_ACTIVITY_ID_REGEX: /strava\.com\/activities\/(\d+)/i,
 
-    DISTANCE_ACTIVITIES: new Set([
+    DISTANCE_ACTIVITIES: [
         'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
         'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',
         'InlineSkate', 'Skateboard', 'Snowshoe', 'Kitesurf', 'VirtualRide', 'VirtualRun', 'GravelRide',
         'MountainBikeRide', 'EMountainBikeRide', 'Velomobile', 'Handcycle', 'Wheelchair'
-    ]),
+    ],
 
     MAP_FOLDER_NAME: 'Strava_Route_Maps',
     GEAR_CONFIG_PREFIX: 'GEAR_CONFIG_',
