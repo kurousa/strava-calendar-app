@@ -8,8 +8,11 @@ describe('summary.ts', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        // global.sendDiscordMessage をスパイ化
-        global.sendDiscordMessage = vi.fn();
+        vi.stubGlobal('sendDiscordMessage', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     describe('generateSummary', () => {
