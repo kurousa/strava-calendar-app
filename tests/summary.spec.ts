@@ -9,6 +9,7 @@ describe('summary.ts', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.stubGlobal('sendDiscordMessage', vi.fn());
+        vi.stubGlobal('getStravaActivities', vi.fn());
     });
 
     afterEach(() => {
