@@ -36,7 +36,7 @@ describe('generateAiComment', () => {
 
         expect(comment).toBe('素晴らしい走りでした！');
         expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
-            expect.stringContaining('gemini-1.5-flash'),
+            expect.stringContaining('gemini-2.5-flash-lite'),
             expect.objectContaining({
                 method: 'post',
                 contentType: 'application/json'
