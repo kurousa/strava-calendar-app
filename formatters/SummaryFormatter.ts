@@ -33,7 +33,8 @@ function formatSummaryReport(data: SummaryData, period: 'weekly' | 'monthly'): s
         message += `👉 https://www.strava.com/activities/${data.longestActivity.id}\n`;
     }
 
-    message += `\nお疲れ様でした！来週も頑張りましょう！ 💪`;
+    const nextPeriod = period === 'weekly' ? '来週' : '来月';
+    message += '\nお疲れ様でした！' + nextPeriod + 'も頑張りましょう！ 💪';
 
     return message;
 }
