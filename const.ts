@@ -76,6 +76,7 @@ deepFreeze(Config);
 // Node.js環境（テスト時）でのグローバル化
 if (typeof global !== 'undefined') {
     (global as any).Config = Config;
+    (global as any).deepFreeze = deepFreeze;
     // 既存のコード（テスト等）との互換性のため、個別の定数もグローバルに展開する
     Object.assign(global, Config);
 }
@@ -84,6 +85,7 @@ if (typeof global !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         Config,
+        deepFreeze,
         ...Config
     };
 }

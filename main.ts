@@ -259,8 +259,8 @@ if (typeof module !== 'undefined' && module.exports) {
         getTargetCalendar,
         processActivityToCalendar,
         getExistingActivityIds,
-        DISTANCE_ACTIVITIES,
-        CALENDAR_API_DELAY_MS,
-        STRAVA_ACTIVITY_ID_REGEX,
+        DISTANCE_ACTIVITIES: Config.DISTANCE_ACTIVITIES,
+        CALENDAR_API_DELAY_MS: Config.CALENDAR_API_DELAY_MS,
+        STRAVA_ACTIVITY_ID_REGEX: Config.STRAVA_ACTIVITY_ID_REGEX,
     };
 }

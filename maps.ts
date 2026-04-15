@@ -2,11 +2,11 @@
  * マップ画像を保存するフォルダを取得または作成する
  */
 function getOrCreateMapFolder(): GoogleAppsScript.Drive.Folder {
-    const folders = DriveApp.getFoldersByName(MAP_FOLDER_NAME);
+    const folders = DriveApp.getFoldersByName(Config.MAP_FOLDER_NAME);
     if (folders.hasNext()) {
         return folders.next();
     }
-    return DriveApp.createFolder(MAP_FOLDER_NAME);
+    return DriveApp.createFolder(Config.MAP_FOLDER_NAME);
 }
 
 /**
