@@ -29,15 +29,29 @@ function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Cont
 
     // ヘッドレスAPI: Next.js等のフロントエンドからのデータ取得用
     if (e && e.parameter && e.parameter.action === 'getStats') {
+        const apiKey = PropertiesService.getScriptProperties().getProperty(Config.PROP_API_KEY);
+        
+        // 認証チェック
+        if (!apiKey || e.parameter.key !== apiKey) {
+            Logger.log('エラー: APIキーが設定されていないか、一致しません。');
+            return ContentService.createTextOutput(JSON.stringify({ 
+                status: 'error', 
+                code: 401,
+                message: 'Unauthorized: Invalid or Missing API Key' 
+            }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
+
         try {
             // スプレッドシートからデータを取得する関数の呼び出し (sheets.ts等に実装想定)
             const stats = getDashboardData() ?? { lastActivity: [], fitness: 0, gears: [] };
-
-            return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: stats }))
-                .setMimeType(ContentService.MimeType.JSON)
-                // CORS対応（Next.jsから直接Fetchできるようにする）
-                // ※ GASの仕様上、完全にヘッダーを制御できないため、フロント側で工夫が必要な場合があります
-                // .setHeader("Access-Control-Allow-Origin", "*"); 
+            
+            return ContentService.createTextOutput(JSON.stringify({ 
+                status: 'success', 
+                code: 200,
+                data: stats 
+            }))
+                .setMimeType(ContentService.MimeType.JSON);
         } catch (err) {
             return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
                 .setMimeType(ContentService.MimeType.JSON);

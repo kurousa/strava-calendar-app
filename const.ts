@@ -36,6 +36,7 @@ var Config = {
     PROP_LAST_ERROR_NOTIFIED_AT: 'LAST_ERROR_NOTIFIED_AT',
     PROP_USER_MAX_HR: 'USER_MAX_HR',
     PROP_USER_REST_HR: 'USER_REST_HR',
+    PROP_API_KEY: 'API_KEY',
 
     // API エンドポイント
     STRAVA_API_BASE: 'https://www.strava.com/api/v3',

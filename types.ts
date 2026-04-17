@@ -153,11 +153,25 @@ interface GearStatus {
     isPeriodic: boolean;
 }
 
-/**
- * ダッシュボードサマリーの型定義
- */
 interface DashboardSummary {
     lastActivity: any[];
     fitness: number;
     gears: GearStatus[];
+}
+
+/**
+ * APIレスポンスの共通型定義
+ */
+type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+interface ApiSuccessResponse<T> {
+    status: 'success';
+    code: number;
+    data: T;
+}
+
+interface ApiErrorResponse {
+    status: 'error';
+    code: number;
+    message: string;
 }

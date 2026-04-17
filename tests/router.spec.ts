@@ -62,9 +62,71 @@ describe('router', () => {
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
         });
 
-        it('should handle headless API getStats action', () => {
+        it('should handle headless API getStats action with valid API key', () => {
             const mockData = { some: 'stats' };
             vi.stubGlobal('getDashboardData', vi.fn().mockReturnValue(mockData));
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'API_KEY') return 'valid_key';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            const e = {
+                parameter: {
+                    action: 'getStats',
+                    key: 'valid_key'
+                }
+            };
+            const result = doGet(e as any);
+
+            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
+                JSON.stringify({ 
+                    status: 'success', 
+                    code: 200,
+                    data: mockData 
+                })
+            );
+            expect(result.getContent()).toBe(JSON.stringify({ 
+                status: 'success', 
+                code: 200,
+                data: mockData 
+            }));
+        });
+
+        it('should return error for getStats action with invalid API key', () => {
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'API_KEY') return 'valid_key';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('Logger', { log: vi.fn() });
+
+            const e = {
+                parameter: {
+                    action: 'getStats',
+                    key: 'invalid_key'
+                }
+            };
+            const result = doGet(e as any);
+
+            expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":401');
+            expect(result.getContent()).toContain('Unauthorized: Invalid or Missing API Key');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('APIキーが設定されていないか、一致しません'));
+        });
+
+        it('should return error if getStats action is called and no API key is configured', () => {
+            const mockData = { some: 'stats' };
+            vi.stubGlobal('getDashboardData', vi.fn().mockReturnValue(mockData));
+            const mockProps = {
+                getProperty: vi.fn(() => null)
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('Logger', { log: vi.fn() });
 
             const e = {
                 parameter: {
@@ -73,10 +135,10 @@ describe('router', () => {
             };
             const result = doGet(e as any);
 
-            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
-                JSON.stringify({ status: 'success', data: mockData })
-            );
-            expect(result.getContent()).toBe(JSON.stringify({ status: 'success', data: mockData }));
+            expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":401');
+            expect(result.getContent()).toContain('Unauthorized: Invalid or Missing API Key');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('APIキーが設定されていないか、一致しません'));
         });
     });
 
