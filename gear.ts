@@ -114,7 +114,7 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
 /**
  * 各機材の現在のステータス（累積距離とアラートしきい値）を取得する
  */
-function getGearStatus(): any[] {
+function getGearStatus(): GearStatus[] {
     const profile = getStravaAthleteProfile();
     if (!profile) return [];
 
