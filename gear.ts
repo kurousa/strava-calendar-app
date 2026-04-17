@@ -111,11 +111,49 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
     Logger.log(`機材ID: ${gearId} にしきい値 ${thresholdKm}km (${isPeriodic ? '定期' : '1回限り'}) を設定しました。`);
 }
 
+/**
+ * 各機材の現在のステータス（累積距離とアラートしきい値）を取得する
+ */
+function getGearStatus(): any[] {
+    const profile = getStravaAthleteProfile();
+    if (!profile) return [];
+
+    const gears = [...profile.bikes, ...profile.shoes];
+    const props = PropertiesService.getScriptProperties();
+    const allProps = props.getProperties();
+
+    return gears.map(gear => {
+        const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
+        let thresholdKm = 0;
+        let isPeriodic = false;
+
+        if (configStr) {
+            try {
+                const config: GearConfig = JSON.parse(configStr);
+                thresholdKm = config.thresholdKm;
+                isPeriodic = config.isPeriodic;
+            } catch (e) {
+                Logger.log(`[Gear Status Error] Failed to parse config for gear ${gear.id}`);
+            }
+        }
+
+        return {
+            id: gear.id,
+            name: gear.name,
+            type: profile.bikes.includes(gear) ? 'Bike' : 'Shoes',
+            distanceKm: gear.distance / 1000,
+            thresholdKm: thresholdKm,
+            isPeriodic: isPeriodic
+        };
+    });
+}
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         checkGearAlerts,
         listGears,
         setGearThreshold,
+        getGearStatus,
     };
 }

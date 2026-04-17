@@ -27,6 +27,23 @@ function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Cont
         }
     }
 
+    // ヘッドレスAPI: Next.js等のフロントエンドからのデータ取得用
+    if (e && e.parameter && e.parameter.action === 'getStats') {
+        try {
+            // スプレッドシートからデータを取得する関数の呼び出し (sheets.ts等に実装想定)
+            const stats = getDashboardData();
+            
+            return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: stats }))
+                .setMimeType(ContentService.MimeType.JSON)
+                // CORS対応（Next.jsから直接Fetchできるようにする）
+                // ※ GASの仕様上、完全にヘッダーを制御できないため、フロント側で工夫が必要な場合があります
+                // .setHeader("Access-Control-Allow-Origin", "*"); 
+        } catch (err) {
+            return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+
     // 通常のアクセス（インポート画面）を表示する
     return HtmlService.createHtmlOutputFromFile('index')
         .setTitle('Strava カレンダーインポート');

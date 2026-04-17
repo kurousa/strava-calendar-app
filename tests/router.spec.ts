@@ -11,15 +11,72 @@ describe('router', () => {
 
         it('should create HTML output from index file and set title', () => {
             const mockSetTitle = vi.fn().mockReturnThis();
-            global.HtmlService.createHtmlOutputFromFile.mockReturnValue({
+            (global as any).HtmlService.createHtmlOutputFromFile.mockReturnValue({
                 setTitle: mockSetTitle
             });
 
             const result = doGet({} as any);
 
-            expect(global.HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
+            expect((global as any).HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
             expect(mockSetTitle).toHaveBeenCalledWith('Strava カレンダーインポート');
             expect(result).toBeDefined();
+        });
+
+        it('should handle Strava Webhook validation request', () => {
+            const mockProps = {
+                getProperty: vi.fn().mockReturnValue('fake_token')
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            const e = {
+                parameter: {
+                    'hub.mode': 'subscribe',
+                    'hub.verify_token': 'fake_token',
+                    'hub.challenge': 'test_challenge'
+                }
+            };
+            const result = doGet(e as any);
+
+            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
+                JSON.stringify({ "hub.challenge": "test_challenge" })
+            );
+            expect(result.getContent()).toBe(JSON.stringify({ "hub.challenge": "test_challenge" }));
+        });
+
+        it('should return 403 for invalid verify token', () => {
+            const mockProps = {
+                getProperty: vi.fn().mockReturnValue('fake_token')
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('Logger', { log: vi.fn() });
+
+            const e = {
+                parameter: {
+                    'hub.mode': 'subscribe',
+                    'hub.verify_token': 'wrong_token'
+                }
+            };
+            doGet(e as any);
+
+            expect((global as any).HtmlService.createHtmlOutput).toHaveBeenCalledWith('Forbidden: Invalid Verify Token');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
+        });
+
+        it('should handle headless API getStats action', () => {
+            const mockData = { some: 'stats' };
+            vi.stubGlobal('getDashboardData', vi.fn().mockReturnValue(mockData));
+
+            const e = {
+                parameter: {
+                    action: 'getStats'
+                }
+            };
+            const result = doGet(e as any);
+
+            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
+                JSON.stringify({ status: 'success', data: mockData })
+            );
+            expect(result.getContent()).toBe(JSON.stringify({ status: 'success', data: mockData }));
         });
     });
 
@@ -41,8 +98,21 @@ describe('router', () => {
             vi.stubGlobal('handleStravaWebhook', vi.fn());
             const result = doPost(e as any);
 
-            expect(global.ContentService.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
+            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
             expect(result.getContent()).toBe(JSON.stringify({ status: 'ok' }));
+        });
+
+        it('should handle errors in doPost', () => {
+            const e = {
+                postData: {
+                    contents: 'invalid json'
+                }
+            };
+            vi.stubGlobal('Logger', { log: vi.fn() });
+            const result = doPost(e as any);
+
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Webhook Error]'));
+            expect(result.getContent()).toContain('status":"error"');
         });
     });
 
@@ -66,13 +136,13 @@ describe('router', () => {
             expect(result2).toBe(expectedError);
             expect(result3).toBe(expectedError);
             expect(result4).toBe(expectedError);
-            expect(global.Logger.log).toHaveBeenCalledWith(expectedError);
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expectedError);
         });
 
         it('should reject invalid dates', () => {
             const result = importPastActivitiesFromWeb('2024-13-45', '2024-01-31');
             expect(result).toBe('エラー: 無効な日付が指定されました。');
-            expect(global.Logger.log).toHaveBeenCalledWith('エラー: 無効な日付が指定されました。');
+            expect((global as any).Logger.log).toHaveBeenCalledWith('エラー: 無効な日付が指定されました。');
         });
 
         it('should reject invalid dates with rollover', () => {
@@ -86,11 +156,11 @@ describe('router', () => {
         it('should reject date ranges where start is after end', () => {
             const result = importPastActivitiesFromWeb('2024-01-31', '2024-01-01');
             expect(result).toBe('エラー: 開始日は終了日より前の日付を指定してください。');
-            expect(global.Logger.log).toHaveBeenCalledWith('エラー: 開始日は終了日より前の日付を指定してください。');
+            expect((global as any).Logger.log).toHaveBeenCalledWith('エラー: 開始日は終了日より前の日付を指定してください。');
         });
 
         it('should correctly parse dates and pass them to importPastActivities', () => {
-            global.importPastActivities.mockReturnValue('SUCCESS_MOCK');
+            (global as any).importPastActivities.mockReturnValue('SUCCESS_MOCK');
 
             const startStr = '2024-03-01';
             const endStr = '2024-03-31';
@@ -100,8 +170,8 @@ describe('router', () => {
             expect(result).toBe('SUCCESS_MOCK');
 
             // Check that importPastActivities was called with correctly parsed dates
-            expect(global.importPastActivities).toHaveBeenCalledTimes(1);
-            const callArgs = global.importPastActivities.mock.calls[0];
+            expect((global as any).importPastActivities).toHaveBeenCalledTimes(1);
+            const callArgs = (global as any).importPastActivities.mock.calls[0];
 
             expect(callArgs[0]).toBeInstanceOf(Date);
             const expectedStart = new Date('2024-03-01T00:00:00');
