@@ -140,3 +140,24 @@ interface SummaryData {
     startDate: Date;
     endDate: Date;
 }
+
+/**
+ * 各機材の現在のステータス情報の型定義
+ */
+interface GearStatus {
+    id: string;
+    name: string;
+    type: 'Bike' | 'Shoes';
+    distanceKm: number;
+    thresholdKm: number;
+    isPeriodic: boolean;
+}
+
+/**
+ * ダッシュボードサマリーの型定義
+ */
+interface DashboardSummary {
+    lastActivity: any[];
+    fitness: number;
+    gears: GearStatus[];
+}

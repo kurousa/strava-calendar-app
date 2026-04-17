@@ -21,8 +21,8 @@ describe('dashboard', () => {
                 getSheetByName: vi.fn().mockReturnValue({
                     getDataRange: vi.fn().mockReturnValue({
                         getValues: vi.fn().mockReturnValue([
-                            ['Header1', 'Header2'],
-                            ['Data1', 'Data2']
+                            ['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '体重(kg)', 'URL'],
+                            ['123', new Date().toISOString(), 'Run', 'Morning Run', 10, 60, 100, 150, 70, 'http://strava.com/123']
                         ])
                     })
                 })
@@ -50,9 +50,12 @@ describe('dashboard', () => {
         const result = getDashboardData();
 
         expect(result).toBeDefined();
-        expect(result.lastActivity).toEqual(['Data1', 'Data2']);
-        expect(result.gears).toHaveLength(1);
-        expect(result.gears[0].name).toBe('Bike');
+        if (result) {
+            expect(result.lastActivity).toContain('Morning Run');
+            expect(result.fitness).toBeGreaterThan(0);
+            expect(result.gears).toHaveLength(1);
+            expect(result.gears[0].name).toBe('Bike');
+        }
     });
 
     it('should return undefined and log error if spreadsheet ID is missing', () => {
