@@ -140,3 +140,38 @@ interface SummaryData {
     startDate: Date;
     endDate: Date;
 }
+
+/**
+ * 各機材の現在のステータス情報の型定義
+ */
+interface GearStatus {
+    id: string;
+    name: string;
+    type: 'Bike' | 'Shoes';
+    distanceKm: number;
+    thresholdKm: number;
+    isPeriodic: boolean;
+}
+
+interface DashboardSummary {
+    lastActivity: any[];
+    fitness: number;
+    gears: GearStatus[];
+}
+
+/**
+ * APIレスポンスの共通型定義
+ */
+type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+interface ApiSuccessResponse<T> {
+    status: 'success';
+    code: number;
+    data: T;
+}
+
+interface ApiErrorResponse {
+    status: 'error';
+    code: number;
+    message: string;
+}

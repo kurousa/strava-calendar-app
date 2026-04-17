@@ -242,3 +242,7 @@ global.generateSummary = (SummaryModule as any).generateSummary;
 global.sendWeeklySummary = (SummaryModule as any).sendWeeklySummary;
 global.sendMonthlySummary = (SummaryModule as any).sendMonthlySummary;
 global.sendDiscordMessage = (NotifierModuleExtension as any).sendDiscordMessage;
+
+// Globalize TSS functions
+import * as TssModule from './tss.ts';
+global.calculateTSS = (TssModule as any).calculateTSS;
