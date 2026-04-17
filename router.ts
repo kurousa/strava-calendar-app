@@ -31,8 +31,8 @@ function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Cont
     if (e && e.parameter && e.parameter.action === 'getStats') {
         try {
             // スプレッドシートからデータを取得する関数の呼び出し (sheets.ts等に実装想定)
-            const stats = getDashboardData();
-            
+            const stats = getDashboardData() ?? { lastActivity: [], fitness: 0, gears: [] };
+
             return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: stats }))
                 .setMimeType(ContentService.MimeType.JSON)
                 // CORS対応（Next.jsから直接Fetchできるようにする）
