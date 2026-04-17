@@ -153,10 +153,29 @@ interface GearStatus {
     isPeriodic: boolean;
 }
 
+interface Activity {
+  id: string;
+  date: string;
+  title: string;
+  type: string;
+  distance: number;
+  duration: number;
+  elevation: number;
+  avgHr?: number;
+  maxHr?: number;
+  avgWatts?: number;
+  avgCadence?: number;
+  calories?: number;
+  mapUrl?: string;
+  weather?: string;
+  aiComment?: string;
+}
+
 interface DashboardSummary {
-    lastActivity: any[];
+    lastActivity: Activity | null;
     fitness: number;
     gears: GearStatus[];
+    history: Array<{ date: string; value: number }>;
 }
 
 /**

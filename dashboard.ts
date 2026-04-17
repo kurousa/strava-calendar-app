@@ -14,12 +14,14 @@ function getDashboardData(): DashboardSummary | undefined {
         return;
     }
     const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return;
 
     // 直近30日のTSS集計や機材ステータスを計算
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     
-    let fitness = 0;
+    let totalFitness = 0;
+    const historyMap: { [date: string]: number } = {};
     const props = PropertiesService.getScriptProperties();
     const maxHR = Number(props.getProperty(Config.PROP_USER_MAX_HR) || 190);
     const restHR = Number(props.getProperty(Config.PROP_USER_REST_HR) || 50);
@@ -27,22 +29,54 @@ function getDashboardData(): DashboardSummary | undefined {
     // ヘッダーを除いてループ (インデックス1から)
     for (let i = 1; i < data.length; i++) {
         const row = data[i];
-        const date = new Date(row[1]); // 2列目: 日付
+        const dateObj = new Date(row[1]);
+        const dateStr = Utilities.formatDate(dateObj, Session.getScriptTimeZone(), 'yyyy-MM-dd');
         
-        if (date >= thirtyDaysAgo) {
-            const durationSec = Number(row[5]) * 60; // 6列目: 時間 (分)
-            const avgHR = Number(row[7]);           // 8列目: 平均心拍数
-            
-            if (avgHR) {
-                fitness += calculateTSS(durationSec, avgHR, maxHR, restHR);
-            }
+        const durationSec = Number(row[5]) * 60;
+        const avgHR = Number(row[7]);
+        
+        let tss = 0;
+        if (avgHR) {
+            tss = calculateTSS(durationSec, avgHR, maxHR, restHR);
+        }
+
+        if (dateObj >= thirtyDaysAgo) {
+            totalFitness += tss;
+            historyMap[dateStr] = (historyMap[dateStr] || 0) + tss;
         }
     }
+
+    // historyを配列に変換してソート
+    const history = Object.keys(historyMap).sort().map(date => ({
+        date,
+        value: Math.round(historyMap[date] * 10) / 10
+    }));
+
+    // 最後のアクティビティをオブジェクトに変換
+    const lastRow = data[data.length - 1];
+    const lastActivity: Activity = {
+        id: String(lastRow[0]),
+        date: Utilities.formatDate(new Date(lastRow[1]), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'),
+        title: String(lastRow[3]),
+        type: String(lastRow[2]),
+        distance: Number(lastRow[4]),
+        duration: Number(lastRow[5]),
+        elevation: Number(lastRow[6]),
+        avgHr: Number(lastRow[7]) || undefined,
+        maxHr: Number(lastRow[8]) || undefined,
+        avgWatts: Number(lastRow[9]) || undefined,
+        avgCadence: Number(lastRow[10]) || undefined,
+        calories: Number(lastRow[11]) || undefined,
+        mapUrl: String(lastRow[12]) || undefined,
+        weather: String(lastRow[13]) || undefined,
+        aiComment: String(lastRow[14]) || undefined,
+    };
     
     const summary: DashboardSummary = {
-        lastActivity: data[data.length - 1],
-        fitness: fitness,
-        gears: getGearStatus()
+        lastActivity: lastActivity,
+        fitness: Math.round(totalFitness * 10) / 10,
+        gears: getGearStatus(),
+        history: history
     };
     
     return summary;

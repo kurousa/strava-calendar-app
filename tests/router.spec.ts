@@ -115,8 +115,8 @@ describe('router', () => {
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
-            expect(result.getContent()).toContain('Unauthorized: Invalid or Missing API Key');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('APIキーが設定されていないか、一致しません'));
+            expect(result.getContent()).toContain('Unauthorized: Invalid Token or API Key');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('エラー: 認証に失敗しました。'));
         });
 
         it('should return error if getStats action is called and no API key is configured', () => {
@@ -137,8 +137,8 @@ describe('router', () => {
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
-            expect(result.getContent()).toContain('Unauthorized: Invalid or Missing API Key');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('APIキーが設定されていないか、一致しません'));
+            expect(result.getContent()).toContain('Unauthorized: Invalid Token or API Key');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('エラー: 認証に失敗しました。'));
         });
     });
 
