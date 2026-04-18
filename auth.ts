@@ -74,6 +74,44 @@ function resetAuth(): void {
     Logger.log('連携を解除しました。');
 }
 
+/**
+ * Google ID Tokenを検証し、許可されたユーザーか確認する
+ */
+function verifyGoogleToken(idToken: string): boolean {
+    if (!idToken) return false;
+    
+    try {
+        // Googleの公式検証エンドポイントを叩く
+        const response = UrlFetchApp.fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+        const tokenInfo = JSON.parse(response.getContentText());
+        
+        // 1. クライアントIDが自分のReactアプリのものか確認
+        const expectedClientId = PropertiesService.getScriptProperties().getProperty(Config.PROP_GOOGLE_CLIENT_ID);
+        if (expectedClientId && tokenInfo.aud !== expectedClientId) {
+            Logger.log('エラー: IDトークンの aud が一致しません。');
+            return false;
+        }
+        
+        // 2. 許可されたメールアドレスか確認
+        const email = tokenInfo.email;
+        if (!email) return false;
+        
+        const allowedEmails = PropertiesService.getScriptProperties().getProperty(Config.PROP_ALLOWED_EMAILS) || "";
+        const allowedList = allowedEmails.split(',').map(s => s.trim());
+        
+        if (!allowedList.includes(email)) {
+             Logger.log(`エラー: 許可されていないユーザーです (${email})`);
+             return false;
+        }
+        
+        return true;
+    } catch (e) {
+        // トークンの有効期限切れや不正な形式の場合はエラーになる
+        Logger.log(`エラー: IDトークンの検証に失敗しました: ${e}`);
+        return false;
+    }
+}
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -81,5 +119,6 @@ if (typeof module !== 'undefined' && module.exports) {
         authCallback,
         startAuth,
         resetAuth,
+        verifyGoogleToken,
     };
 }

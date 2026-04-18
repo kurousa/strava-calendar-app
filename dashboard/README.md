@@ -49,12 +49,10 @@ cp .env.example .env.local
 ```
 VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
 VITE_GAS_DEPLOY_ID=YOUR_GAS_DEPLOY_ID
-VITE_DASHBOARD_API_KEY=YOUR_DASHBOARD_API_KEY
 ```
 
 - `VITE_GOOGLE_CLIENT_ID`: Google Cloud Consoleで作成したOAuth2クライアントID。
 - `VITE_GAS_DEPLOY_ID`: Google Apps Script のウェブアプリとしてデプロイした際のデプロイ ID。
-- `VITE_DASHBOARD_API_KEY`: GAS 側で設定した API キー。
 
 ## 開発と実行
 

@@ -215,7 +215,12 @@ vi.stubGlobal('viewStravaWebhookSubscriptions', vi.fn(() => []));
 vi.stubGlobal('deleteStravaWebhookSubscription', vi.fn());
 
 // Globalize Auth functions
-vi.stubGlobal('getOAuthService', vi.fn());
+import * as AuthModule from './auth.ts';
+vi.stubGlobal('getOAuthService', (AuthModule as any).getOAuthService || vi.fn());
+vi.stubGlobal('authCallback', (AuthModule as any).authCallback || vi.fn());
+vi.stubGlobal('startAuth', (AuthModule as any).startAuth || vi.fn());
+vi.stubGlobal('resetAuth', (AuthModule as any).resetAuth || vi.fn());
+vi.stubGlobal('verifyGoogleToken', (AuthModule as any).verifyGoogleToken || vi.fn());
 
 // Globalize Sheets functions
 vi.stubGlobal('backupToSpreadsheet', vi.fn());
