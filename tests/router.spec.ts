@@ -35,6 +35,7 @@ describe('router', () => {
         it('should return true if email matches one of multiple allowed emails', () => {
             const mockProps = {
                 getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
                     if (key === 'ALLOWED_EMAILS') return 'other@example.com, test@example.com, user@example.com';
                     return null;
                 })
@@ -43,6 +44,7 @@ describe('router', () => {
 
             (global as any).UrlFetchApp.fetch.mockReturnValue({
                 getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
                     email: 'test@example.com'
                 })
             });
@@ -79,6 +81,7 @@ describe('router', () => {
         it('should return false if email is not allowed', () => {
             const mockProps = {
                 getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
                     if (key === 'ALLOWED_EMAILS') return 'allowed@example.com';
                     return null;
                 })
@@ -87,13 +90,14 @@ describe('router', () => {
 
             (global as any).UrlFetchApp.fetch.mockReturnValue({
                 getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
                     email: 'intruder@example.com'
                 })
             });
 
             const result = verifyGoogleToken('token');
             expect(result).toBe(false);
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーです'));
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーによるアクセスです'));
         });
 
         it('should return false if UrlFetchApp fails', () => {
@@ -257,7 +261,7 @@ describe('router', () => {
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーです (intruder@example.com)'));
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーによるアクセスです'));
         });
 
         it('should return error if getStats action is called without token', () => {
