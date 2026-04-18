@@ -58,9 +58,9 @@ describe('fetchDashboardData', () => {
       message: 'Invalid token'
     };
 
-    (global.fetch as any).mockResolvedValue({
+    vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockErrorResponse)
-    });
+    } as any);
 
     const { fetchDashboardData } = await import('../src/api/client');
 
