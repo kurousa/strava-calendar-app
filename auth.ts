@@ -9,6 +9,8 @@ declare const OAuth2: any;
 let cachedStravaClientId: string | null = null;
 let cachedStravaClientSecret: string | null = null;
 let cachedStravaScope: string | null = null;
+let cachedGoogleClientId: string | null = null;
+let cachedAllowedEmails: string | null = null;
 
 /**
  * Strava連携のためのOAuth2サービスを取得する
@@ -86,8 +88,13 @@ function verifyGoogleToken(idToken: string): boolean {
         const tokenInfo = JSON.parse(response.getContentText());
         
         // 1. クライアントIDが自分のReactアプリのものか確認
-        // 1. クライアントIDが自分のReactアプリのものか確認
-        const expectedClientId = PropertiesService.getScriptProperties().getProperty(Config.PROP_GOOGLE_CLIENT_ID);
+        if (cachedGoogleClientId === null || cachedAllowedEmails === null) {
+             const props = PropertiesService.getScriptProperties();
+             cachedGoogleClientId = props.getProperty(Config.PROP_GOOGLE_CLIENT_ID) || "";
+             cachedAllowedEmails = props.getProperty(Config.PROP_ALLOWED_EMAILS) || "";
+        }
+        
+        const expectedClientId = cachedGoogleClientId;
         if (!expectedClientId || tokenInfo.aud !== expectedClientId) {
             Logger.log('エラー: クライアントIDが未設定、またはIDトークンの aud が一致しません。');
             return false;
@@ -97,7 +104,7 @@ function verifyGoogleToken(idToken: string): boolean {
         const email = tokenInfo.email;
         if (!email) return false;
         
-        const allowedEmails = PropertiesService.getScriptProperties().getProperty(Config.PROP_ALLOWED_EMAILS) || "";
+        const allowedEmails = cachedAllowedEmails;
         const allowedList = allowedEmails.split(',').map(s => s.trim());
         
         if (!allowedList.includes(email)) {
@@ -113,6 +120,17 @@ function verifyGoogleToken(idToken: string): boolean {
     }
 }
 
+/**
+ * キャッシュされた設定値をリセットする（主にテスト用）
+ */
+function resetConfigCache(): void {
+    cachedStravaClientId = null;
+    cachedStravaClientSecret = null;
+    cachedStravaScope = null;
+    cachedGoogleClientId = null;
+    cachedAllowedEmails = null;
+}
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -121,5 +139,6 @@ if (typeof module !== 'undefined' && module.exports) {
         startAuth,
         resetAuth,
         verifyGoogleToken,
+        resetConfigCache,
     };
 }

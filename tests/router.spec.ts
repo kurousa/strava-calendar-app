@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { doGet, doPost } from '../router';
-import { verifyGoogleToken } from '../auth';
+import { verifyGoogleToken, resetConfigCache } from '../auth';
 import { importPastActivitiesFromWeb } from '../manual_import';
 
 describe('router', () => {
@@ -9,6 +9,7 @@ describe('router', () => {
         beforeEach(() => {
             vi.resetAllMocks();
             vi.stubGlobal('Logger', { log: vi.fn() });
+            resetConfigCache();
         });
 
         it('should return true for valid token and allowed email', () => {
@@ -114,6 +115,7 @@ describe('router', () => {
     describe('doGet', () => {
         beforeEach(() => {
             vi.resetAllMocks();
+            resetConfigCache();
         });
 
         it('should create HTML output from index file and set title', () => {
@@ -283,6 +285,7 @@ describe('router', () => {
     describe('doPost', () => {
         beforeEach(() => {
             vi.resetAllMocks();
+            resetConfigCache();
         });
 
         it('should return OK text output', () => {
@@ -321,6 +324,7 @@ describe('router', () => {
             vi.resetAllMocks();
             vi.stubGlobal('Logger', { log: vi.fn() });
             vi.stubGlobal('importPastActivities', vi.fn());
+            resetConfigCache();
         });
 
 
