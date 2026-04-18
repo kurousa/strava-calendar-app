@@ -1,34 +1,13 @@
-import { useState, useEffect, Component, type ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 import { GoogleLogin, googleLogout } from '@react-oauth/google'
-import { Heart, Activity, Clock, Map, Cloud, LogOut, ChevronRight, Zap } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Heart, Activity, Clock, Cloud, LogOut, ChevronRight, Zap } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { fetchDashboardData } from './api/client'
-import type { DashboardSummary, GearStatus } from './api/types'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean}> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() { return { hasError: true }; }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="p-8 bg-surface-low rounded-[40px] text-on-surface/40 flex flex-col items-center justify-center space-y-2">
-          <p className="font-bold italic text-xs">COMPONENT LOAD ERROR</p>
-          <p className="text-[10px] uppercase tracking-widest opacity-50">Static bypass activated</p>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import type { DashboardSummary } from './api/types'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { ActivityDetail } from './components/ActivityDetail'
+import { GearItem } from './components/GearItem'
+import { MetaStat } from './components/Stats'
 
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('google_id_token'))
@@ -96,80 +75,6 @@ export default function App() {
   }
 
   const hasHistory = data?.history && data.history.length > 0;
-
-  // Detail View Component
-  const ActivityDetail = ({ activity }: { activity: NonNullable<DashboardSummary['lastActivity']> }) => (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => setView('dashboard')}
-          className="p-3 rounded-2xl bg-surface-low hover:bg-on-surface hover:text-white transition-all font-bold text-xs uppercase tracking-widest flex items-center gap-2"
-        >
-          <ChevronRight className="w-4 h-4 rotate-180" /> Back
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-8 space-y-12">
-          {/* Hero Section */}
-          <div className="bg-strava text-white p-12 md:p-16 rounded-[64px] shadow-2xl space-y-10 relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-16 opacity-10">
-               <Zap className="w-64 h-64" />
-             </div>
-             <div className="space-y-4 relative z-10">
-               <p className="text-xs font-black tracking-[0.5em] uppercase opacity-60">{activity.date}</p>
-               <h2 className="text-5xl md:text-8xl font-black italic tracking-tighter leading-[0.85] uppercase">
-                 {activity.title}
-               </h2>
-             </div>
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
-               <DetailStat label="Distance" value={activity.distance?.toFixed(2)} unit="KM" />
-               <DetailStat label="Time" value={activity.duration} unit="MIN" />
-               <DetailStat label="Elevation" value={Math.round(activity.elevation || 0)} unit="M" />
-               <DetailStat label="Calories" value={activity.calories} unit="KCAL" />
-             </div>
-          </div>
-
-          {/* AI Comment & Analysis */}
-          <div className="bg-white p-12 rounded-[56px] border border-on-surface/5 shadow-xl space-y-8">
-            <div className="flex items-center gap-4 text-strava">
-              <Cloud className="w-6 h-6" />
-              <h4 className="text-xs font-black tracking-widest uppercase">Atmospheric Signal / AI Analysis</h4>
-            </div>
-            <p className="text-3xl md:text-4xl font-bold tracking-tight leading-tight italic">
-              {activity.aiComment || "The performance analysis engine is refining its insights for this session."}
-            </p>
-            <div className="pt-6 flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-on-surface/30">
-              <span className="px-4 py-2 bg-surface-low rounded-full truncate">Weather: {activity.weather || 'Standard Condition'}</span>
-              <span className="px-4 py-2 bg-surface-low rounded-full">Type: {activity.type}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-4 space-y-8">
-          {/* Performance Deep Dive */}
-          <div className="bg-on-surface text-white p-10 rounded-[56px] space-y-10">
-            <h3 className="text-xs font-black tracking-widest uppercase text-white/40">Performance Metrics</h3>
-            <div className="space-y-8">
-              <MetricRow icon={<Heart className="w-5 h-5" />} label="Avg Heart Rate" value={activity.avgHr} unit="BPM" />
-              <MetricRow icon={<Heart className="w-5 h-5" />} label="Max Heart Rate" value={activity.maxHr} unit="BPM" />
-              <MetricRow icon={<Zap className="w-5 h-5" />} label="Avg Power" value={activity.avgWatts} unit="W" />
-              <MetricRow icon={<Activity className="w-5 h-5" />} label="Avg Cadence" value={activity.avgCadence} unit="RPM" />
-            </div>
-          </div>
-
-          <a 
-            href={`https://www.strava.com/activities/${activity.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block bg-strava hover:bg-on-surface transition-all duration-500 text-white p-8 rounded-[48px] text-center font-black italic tracking-tighter text-2xl uppercase shadow-xl"
-          >
-            Open on Strava
-          </a>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen p-4 md:p-10 lg:p-16 space-y-12 max-w-7xl mx-auto text-on-surface bg-[#fcfcfc]">
@@ -351,82 +256,10 @@ export default function App() {
               </div>
             </div>
           ) : (
-            data.lastActivity && <ActivityDetail activity={data.lastActivity} />
+            data.lastActivity && <ActivityDetail activity={data.lastActivity} onBack={() => setView('dashboard')} />
           )}
         </main>
       )}
-    </div>
-  )
-}
-
-// Helper Components
-function DetailStat({ label, value, unit }: { label: string, value: string | number | undefined, unit: string }) {
-  return (
-    <div>
-      <p className="text-[10px] font-black tracking-widest text-white/50 uppercase">{label}</p>
-      <p className="text-3xl font-black italic tracking-tighter">{value || '-'}<span className="text-xs ml-1 opacity-50">{unit}</span></p>
-    </div>
-  )
-}
-
-function MetricRow({ icon, label, value, unit }: { icon: ReactNode, label: string, value: string | number | undefined, unit: string }) {
-  return (
-    <div className="flex items-center justify-between border-b border-white/5 pb-4">
-      <div className="flex items-center gap-4">
-        <div className="text-strava">{icon}</div>
-        <span className="text-[10px] font-black tracking-widest uppercase opacity-60">{label}</span>
-      </div>
-      <p className="text-xl font-black italic tracking-tighter uppercase">{value || 'N/A'}<span className="text-[10px] ml-1 opacity-40 not-italic">{unit}</span></p>
-    </div>
-  )
-}
-
-function MetaStat({ icon, label, value, unit }: { icon: ReactNode, label: string, value: string, unit: string }) {
-  return (
-    <div className="flex items-center gap-5 relative z-10">
-       <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md">
-         {icon}
-       </div>
-       <div>
-         <p className="text-[10px] font-black text-white/30 tracking-widest uppercase">{label}</p>
-         <p className="text-3xl font-black italic tracking-tighter uppercase">{value} <span className="text-xs opacity-40 not-italic">{unit}</span></p>
-       </div>
-    </div>
-  )
-}
-
-function GearItem({ gear }: { gear: GearStatus }) {
-  return (
-    <div className="bg-white p-6 rounded-[32px] shadow-lg hover:shadow-xl transition-all duration-300 border border-on-surface/5 flex gap-5 items-center group">
-      <div className="bg-surface-low p-4 rounded-2xl group-hover:bg-on-surface group-hover:text-white transition-colors duration-500">
-        {gear.type === 'Bike' ? <Activity className="w-5 h-5" /> : <Map className="w-5 h-5" />}
-      </div>
-      <div className="flex-1 space-y-3">
-        <div className="flex justify-between items-center">
-          <h4 className="text-sm font-black tracking-tight truncate max-w-[150px] uppercase">{gear.name}</h4>
-          <span className={cn(
-            "px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase",
-            gear.thresholdKm && (gear.distanceKm || 0) > gear.thresholdKm * 0.8 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
-          )}>
-            In Use
-          </span>
-        </div>
-        <div className="space-y-1.5">
-          <div className="w-full bg-surface-low h-1.5 rounded-full overflow-hidden">
-            <div 
-              className={cn(
-                "h-full transition-all duration-1000",
-                gear.thresholdKm && (gear.distanceKm || 0) > gear.thresholdKm * 0.8 ? "bg-red-500" : "bg-strava"
-              )}
-              style={{ width: `${Math.min(((gear.distanceKm || 0) / (gear.thresholdKm || 5000)) * 100, 100)}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[8px] font-black tracking-[0.2em] text-on-surface/30 uppercase">
-            <span>{Math.round(gear.distanceKm || 0)} KM</span>
-            <span>{gear.thresholdKm || 5000} KM LIMIT</span>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
