@@ -1,3 +1,4 @@
+import React from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 
@@ -24,21 +25,23 @@ export function Heatmap({ data }: HeatmapProps) {
           values={data || []}
           horizontal={false}
           gutterSize={2}
-          classForValue={(value: { date: string; value: number } | undefined) => {
-            if (!value || value.value === 0) {
+          classForValue={(value) => {
+            const v = value as { date: string; value: number } | undefined;
+            if (!v || v.value === 0) {
               return 'color-empty';
             }
-            const val = value.value;
+            const val = v.value;
             if (val < 30) return 'color-strava-1';
             if (val < 60) return 'color-strava-2';
             if (val < 90) return 'color-strava-3';
             return 'color-strava-4';
           }}
-          tooltipDataAttrs={(value: { date: string; value: number } | undefined) => {
-            if (!value || !value.date) return {};
+          tooltipDataAttrs={(value) => {
+            const v = value as { date: string; value: number } | undefined;
+            if (!v || !v.date) return {};
             return {
-              'data-tip': `${value.date}: TSS ${value.value}`,
-            };
+              'data-tip': `${v.date}: TSS ${v.value}`,
+            } as unknown as React.SVGAttributes<SVGSVGElement>;
           }}
         />
       </div>
