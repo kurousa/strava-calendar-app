@@ -369,7 +369,7 @@ function DetailStat({ label, value, unit }: { label: string, value: string | num
   )
 }
 
-function MetricRow({ icon, label, value, unit }: { icon: ReactNode, label: string, value: any, unit: string }) {
+function MetricRow({ icon, label, value, unit }: { icon: ReactNode, label: string, value: string | number | undefined, unit: string }) {
   return (
     <div className="flex items-center justify-between border-b border-white/5 pb-4">
       <div className="flex items-center gap-4">
