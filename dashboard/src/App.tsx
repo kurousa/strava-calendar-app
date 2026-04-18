@@ -8,6 +8,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { ActivityDetail } from './components/ActivityDetail'
 import { GearItem } from './components/GearItem'
 import { MetaStat } from './components/Stats'
+import { Heatmap } from './components/Heatmap'
 
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('google_id_token'))
@@ -133,7 +134,7 @@ export default function App() {
                   <div className="h-[200px] w-full mt-4">
                     <ErrorBoundary>
                       {hasHistory ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                           <AreaChart data={data.history}>
                             <defs>
                               <linearGradient id="colorTss" x1="0" y1="0" x2="0" y2="1">
@@ -227,6 +228,14 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                </ErrorBoundary>
+
+                {/* Heatmap */}
+                <ErrorBoundary>
+                  <Heatmap data={data.heatmapData || data.history.map((h, i) => ({
+                    date: h.date,
+                    value: Math.round(Math.max(0, h.value - (i > 0 ? data.history[i-1].value : 0)) * 10) / 10
+                  }))} />
                 </ErrorBoundary>
               </div>
 

@@ -37,4 +37,5 @@ export interface DashboardSummary {
   fitness: number;
   gears: GearStatus[];
   history: { date: string; value: number }[];
+  heatmapData: { date: string; value: number }[];
 }
