@@ -7,31 +7,32 @@ function getDashboardData(): DashboardSummary | undefined {
         Logger.log(`${Config.PROP_SPREADSHEET_ID} が設定されていないため、ダッシュボードのデータを取得できません。`);
         return;
     }
+
     const ss = SpreadsheetApp.openById(spreadsheetId);
     const sheet = ss.getSheetByName(Config.BACKUP_SHEET_NAME);
     if (!sheet) {
         Logger.log(`${Config.BACKUP_SHEET_NAME} が設定されていないため、ダッシュボードのデータを取得できません。`);
         return;
     }
+
     const data = sheet.getDataRange().getValues();
     if (data.length <= 1) return;
 
-    // 直近30日のTSS集計や機材ステータスを計算
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     
-    let totalFitness = 0;
-    const historyMap: { [date: string]: number } = {};
     const props = PropertiesService.getScriptProperties();
     const maxHR = Number(props.getProperty(Config.PROP_USER_MAX_HR) || 190);
     const restHR = Number(props.getProperty(Config.PROP_USER_REST_HR) || 50);
 
-    // ヘッダーを除いてループ (インデックス1から)
+    // 1. 日次TSSの集計
+    const dailyTss: { [date: string]: number } = {};
     for (let i = 1; i < data.length; i++) {
         const row = data[i];
         const dateObj = new Date(row[1]);
+        if (isNaN(dateObj.getTime())) continue;
+
         const dateStr = Utilities.formatDate(dateObj, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-        
         const durationSec = Number(row[5]) * 60;
         const avgHR = Number(row[7]);
         
@@ -39,42 +40,54 @@ function getDashboardData(): DashboardSummary | undefined {
         if (avgHR) {
             tss = calculateTSS(durationSec, avgHR, maxHR, restHR);
         }
-
+        
+        // 期間内のデータを収集
         if (dateObj >= thirtyDaysAgo) {
-            totalFitness += tss;
-            historyMap[dateStr] = (historyMap[dateStr] || 0) + tss;
+            dailyTss[dateStr] = (dailyTss[dateStr] || 0) + tss;
         }
     }
 
-    // historyを配列に変換してソート
-    const history = Object.keys(historyMap).sort().map(date => ({
-        date,
-        value: Math.round(historyMap[date] * 10) / 10
-    }));
+    // 2. 蓄積型（累積）データの生成
+    // 期間内の日付を並べて、前日の値を加算していく
+    const dates = [];
+    for (let i = 0; i <= 30; i++) {
+        const d = new Date(thirtyDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
+        dates.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'));
+    }
 
-    // 最後のアクティビティをオブジェクトに変換
+    let runningTotal = 0;
+    const history = dates.map(date => {
+        const dayTss = dailyTss[date] || 0;
+        runningTotal += dayTss;
+        return {
+            date,
+            value: Math.round(runningTotal * 10) / 10
+        };
+    });
+
+    // 最後のアクティビティ
     const lastRow = data[data.length - 1];
     const lastActivity: Activity = {
         id: String(lastRow[0]),
         date: Utilities.formatDate(new Date(lastRow[1]), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'),
-        title: String(lastRow[3]),
-        type: String(lastRow[2]),
-        distance: Number(lastRow[4]),
-        duration: Number(lastRow[5]),
-        elevation: Number(lastRow[6]),
+        title: String(lastRow[3] || 'Untitled Activity'),
+        type: String(lastRow[2] || 'Ride'),
+        distance: Number(lastRow[4]) || 0,
+        duration: Number(lastRow[5]) || 0,
+        elevation: Number(lastRow[6]) || 0,
         avgHr: Number(lastRow[7]) || undefined,
         maxHr: Number(lastRow[8]) || undefined,
         avgWatts: Number(lastRow[9]) || undefined,
         avgCadence: Number(lastRow[10]) || undefined,
         calories: Number(lastRow[11]) || undefined,
-        mapUrl: String(lastRow[12]) || undefined,
-        weather: String(lastRow[13]) || undefined,
-        aiComment: String(lastRow[14]) || undefined,
+        weather: String(lastRow[12] || ''),
+        aiComment: String(lastRow[13] || ''),
+        mapUrl: String(lastRow[14] || '')
     };
     
     const summary: DashboardSummary = {
         lastActivity: lastActivity,
-        fitness: Math.round(totalFitness * 10) / 10,
+        fitness: Math.round(runningTotal * 10) / 10,
         gears: getGearStatus(),
         history: history
     };

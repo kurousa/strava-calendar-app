@@ -1,14 +1,19 @@
 import type { ApiResponse, DashboardSummary } from './types';
 
-const GAS_URL = import.meta.env.VITE_GAS_URL;
+const GAS_DEPLOY_ID = import.meta.env.VITE_GAS_DEPLOY_ID;
 const API_KEY = import.meta.env.VITE_DASHBOARD_API_KEY;
 
-export async function fetchDashboardData(idToken: string): Promise<DashboardSummary> {
-  if (!GAS_URL) {
-    throw new Error('VITE_GAS_URL is not defined');
+const getGasUrl = () => {
+  if (!GAS_DEPLOY_ID) {
+    throw new Error('VITE_GAS_DEPLOY_ID is not defined');
   }
+  return `https://script.google.com/macros/s/${GAS_DEPLOY_ID}/exec`;
+};
 
-  const url = new URL(GAS_URL);
+export async function fetchDashboardData(idToken: string): Promise<DashboardSummary> {
+  const gasUrl = getGasUrl();
+
+  const url = new URL(gasUrl);
   url.searchParams.append('action', 'getStats');
   url.searchParams.append('token', idToken);
   if (API_KEY) {

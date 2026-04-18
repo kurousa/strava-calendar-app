@@ -72,15 +72,28 @@ describe('sheets.ts', () => {
                 distance: 5000,
                 moving_time: 1800,
                 total_elevation_gain: 50,
-                average_heartrate: 150
+                average_heartrate: 150,
+                max_heartrate: 180,
+                average_watts: 200,
+                average_cadence: 80,
+                calories: 500,
+                start_latlng: [35.0, 139.0]
             }
         ];
+
+        // モックを差し込んで副作用を抑える
+        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Sunny'));
+        vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Nice!'));
 
         backupToSpreadsheet(activities as any);
 
         expect(mockSpreadsheet.getSheetByName).toHaveBeenCalledWith('Activities');
         expect(mockSpreadsheet.insertSheet).toHaveBeenCalledWith('Activities');
-        expect(mockSheet.appendRow).toHaveBeenCalledWith(expect.arrayContaining(['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '体重(kg)', 'URL']));
+        expect(mockSheet.appendRow).toHaveBeenCalledWith(expect.arrayContaining([
+            'ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', 
+            '平均心拍数', '最大心拍数', '平均ワット', 'ケイデンス', 'カロリー', 
+            '天気', 'AIコメント', 'URL'
+        ]));
         expect(mockSheet.setFrozenRows).toHaveBeenCalledWith(1);
     });
 
@@ -100,15 +113,23 @@ describe('sheets.ts', () => {
                 distance: 10000,
                 moving_time: 3600,
                 total_elevation_gain: 100,
-                average_heartrate: 140
+                average_heartrate: 140,
+                max_heartrate: 160,
+                average_watts: 180,
+                average_cadence: 90,
+                calories: 800,
+                start_latlng: [35.0, 139.0]
             }
         ];
+
+        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Cloudy'));
+        vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Good effort!'));
 
         backupToSpreadsheet(activities as any);
 
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
-        expect(mockSheet.getRange).toHaveBeenNthCalledWith(1, 2, 1, 1, 1); // 既存ID取得用
-        expect(mockSheet.getRange).toHaveBeenNthCalledWith(2, 3, 1, 1, 10); // データ書き込み用 (lastRow + 1)
+        expect(mockSheet.getRange).toHaveBeenNthCalledWith(1, 2, 1, 1, 1);
+        expect(mockSheet.getRange).toHaveBeenNthCalledWith(2, 3, 1, 1, 15); // column count is 15
         expect(mockRange.setValues).toHaveBeenCalledWith([
             [
                 67890,
@@ -119,7 +140,12 @@ describe('sheets.ts', () => {
                 60,
                 100,
                 140,
-                null,
+                160,
+                180,
+                90,
+                800,
+                'Cloudy',
+                'Good effort!',
                 'https://www.strava.com/activities/67890'
             ]
         ]);
