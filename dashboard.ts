@@ -20,6 +20,7 @@ function getDashboardData(): DashboardSummary | undefined {
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
     
     const props = PropertiesService.getScriptProperties();
     const maxHR = Number(props.getProperty(Config.PROP_USER_MAX_HR) || 190);
@@ -42,21 +43,25 @@ function getDashboardData(): DashboardSummary | undefined {
         }
         
         // 期間内のデータを収集
-        if (dateObj >= thirtyDaysAgo) {
+        if (dateObj >= oneYearAgo) {
             dailyTss[dateStr] = (dailyTss[dateStr] || 0) + tss;
         }
     }
 
     // 2. 蓄積型（累積）データの生成
     // 期間内の日付を並べて、前日の値を加算していく
-    const dates = [];
+    const historyDates = [];
     for (let i = 0; i <= 30; i++) {
         const d = new Date(thirtyDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
-        dates.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'));
+        historyDates.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'));
     }
 
     let runningTotal = 0;
-    const history = dates.map(date => {
+    // 30日前までの蓄積を計算（より正確な累積値のため）
+    // dailyTssには365日分入っているが、historyの起点はthirtyDaysAgo
+    // historyの最初の値に、それ以前の蓄積を入れる必要があるかどうか？
+    // 現状の実装は thirtyDaysAgo から 0 からスタートしているのでそれに合わせる
+    const history = historyDates.map(date => {
         const dayTss = dailyTss[date] || 0;
         runningTotal += dayTss;
         return {
@@ -64,6 +69,17 @@ function getDashboardData(): DashboardSummary | undefined {
             value: Math.round(runningTotal * 10) / 10
         };
     });
+
+    // 3. ヒートマップ用データの生成（過去1年分）
+    const heatmapDates = [];
+    for (let i = 0; i < 365; i++) {
+        const d = new Date(oneYearAgo.getTime() + i * 24 * 60 * 60 * 1000);
+        heatmapDates.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'));
+    }
+    const heatmapData = heatmapDates.map(date => ({
+        date,
+        value: dailyTss[date] || 0
+    }));
 
     // 最後のアクティビティ
     const lastRow = data[data.length - 1];
@@ -89,7 +105,8 @@ function getDashboardData(): DashboardSummary | undefined {
         lastActivity: lastActivity,
         fitness: Math.round(runningTotal * 10) / 10,
         gears: getGearStatus(),
-        history: history
+        history: history,
+        heatmapData: heatmapData
     };
     
     return summary;

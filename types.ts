@@ -176,6 +176,7 @@ interface DashboardSummary {
     fitness: number;
     gears: GearStatus[];
     history: Array<{ date: string; value: number }>;
+    heatmapData: Array<{ date: string; value: number }>;
 }
 
 /**

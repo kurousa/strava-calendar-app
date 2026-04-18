@@ -8,6 +8,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { ActivityDetail } from './components/ActivityDetail'
 import { GearItem } from './components/GearItem'
 import { MetaStat } from './components/Stats'
+import { Heatmap } from './components/Heatmap'
 
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('google_id_token'))
@@ -227,6 +228,11 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                </ErrorBoundary>
+
+                {/* Heatmap */}
+                <ErrorBoundary>
+                  <Heatmap data={data.heatmapData} />
                 </ErrorBoundary>
               </div>
 
