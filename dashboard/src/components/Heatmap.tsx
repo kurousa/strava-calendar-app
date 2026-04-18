@@ -24,7 +24,7 @@ export function Heatmap({ data }: HeatmapProps) {
           values={data || []}
           horizontal={false}
           gutterSize={2}
-          classForValue={(value: { date: string; value: number } | undefined) => {
+          classForValue={(value: any) => {
             if (!value || value.value === 0) {
               return 'color-empty';
             }
@@ -34,12 +34,11 @@ export function Heatmap({ data }: HeatmapProps) {
             if (val < 90) return 'color-strava-3';
             return 'color-strava-4';
           }}
-          // @ts-ignore
-          tooltipDataAttrs={(value) => {
-            if (!value || !value.date) return {};
+          tooltipDataAttrs={(value: any) => {
+            if (!value || !value.date) return {} as any;
             return {
-              'data-tip': `${value.date}: TSS ${(value as any).value}`,
-            };
+              'data-tip': `${value.date}: TSS ${value.value}`,
+            } as any;
           }}
         />
       </div>
