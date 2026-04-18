@@ -6,6 +6,11 @@ describe('fetchDashboardData', () => {
     vi.stubGlobal('fetch', vi.fn());
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
   it('should throw error when VITE_GAS_DEPLOY_ID is not defined', async () => {
     // Ensure it's undefined
     vi.stubEnv('VITE_GAS_DEPLOY_ID', '');
