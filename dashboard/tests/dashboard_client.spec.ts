@@ -12,7 +12,7 @@ describe('fetchDashboardData', () => {
 
     // We need to import the module after stubbing the environment variable
     // because GAS_DEPLOY_ID is initialized at the top level.
-    const { fetchDashboardData } = await import('../dashboard/src/api/client');
+    const { fetchDashboardData } = await import('../src/api/client');
 
     await expect(fetchDashboardData('token')).rejects.toThrow('VITE_GAS_DEPLOY_ID is not defined');
   });
@@ -35,7 +35,7 @@ describe('fetchDashboardData', () => {
       json: () => Promise.resolve(mockResponse)
     });
 
-    const { fetchDashboardData } = await import('../dashboard/src/api/client');
+    const { fetchDashboardData } = await import('../src/api/client');
     const result = await fetchDashboardData('fake-token');
 
     expect(result).toEqual(mockResponse.data);
@@ -62,7 +62,7 @@ describe('fetchDashboardData', () => {
       json: () => Promise.resolve(mockErrorResponse)
     });
 
-    const { fetchDashboardData } = await import('../dashboard/src/api/client');
+    const { fetchDashboardData } = await import('../src/api/client');
 
     await expect(fetchDashboardData('invalid-token')).rejects.toThrow('Invalid token');
   });
@@ -78,7 +78,7 @@ describe('fetchDashboardData', () => {
       json: () => Promise.resolve(mockErrorResponse)
     });
 
-    const { fetchDashboardData } = await import('../dashboard/src/api/client');
+    const { fetchDashboardData } = await import('../src/api/client');
 
     await expect(fetchDashboardData('token')).rejects.toThrow('Failed to fetch data');
   });
