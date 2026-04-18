@@ -24,11 +24,11 @@ export function Heatmap({ data }: HeatmapProps) {
           values={data || []}
           horizontal={false}
           gutterSize={2}
-          classForValue={(value) => {
-            if (!value || (value as any).value === 0) {
+          classForValue={(value: { date: string; value: number } | undefined) => {
+            if (!value || value.value === 0) {
               return 'color-empty';
             }
-            const val = (value as any).value;
+            const val = value.value;
             if (val < 30) return 'color-strava-1';
             if (val < 60) return 'color-strava-2';
             if (val < 90) return 'color-strava-3';
