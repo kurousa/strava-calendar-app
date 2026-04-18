@@ -11,16 +11,23 @@ dashboard/
 │   ├── api/               # API クライアントと型定義
 │   │   ├── client.ts      # Google Apps Script Web App 用 API クライアント
 │   │   └── types.ts       # API レスポンスの型定義
-│   ├── assets/            # コンポーネント用アセット
-│   ├── App.tsx            # メインコンポーネント (ダッシュボード UI)
-│   ├── App.css            # ダッシュボード固有のスタイル
-│   ├── index.css          # グローバルスタイル
+│   ├── components/        # UI コンポーネント (再利用可能な部品)
+│   │   ├── ActivityDetail.tsx # 活動詳細画面
+│   │   ├── ErrorBoundary.tsx  # エラー境界
+│   │   ├── GearItem.tsx       # ギア表示コンポーネント
+│   │   └── Stats.tsx          # 統計表示用ヘルパー
+│   ├── lib/               # ユーティリティ
+│   │   └── utils.ts       # Tailwind 結合用ユーティリティ (cn)
+│   ├── assets/            # 画像・アセット
+│   ├── App.tsx            # メインコンポーネント (ルーティング・全体構成)
+│   ├── App.css            # アプリケーション固有のスタイル
+│   ├── index.css          # グローバルスタイル (Tailwind 指令含む)
 │   └── main.tsx           # React エントリーポイント
-├── index.html             # アプリケーションのエントリーポイント
-├── package.json           # 依存関係とスクリプト
+├── index.html             # HTML テンプレート
+├── package.json           # 依存関係・スクリプト
 ├── tsconfig.json          # TypeScript 設定
 ├── vercel.json            # Vercel デプロイ設定
-└── vite.config.ts         # Vite ビルド設定
+└── vite.config.ts         # Vite 設定
 ```
 
 ## セットアップ
@@ -35,13 +42,19 @@ pnpm install
 
 `.env.local` ファイルを作成し、以下の変数を設定してください。
 
-```text
-VITE_GAS_DEPLOY_ID=YOUR_GAS_DEPLOY_MENT_ID
-VITE_API_KEY=YOUR_API_KEY
+```shell
+cp .env.example .env.local
 ```
 
+```
+VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+VITE_GAS_DEPLOY_ID=YOUR_GAS_DEPLOY_ID
+VITE_DASHBOARD_API_KEY=YOUR_DASHBOARD_API_KEY
+```
+
+- `VITE_GOOGLE_CLIENT_ID`: Google Cloud Consoleで作成したOAuth2クライアントID。
 - `VITE_GAS_DEPLOY_ID`: Google Apps Script のウェブアプリとしてデプロイした際のデプロイ ID。
-- `VITE_API_KEY`: GAS 側で設定した API キー。
+- `VITE_DASHBOARD_API_KEY`: GAS 側で設定した API キー。
 
 ## 開発と実行
 
@@ -59,4 +72,4 @@ pnpm build
 
 ## デプロイ
 
-このダッシュボードは Vercel にデプロイされるように設定されています。`.github/workflows/deploy-dashboard.yml` を通じて、`main` ブランチへのプッシュ時に自動的にデプロイされます。
+このダッシュボードは Vercel にデプロイされるように設定されています。
