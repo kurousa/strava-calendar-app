@@ -395,7 +395,7 @@ function MetaStat({ icon, label, value, unit }: { icon: ReactNode, label: string
   )
 }
 
-function GearItem({ gear }: { gear: any }) {
+function GearItem({ gear }: { gear: GearStatus }) {
   return (
     <div className="bg-white p-6 rounded-[32px] shadow-lg hover:shadow-xl transition-all duration-300 border border-on-surface/5 flex gap-5 items-center group">
       <div className="bg-surface-low p-4 rounded-2xl group-hover:bg-on-surface group-hover:text-white transition-colors duration-500">
