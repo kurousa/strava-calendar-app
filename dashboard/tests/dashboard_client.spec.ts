@@ -31,9 +31,9 @@ describe('fetchDashboardData', () => {
       }
     };
 
-    (global.fetch as any).mockResolvedValue({
+    vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockResponse)
-    });
+    } as any);
 
     const { fetchDashboardData } = await import('../src/api/client');
     const result = await fetchDashboardData('fake-token');
