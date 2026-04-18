@@ -3,7 +3,7 @@ import { GoogleLogin, googleLogout } from '@react-oauth/google'
 import { Heart, Activity, Clock, Map, Cloud, LogOut, ChevronRight, Zap } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { fetchDashboardData } from './api/client'
-import type { DashboardSummary } from './api/types'
+import type { DashboardSummary, GearStatus } from './api/types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
