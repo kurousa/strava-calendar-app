@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('sheets.ts', () => {
     let mockSpreadsheet: any;
@@ -37,6 +37,10 @@ describe('sheets.ts', () => {
             })
         });
         global.Logger.log = vi.fn();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     it('should skip backup if SPREADSHEET_ID is not set', async () => {
