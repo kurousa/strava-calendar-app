@@ -360,7 +360,7 @@ export default function App() {
 }
 
 // Helper Components
-function DetailStat({ label, value, unit }: { label: string, value: any, unit: string }) {
+function DetailStat({ label, value, unit }: { label: string, value: string | number | undefined, unit: string }) {
   return (
     <div>
       <p className="text-[10px] font-black tracking-widest text-white/50 uppercase">{label}</p>
