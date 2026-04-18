@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { GoogleLogin, googleLogout } from '@react-oauth/google'
 import { Heart, Activity, Clock, Cloud, LogOut, ChevronRight, Zap } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
@@ -17,13 +17,17 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<'dashboard' | 'detail'>('dashboard')
 
-  useEffect(() => {
-    if (token) {
-      loadData(token)
-    }
-  }, [token])
+  const handleLogout = useCallback(() => {
+    googleLogout()
+    setToken(null)
+    localStorage.removeItem('google_id_token')
+    setData(null)
+    setView('dashboard')
+  }, [])
 
-  const loadData = async (idToken: string) => {
+  const loadData = useCallback(async (idToken: string) => {
+    // Avoid synchronous setState directly in useEffect body
+    await Promise.resolve()
     setLoading(true)
     setError(null)
     try {
@@ -37,15 +41,16 @@ export default function App() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [handleLogout])
 
-  const handleLogout = () => {
-    googleLogout()
-    setToken(null)
-    localStorage.removeItem('google_id_token')
-    setData(null)
-    setView('dashboard')
-  }
+  useEffect(() => {
+    if (token) {
+      const timer = setTimeout(() => {
+        loadData(token)
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  }, [token, loadData])
 
   if (!token) {
     return (
