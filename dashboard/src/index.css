@@ -42,22 +42,22 @@
 }
 
 .react-calendar-heatmap .color-strava-1 {
-  fill: #fc6100;
+  fill: var(--color-strava);
   fill-opacity: 0.2;
 }
 
 .react-calendar-heatmap .color-strava-2 {
-  fill: #fc6100;
+  fill: var(--color-strava);
   fill-opacity: 0.4;
 }
 
 .react-calendar-heatmap .color-strava-3 {
-  fill: #fc6100;
+  fill: var(--color-strava);
   fill-opacity: 0.7;
 }
 
 .react-calendar-heatmap .color-strava-4 {
-  fill: #fc6100;
+  fill: var(--color-strava);
 }
 
 .react-calendar-heatmap rect {
