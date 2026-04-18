@@ -20,14 +20,16 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         // シートが存在しない場合は新規作成し、ヘッダーを設定
         if (!sheet) {
             sheet = ss.insertSheet(Config.BACKUP_SHEET_NAME);
-            const headers = ['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '体重(kg)', 'URL'];
+            const headers = [
+                'ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', 
+                '平均心拍数', '最大心拍数', '平均ワット', 'ケイデンス', 'カロリー', 
+                '天気', 'AIコメント', 'URL'
+            ];
             sheet.appendRow(headers);
-            // ヘッダー行を固定し、太字にする装飾
             sheet.setFrozenRows(1);
             sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
         }
         
-        // シートに既存のレコードがある場合は、既存のレコードを取得（重複登録を防止するため）
         const existingIds = new Set<string>();
         const lastRow = sheet.getLastRow();
         if (lastRow > 1) {
@@ -36,7 +38,6 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             });
         }
 
-        // アクティビティをスプレッドシートの「行 (配列)」の形式に変換
         const rows = activities.map(activity => {
             if (existingIds.has(String(activity.id))) {
                 Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
@@ -44,15 +45,16 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             }
             const distanceKm = activity.distance ? (activity.distance / 1000).toFixed(2) : '0';
             const timeMin = activity.moving_time ? Math.floor(activity.moving_time / 60) : 0;
-            // Stravaの開始時間をスプレッドシートで扱いやすい形式に
-            // start_date_local はローカル時刻だが、Strava APIが末尾に 'Z'（UTC）を
-            // 付与するため、除去してGASのスクリプトタイムゾーンで正しく解釈させる
             const date = activity.start_date_local
                 ? new Date(activity.start_date_local.replace(/Z$/i, ''))
                 : new Date(activity.start_date);
-            // NOTE: ループ内で体重を取得しているが、これはアクティビティで記録が変わる可能性を加味したもの
-            // 実際の出力等を検討後に変更するかを検討する
-            const weight = getAthleteWeight();
+            
+            // 天気とAIコメントの取得
+            let weather = '';
+            if (activity.start_latlng && activity.start_latlng.length === 2) {
+                weather = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], date);
+            }
+            const aiComment = generateAiComment(activity);
             const url = `https://www.strava.com/activities/${activity.id}`;
 
             return [
@@ -60,22 +62,24 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
                 date,
                 activity.type,
                 activity.name,
-                Number(distanceKm), // 数値として入力
+                Number(distanceKm),
                 timeMin,
                 activity.total_elevation_gain || 0,
                 activity.average_heartrate || '',
-                weight,
+                activity.max_heartrate || '',
+                activity.average_watts || '',
+                activity.average_cadence || '',
+                activity.calories || '',
+                weather || '',
+                aiComment || '',
                 url
             ];
         })
-        // undefined（スキップされたもの）を除外
         .filter((row): row is any[] => row !== undefined);
-        // 新規登録するアクティビティがない場合は終了
+
         if (rows.length === 0) return;
 
-        // 最終行の次の行から、一括でデータを流し込む（非常に高速）
-        sheet.getRange(lastRow + 1, 1, rows.length, rows[0] ? rows[0].length : 0).setValues(rows);
-        
+        sheet.getRange(lastRow + 1, 1, rows.length, rows[0].length).setValues(rows);
         Logger.log(`スプレッドシートに ${rows.length} 件バックアップしました。`);
 
     } catch (e) {

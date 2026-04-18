@@ -21,8 +21,8 @@ describe('dashboard', () => {
                 getSheetByName: vi.fn().mockReturnValue({
                     getDataRange: vi.fn().mockReturnValue({
                         getValues: vi.fn().mockReturnValue([
-                            ['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '体重(kg)', 'URL'],
-                            ['123', new Date().toISOString(), 'Run', 'Morning Run', 10, 60, 100, 150, 70, 'http://strava.com/123']
+                            ['ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', '平均心拍数', '最大心拍数', '平均ワット', 'ケイデンス', 'カロリー', '天気', 'AIコメント', 'URL'],
+                            ['123', new Date(), 'Run', 'Morning Run', 10, 60, 100, 150, 180, 200, 80, 500, 'Sunny', 'Great!', 'http://strava.com/123']
                         ])
                     })
                 })
