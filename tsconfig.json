@@ -23,6 +23,7 @@
     ],
     "exclude": [
         "node_modules",
+        "dashboard",
         "tests/**",
         "vitest.config.ts",
         "vitest.setup.ts"

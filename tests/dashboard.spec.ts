@@ -51,7 +51,7 @@ describe('dashboard', () => {
 
         expect(result).toBeDefined();
         if (result) {
-            expect(result.lastActivity).toContain('Morning Run');
+            expect(result.lastActivity?.title).toBe('Morning Run');
             expect(result.fitness).toBeGreaterThan(0);
             expect(result.gears).toHaveLength(1);
             expect(result.gears[0].name).toBe('Bike');

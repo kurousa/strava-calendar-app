@@ -29,21 +29,42 @@ function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Cont
 
     // ヘッドレスAPI: Next.js等のフロントエンドからのデータ取得用
     if (e && e.parameter && e.parameter.action === 'getStats') {
+        const token = e.parameter.token;
         const apiKey = PropertiesService.getScriptProperties().getProperty(Config.PROP_API_KEY);
         
-        // 認証チェック
-        if (!apiKey || e.parameter.key !== apiKey) {
-            Logger.log('エラー: APIキーが設定されていないか、一致しません。');
+        let isAuthorized = false;
+
+        // 1. APIキーによる認証 (既存)
+        if (apiKey && e.parameter.key === apiKey) {
+            isAuthorized = true;
+        }
+
+        // 2. Google ID Token による認証
+        if (!isAuthorized && token) {
+            const email = verifyIdToken(token);
+            if (email) {
+                const allowedEmails = PropertiesService.getScriptProperties().getProperty(Config.PROP_ALLOWED_EMAILS) || "";
+                const allowedList = allowedEmails.split(',').map(s => s.trim());
+                if (allowedList.includes(email)) {
+                    isAuthorized = true;
+                } else {
+                    Logger.log(`エラー: 許可されていないユーザーです (${email})`);
+                }
+            }
+        }
+
+        if (!isAuthorized) {
+            Logger.log('エラー: 認証に失敗しました。');
             return ContentService.createTextOutput(JSON.stringify({ 
                 status: 'error', 
                 code: 401,
-                message: 'Unauthorized: Invalid or Missing API Key' 
+                message: 'Unauthorized: Invalid Token or API Key' 
             }))
                 .setMimeType(ContentService.MimeType.JSON);
         }
 
         try {
-            // スプレッドシートからデータを取得する関数の呼び出し (sheets.ts等に実装想定)
+            // スプレッドシートからデータを取得する関数の呼び出し
             const stats = getDashboardData() ?? { lastActivity: [], fitness: 0, gears: [] };
             
             return ContentService.createTextOutput(JSON.stringify({ 
@@ -83,6 +104,28 @@ function doPost(e: any): GoogleAppsScript.Content.TextOutput {
         Logger.log(`[Webhook Error] ${(err as Error).toString()}`);
         return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
             .setMimeType(ContentService.MimeType.JSON);
+    }
+}
+
+/**
+ * Google ID Tokenを検証し、メールアドレスを返す
+ */
+function verifyIdToken(token: string): string | null {
+    try {
+        const response = UrlFetchApp.fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+        const data = JSON.parse(response.getContentText());
+        
+        // クライアントIDの検証
+        const expectedClientId = PropertiesService.getScriptProperties().getProperty(Config.PROP_GOOGLE_CLIENT_ID);
+        if (expectedClientId && data.aud !== expectedClientId) {
+            Logger.log('エラー: IDトークンの aud が一致しません。');
+            return null;
+        }
+
+        return data.email || null;
+    } catch (e) {
+        Logger.log(`エラー: IDトークンの検証に失敗しました: ${e}`);
+        return null;
     }
 }
 

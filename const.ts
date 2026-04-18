@@ -37,6 +37,8 @@ var Config = {
     PROP_USER_MAX_HR: 'USER_MAX_HR',
     PROP_USER_REST_HR: 'USER_REST_HR',
     PROP_API_KEY: 'API_KEY',
+    PROP_GOOGLE_CLIENT_ID: 'GOOGLE_CLIENT_ID',
+    PROP_ALLOWED_EMAILS: 'ALLOWED_EMAILS',
 
     // API エンドポイント
     STRAVA_API_BASE: 'https://www.strava.com/api/v3',

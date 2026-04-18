@@ -88,7 +88,8 @@ vi.hoisted(() => {
     (global as any).Session = {
         getEffectiveUser: vi.fn(() => ({
             getEmail: vi.fn(() => 'test@example.com')
-        }))
+        })),
+        getScriptTimeZone: vi.fn(() => 'Asia/Tokyo')
     };
 
     (global as any).MailApp = {

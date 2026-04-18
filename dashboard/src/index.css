@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Lexend", sans-serif;
+  --font-sans: "Inter", sans-serif;
+
+  --color-primary-custom: #a43d00;
+  --color-strava: #fc6100;
+  --color-background-custom: #f9f9fa;
+  --color-surface-low: #f3f3f4;
+  --color-on-surface: #1a1c1d;
+  --color-on-secondary: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply bg-background-custom text-on-surface font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20;
+}
+
+/* Layering without borders as per DESIGN.md */
+.layer-card {
+  @apply bg-white shadow-sm hover:shadow-md transition-shadow duration-300;
+}
