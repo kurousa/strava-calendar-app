@@ -7,29 +7,31 @@ interface HeatmapProps {
 
 export function Heatmap({ data }: HeatmapProps) {
   const today = new Date();
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(today.getFullYear() - 1);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
 
   return (
     <div className="bg-white/60 backdrop-blur-xl rounded-[40px] p-8 md:p-10 space-y-6 border border-white/20 shadow-2xl relative overflow-hidden group">
       <div className="space-y-1">
         <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Activity</h2>
-        <p className="text-[10px] font-bold tracking-widest text-on-surface/40 uppercase">Annual Contribution Map</p>
+        <p className="text-[10px] font-bold tracking-widest text-on-surface/40 uppercase">30-Day Activity Map</p>
       </div>
 
-      <div className="heatmap-container">
+      <div className="heatmap-container mx-auto max-w-[280px]">
         <CalendarHeatmap
-          startDate={oneYearAgo}
+          startDate={thirtyDaysAgo}
           endDate={today}
-          values={data}
+          values={data || []}
+          horizontal={false}
+          gutterSize={2}
           classForValue={(value) => {
             if (!value || (value as any).value === 0) {
               return 'color-empty';
             }
             const val = (value as any).value;
-            if (val < 50) return 'color-strava-1';
-            if (val < 100) return 'color-strava-2';
-            if (val < 200) return 'color-strava-3';
+            if (val < 30) return 'color-strava-1';
+            if (val < 60) return 'color-strava-2';
+            if (val < 90) return 'color-strava-3';
             return 'color-strava-4';
           }}
           // @ts-ignore

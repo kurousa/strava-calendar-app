@@ -70,13 +70,8 @@ function getDashboardData(): DashboardSummary | undefined {
         };
     });
 
-    // 3. ヒートマップ用データの生成（過去1年分）
-    const heatmapDates = [];
-    for (let i = 0; i < 365; i++) {
-        const d = new Date(oneYearAgo.getTime() + i * 24 * 60 * 60 * 1000);
-        heatmapDates.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'));
-    }
-    const heatmapData = heatmapDates.map(date => ({
+    // 3. ヒートマップ用データの生成（直近30日分に修正）
+    const heatmapData = historyDates.map(date => ({
         date,
         value: dailyTss[date] || 0
     }));
