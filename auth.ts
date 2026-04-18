@@ -86,9 +86,10 @@ function verifyGoogleToken(idToken: string): boolean {
         const tokenInfo = JSON.parse(response.getContentText());
         
         // 1. クライアントIDが自分のReactアプリのものか確認
+        // 1. クライアントIDが自分のReactアプリのものか確認
         const expectedClientId = PropertiesService.getScriptProperties().getProperty(Config.PROP_GOOGLE_CLIENT_ID);
-        if (expectedClientId && tokenInfo.aud !== expectedClientId) {
-            Logger.log('エラー: IDトークンの aud が一致しません。');
+        if (!expectedClientId || tokenInfo.aud !== expectedClientId) {
+            Logger.log('エラー: クライアントIDが未設定、またはIDトークンの aud が一致しません。');
             return false;
         }
         
