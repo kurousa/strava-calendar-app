@@ -1,12 +1,121 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { doGet, doPost } from '../router';
+import { verifyGoogleToken, resetConfigCache } from '../auth';
 import { importPastActivitiesFromWeb } from '../manual_import';
 
 describe('router', () => {
 
+    describe('verifyGoogleToken', () => {
+        beforeEach(() => {
+            vi.resetAllMocks();
+            vi.stubGlobal('Logger', { log: vi.fn() });
+            resetConfigCache();
+        });
+
+        it('should return true for valid token and allowed email', () => {
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    if (key === 'ALLOWED_EMAILS') return 'test@example.com';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
+                    email: 'test@example.com'
+                })
+            });
+
+            const result = verifyGoogleToken('valid_token');
+            expect(result).toBe(true);
+        });
+
+        it('should return true if email matches one of multiple allowed emails', () => {
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    if (key === 'ALLOWED_EMAILS') return 'other@example.com, test@example.com, user@example.com';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
+                    email: 'test@example.com'
+                })
+            });
+
+            const result = verifyGoogleToken('valid_token');
+            expect(result).toBe(true);
+        });
+
+        it('should return false if token is empty', () => {
+            expect(verifyGoogleToken('')).toBe(false);
+        });
+
+        it('should return false if aud mismatch', () => {
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'wrong_client_id',
+                    email: 'test@example.com'
+                })
+            });
+
+            const result = verifyGoogleToken('token');
+            expect(result).toBe(false);
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('aud が一致しません'));
+        });
+
+        it('should return false if email is not allowed', () => {
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    if (key === 'ALLOWED_EMAILS') return 'allowed@example.com';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
+                    email: 'intruder@example.com'
+                })
+            });
+
+            const result = verifyGoogleToken('token');
+            expect(result).toBe(false);
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーによるアクセスです'));
+        });
+
+        it('should return false if UrlFetchApp fails', () => {
+            (global as any).UrlFetchApp.fetch.mockImplementation(() => {
+                throw new Error('Network error');
+            });
+
+            const result = verifyGoogleToken('bad_token');
+            expect(result).toBe(false);
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('IDトークンの検証に失敗しました'));
+        });
+    });
+
     describe('doGet', () => {
         beforeEach(() => {
             vi.resetAllMocks();
+            resetConfigCache();
         });
 
         it('should create HTML output from index file and set title', () => {
@@ -62,70 +171,102 @@ describe('router', () => {
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
         });
 
-        it('should handle headless API getStats action with valid API key', () => {
+        it('should handle headless API getStats action with valid ID Token', () => {
             const mockData = { some: 'stats' };
             vi.stubGlobal('getDashboardData', vi.fn().mockReturnValue(mockData));
+            
+            // PropertiesService のモック
             const mockProps = {
                 getProperty: vi.fn((key) => {
-                    if (key === 'API_KEY') return 'valid_key';
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    if (key === 'ALLOWED_EMAILS') return 'test@example.com';
                     return null;
                 })
             };
             (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+
+            // UrlFetchApp.fetch のモック
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
+                    email: 'test@example.com'
+                })
+            });
 
             const e = {
                 parameter: {
                     action: 'getStats',
-                    key: 'valid_key'
+                    token: 'valid_id_token'
                 }
             };
             const result = doGet(e as any);
 
-            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
-                JSON.stringify({ 
-                    status: 'success', 
-                    code: 200,
-                    data: mockData 
-                })
-            );
-            expect(result.getContent()).toBe(JSON.stringify({ 
-                status: 'success', 
-                code: 200,
-                data: mockData 
-            }));
+            expect(result.getContent()).toContain('"status":"success"');
+            expect(result.getContent()).toContain('"code":200');
+            expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_id_token'));
         });
 
-        it('should return error for getStats action with invalid API key', () => {
+        it('should return error for getStats action with invalid ID Token (aud mismatch)', () => {
             const mockProps = {
                 getProperty: vi.fn((key) => {
-                    if (key === 'API_KEY') return 'valid_key';
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
                     return null;
                 })
             };
             (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'wrong_client_id',
+                    email: 'test@example.com'
+                })
+            });
             vi.stubGlobal('Logger', { log: vi.fn() });
 
             const e = {
                 parameter: {
                     action: 'getStats',
-                    key: 'invalid_key'
+                    token: 'invalid_token'
                 }
             };
             const result = doGet(e as any);
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
-            expect(result.getContent()).toContain('Unauthorized: Invalid Token or API Key');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('エラー: 認証に失敗しました。'));
+            expect(result.getContent()).toContain('Unauthorized: Invalid Token');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('IDトークンの aud が一致しません'));
         });
 
-        it('should return error if getStats action is called and no API key is configured', () => {
-            const mockData = { some: 'stats' };
-            vi.stubGlobal('getDashboardData', vi.fn().mockReturnValue(mockData));
+        it('should return error for getStats action with forbidden email', () => {
             const mockProps = {
-                getProperty: vi.fn(() => null)
+                getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    if (key === 'ALLOWED_EMAILS') return 'allowed@example.com';
+                    return null;
+                })
             };
             (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            (global as any).UrlFetchApp.fetch.mockReturnValue({
+                getContentText: () => JSON.stringify({
+                    aud: 'valid_client_id',
+                    email: 'intruder@example.com'
+                })
+            });
+            vi.stubGlobal('Logger', { log: vi.fn() });
+
+            const e = {
+                parameter: {
+                    action: 'getStats',
+                    token: 'some_token'
+                }
+            };
+            const result = doGet(e as any);
+
+            expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":401');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーによるアクセスです'));
+        });
+
+        it('should return error if getStats action is called without token', () => {
             vi.stubGlobal('Logger', { log: vi.fn() });
 
             const e = {
@@ -137,14 +278,14 @@ describe('router', () => {
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
-            expect(result.getContent()).toContain('Unauthorized: Invalid Token or API Key');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('エラー: 認証に失敗しました。'));
+            expect(result.getContent()).toContain('Unauthorized: Invalid Token');
         });
     });
 
     describe('doPost', () => {
         beforeEach(() => {
             vi.resetAllMocks();
+            resetConfigCache();
         });
 
         it('should return OK text output', () => {
@@ -183,6 +324,7 @@ describe('router', () => {
             vi.resetAllMocks();
             vi.stubGlobal('Logger', { log: vi.fn() });
             vi.stubGlobal('importPastActivities', vi.fn());
+            resetConfigCache();
         });
 
 

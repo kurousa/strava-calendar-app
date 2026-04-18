@@ -9,6 +9,8 @@ declare const OAuth2: any;
 let cachedStravaClientId: string | null = null;
 let cachedStravaClientSecret: string | null = null;
 let cachedStravaScope: string | null = null;
+let cachedGoogleClientId: string | null = null;
+let cachedAllowedEmails: string | null = null;
 
 /**
  * Strava連携のためのOAuth2サービスを取得する
@@ -74,6 +76,61 @@ function resetAuth(): void {
     Logger.log('連携を解除しました。');
 }
 
+/**
+ * Google ID Tokenを検証し、許可されたユーザーか確認する
+ */
+function verifyGoogleToken(idToken: string): boolean {
+    if (!idToken) return false;
+    
+    try {
+        // Googleの公式検証エンドポイントを叩く
+        const response = UrlFetchApp.fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+        const tokenInfo = JSON.parse(response.getContentText());
+        
+        // 1. クライアントIDが自分のReactアプリのものか確認
+        if (cachedGoogleClientId === null || cachedAllowedEmails === null) {
+             const props = PropertiesService.getScriptProperties();
+             cachedGoogleClientId = props.getProperty(Config.PROP_GOOGLE_CLIENT_ID) || "";
+             cachedAllowedEmails = props.getProperty(Config.PROP_ALLOWED_EMAILS) || "";
+        }
+        
+        const expectedClientId = cachedGoogleClientId;
+        if (!expectedClientId || tokenInfo.aud !== expectedClientId) {
+            Logger.log('エラー: クライアントIDが未設定、またはIDトークンの aud が一致しません。');
+            return false;
+        }
+        
+        // 2. 許可されたメールアドレスか確認
+        const email = tokenInfo.email;
+        if (!email) return false;
+        
+        const allowedEmails = cachedAllowedEmails;
+        const allowedList = allowedEmails.split(',').map(s => s.trim());
+        
+        if (!allowedList.includes(email)) {
+             Logger.log('エラー: 許可されていないユーザーによるアクセスです。');
+             return false;
+        }
+        
+        return true;
+    } catch (e) {
+        // トークンの有効期限切れや不正な形式の場合はエラーになる
+        Logger.log(`エラー: IDトークンの検証に失敗しました: ${e}`);
+        return false;
+    }
+}
+
+/**
+ * キャッシュされた設定値をリセットする（主にテスト用）
+ */
+function resetConfigCache(): void {
+    cachedStravaClientId = null;
+    cachedStravaClientSecret = null;
+    cachedStravaScope = null;
+    cachedGoogleClientId = null;
+    cachedAllowedEmails = null;
+}
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -81,5 +138,7 @@ if (typeof module !== 'undefined' && module.exports) {
         authCallback,
         startAuth,
         resetAuth,
+        verifyGoogleToken,
+        resetConfigCache,
     };
 }
