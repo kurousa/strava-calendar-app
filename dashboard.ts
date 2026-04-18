@@ -56,11 +56,16 @@ function getDashboardData(): DashboardSummary | undefined {
         historyDates.push(Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'));
     }
 
+    // 1年周期の中での「30日前時点」の蓄積TSSを計算し、初期値とする
     let runningTotal = 0;
-    // 30日前までの蓄積を計算（より正確な累積値のため）
-    // dailyTssには365日分入っているが、historyの起点はthirtyDaysAgo
-    // historyの最初の値に、それ以前の蓄積を入れる必要があるかどうか？
-    // 現状の実装は thirtyDaysAgo から 0 からスタートしているのでそれに合わせる
+    const thirtyDaysAgoStr = Utilities.formatDate(thirtyDaysAgo, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    
+    Object.keys(dailyTss).forEach(date => {
+        if (date < thirtyDaysAgoStr) {
+            runningTotal += dailyTss[date];
+        }
+    });
+
     const history = historyDates.map(date => {
         const dayTss = dailyTss[date] || 0;
         runningTotal += dayTss;
