@@ -152,14 +152,16 @@ describe('sheets.ts', () => {
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('1 件バックアップしました'));
     });
 
-    it('should handle errors and log them', async () => {
+    it('should handle errors, log them, and send an error email', async () => {
         global.SpreadsheetApp.openById = vi.fn().mockImplementation(() => {
             throw new Error('Spreadsheet not found');
         });
+        vi.stubGlobal('sendErrorEmail', vi.fn());
 
         const { backupToSpreadsheet } = await import('../sheets');
         backupToSpreadsheet([{ id: 123 } as any]);
 
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Backup Error]'));
+        expect(global.sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('Spreadsheet not found'));
     });
 });
