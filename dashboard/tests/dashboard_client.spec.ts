@@ -38,7 +38,7 @@ describe('fetchDashboardData', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockResponse)
-    } as any);
+    } as Response);
 
     const { fetchDashboardData } = await import('../src/api/client');
     const result = await fetchDashboardData('fake-token');
@@ -65,7 +65,7 @@ describe('fetchDashboardData', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockErrorResponse)
-    } as any);
+    } as Response);
 
     const { fetchDashboardData } = await import('../src/api/client');
 
@@ -81,7 +81,7 @@ describe('fetchDashboardData', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockErrorResponse)
-    } as any);
+    } as Response);
 
     const { fetchDashboardData } = await import('../src/api/client');
 
