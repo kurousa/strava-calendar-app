@@ -101,7 +101,7 @@ function verifyGoogleToken(idToken: string): boolean {
         const allowedList = allowedEmails.split(',').map(s => s.trim());
         
         if (!allowedList.includes(email)) {
-             Logger.log(`エラー: 許可されていないユーザーです (${email})`);
+             Logger.log('エラー: 許可されていないユーザーによるアクセスです。');
              return false;
         }
         
