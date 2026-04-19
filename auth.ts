@@ -84,7 +84,7 @@ function verifyGoogleToken(idToken: string): boolean {
     
     try {
         // Googleの公式検証エンドポイントを叩く
-        const response = UrlFetchApp.fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+        const response = UrlFetchApp.fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
         const tokenInfo = JSON.parse(response.getContentText());
         
         // 1. クライアントIDが自分のReactアプリのものか確認
