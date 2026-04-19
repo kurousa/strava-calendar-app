@@ -23,9 +23,8 @@ describe('fetchDashboardData', () => {
   });
 
   it('should throw error when VITE_GAS_DEPLOY_ID is completely undefined', async () => {
-    // Ensure it's strictly undefined by unstubbing all envs
-    vi.unstubAllEnvs();
-    delete process.env.VITE_GAS_DEPLOY_ID;
+    // Ensure it's strictly undefined
+    vi.stubEnv('VITE_GAS_DEPLOY_ID', undefined as any);
 
     // We need to import the module after stubbing the environment variable
     // because GAS_DEPLOY_ID is initialized at the top level.
