@@ -23,8 +23,9 @@ describe('fetchDashboardData', () => {
   });
 
   it('should throw error when VITE_GAS_DEPLOY_ID is completely undefined', async () => {
-    // Ensure it's strictly undefined
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', undefined as any);
+    // Ensure it's strictly undefined by unstubbing all envs
+    vi.unstubAllEnvs();
+    delete process.env.VITE_GAS_DEPLOY_ID;
 
     // We need to import the module after stubbing the environment variable
     // because GAS_DEPLOY_ID is initialized at the top level.
@@ -49,7 +50,7 @@ describe('fetchDashboardData', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockResponse)
-    } as Response);
+    } as unknown as Response);
 
     const { fetchDashboardData } = await import('../src/api/client');
     const result = await fetchDashboardData('fake-token');
@@ -76,7 +77,7 @@ describe('fetchDashboardData', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockErrorResponse)
-    } as Response);
+    } as unknown as Response);
 
     const { fetchDashboardData } = await import('../src/api/client');
 
@@ -92,7 +93,7 @@ describe('fetchDashboardData', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       json: () => Promise.resolve(mockErrorResponse)
-    } as Response);
+    } as unknown as Response);
 
     const { fetchDashboardData } = await import('../src/api/client');
 
