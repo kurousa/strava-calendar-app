@@ -134,7 +134,7 @@ describe('maps.ts', () => {
             expect(result).toBeNull();
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
-            vi.stubGlobal('sendErrorEmail', vi.fn());
+            vi.unstubAllGlobals();
         });
         it('should create and return new file if it does not exist', () => {
             const mockFile = {
