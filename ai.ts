@@ -69,7 +69,7 @@ function generateAiComment(activity: StravaActivity): string {
 
         return comment;
     } catch (e) {
-        const errorMsg = `[AI API Exception] AIコメントの生成中にエラーが発生しました: ${e}`;
+        const errorMsg = `[AI API Error] AIコメントの生成中にエラーが発生しました: ${e}`;
         Logger.log(errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         return '';

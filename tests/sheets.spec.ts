@@ -59,6 +59,7 @@ describe('sheets.ts', () => {
         const { backupToSpreadsheet } = await import('../sheets');
         backupToSpreadsheet([]);
 
+        expect(global.PropertiesService.getScriptProperties).not.toHaveBeenCalled();
         expect(global.SpreadsheetApp.openById).not.toHaveBeenCalled();
     });
 
@@ -154,6 +155,26 @@ describe('sheets.ts', () => {
             ]
         ]);
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('1 件バックアップしました'));
+    });
+
+    it('should skip appending rows if rows.length === 0 after filtering', async () => {
+        mockSpreadsheet.getSheetByName.mockReturnValue(mockSheet);
+        mockSheet.getLastRow.mockReturnValue(2); // Headers + 1 record
+        mockRange.getValues.mockReturnValue([['12345']]); // Existing ID
+
+        const { backupToSpreadsheet } = await import('../sheets');
+        const activities = [
+            { id: 12345, name: 'Duplicate' },
+        ];
+
+        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Cloudy'));
+        vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Good effort!'));
+
+        backupToSpreadsheet(activities as any);
+
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
+        expect(mockSheet.getRange).toHaveBeenCalledTimes(1); // Only called to get existing IDs
+        expect(mockRange.setValues).not.toHaveBeenCalled();
     });
 
     it('should handle errors, log them, and send an error email', async () => {

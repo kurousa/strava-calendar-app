@@ -6,6 +6,7 @@ describe('gear', () => {
     let mockProperties: { [key: string]: string } = {};
 
     beforeEach(() => {
+        vi.stubGlobal('sendErrorEmail', vi.fn());
         vi.clearAllMocks();
         mockProperties = {};
 

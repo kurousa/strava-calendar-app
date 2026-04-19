@@ -8,7 +8,7 @@
  * - Strava Webhook のバリデーションリクエスト (GET) に対応する
  * - 通常のアクセス（インポート画面）を表示する
  */
-function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Content.TextOutput {
+function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Content.TextOutput {
     // Strava Webhook のバリデーションリクエスト (GET) の場合
     if (e && e.parameter && e.parameter['hub.mode'] === 'subscribe') {
         const verifyToken = PropertiesService.getScriptProperties().getProperty(Config.PROP_STRAVA_VERIFY_TOKEN);
@@ -67,7 +67,7 @@ function doGet(e: any): GoogleAppsScript.HTML.HtmlOutput | GoogleAppsScript.Cont
  * POSTリクエストハンドラー
  * - Strava Webhook からの通知 (POST) を受け取る
  */
-function doPost(e: any): GoogleAppsScript.Content.TextOutput {
+function doPost(e: GoogleAppsScript.Events.DoPost): GoogleAppsScript.Content.TextOutput {
     try {
         const event: StravaWebhookEvent = JSON.parse(e.postData.contents);
         Logger.log(`[Webhook] Received event: ${event.aspect_type} for ${event.object_type} (ID: ${event.object_id})`);

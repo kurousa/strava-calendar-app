@@ -220,6 +220,8 @@ function processActivityToCalendar(
                 }
             } catch (e) {
                 Logger.log(`添付ファイルの追加に失敗しました: ${e}`);
+                const errorMsg = `[Calendar Error] 添付ファイルの追加に失敗しました: ${e}`;
+                if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
             }
         }
     }
