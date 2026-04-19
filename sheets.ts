@@ -6,12 +6,13 @@
  * 成功したアクティビティを一括でスプレッドシートに追記する
  */
 function backupToSpreadsheet(activities: StravaActivity[]): void {
+    if (activities.length === 0) return;
+
     const spreadsheetId = PropertiesService.getScriptProperties().getProperty(Config.PROP_SPREADSHEET_ID);
     if (!spreadsheetId) {
         Logger.log(`${Config.PROP_SPREADSHEET_ID} が設定されていないため、バックアップをスキップします。`);
         return;
     }
-    if (activities.length === 0) return;
 
     try {
         const ss = SpreadsheetApp.openById(spreadsheetId);
