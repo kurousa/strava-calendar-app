@@ -8,7 +8,10 @@ describe('utils', () => {
     });
 
     it('handles conditional class names with clsx', () => {
-      expect(cn('class1', true && 'class2', false && 'class3')).toBe('class1 class2');
+      // Avoid using constant truthiness to fix ESLint no-constant-binary-expression
+      const isTrue = true;
+      const isFalse = false;
+      expect(cn('class1', isTrue && 'class2', isFalse && 'class3')).toBe('class1 class2');
       expect(cn({ 'class1': true, 'class2': false })).toBe('class1');
     });
 
