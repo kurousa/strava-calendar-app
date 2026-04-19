@@ -50,6 +50,8 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
         
     } catch (e) {
         Logger.log(`[Weather API Exception] ${e}`);
+        const errorMsg = `[Weather API Error] 天気情報の取得に失敗しました: ${e}`;
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         return '';
     }
 }
