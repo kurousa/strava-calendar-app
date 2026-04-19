@@ -29,7 +29,7 @@ describe('router', () => {
                 })
             });
 
-            const result = verifyGoogleToken('valid_token');
+            const result = verifyGoogleToken('valid_header.valid_payload.valid_signature');
             expect(result).toBe(true);
         });
 
@@ -50,7 +50,7 @@ describe('router', () => {
                 })
             });
 
-            const result = verifyGoogleToken('valid_token');
+            const result = verifyGoogleToken('valid_header.valid_payload.valid_signature');
             expect(result).toBe(true);
         });
 
@@ -74,7 +74,7 @@ describe('router', () => {
                 })
             });
 
-            const result = verifyGoogleToken('token');
+            const result = verifyGoogleToken('test_header.test_payload.test_signature');
             expect(result).toBe(false);
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('aud が一致しません'));
         });
@@ -96,7 +96,7 @@ describe('router', () => {
                 })
             });
 
-            const result = verifyGoogleToken('token');
+            const result = verifyGoogleToken('test_header.test_payload.test_signature');
             expect(result).toBe(false);
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーによるアクセスです'));
         });
@@ -106,7 +106,7 @@ describe('router', () => {
                 throw new Error('Network error');
             });
 
-            const result = verifyGoogleToken('bad_token');
+            const result = verifyGoogleToken('bad_header.bad_payload.bad_signature');
             expect(result).toBe(false);
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('IDトークンの検証に失敗しました'));
         });
@@ -196,14 +196,14 @@ describe('router', () => {
             const e = {
                 parameter: {
                     action: 'getStats',
-                    token: 'valid_id_token'
+                    token: 'valid_header.valid_payload.valid_signature'
                 }
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(result.getContent()).toContain('"status":"success"');
             expect(result.getContent()).toContain('"code":200');
-            expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_id_token'));
+            expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_header.valid_payload.valid_signature'));
         });
 
         it('should return error for getStats action with invalid ID Token (aud mismatch)', () => {
@@ -225,7 +225,7 @@ describe('router', () => {
             const e = {
                 parameter: {
                     action: 'getStats',
-                    token: 'invalid_token'
+                    token: 'invalid_header.invalid_payload.invalid_signature'
                 }
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
@@ -256,7 +256,7 @@ describe('router', () => {
             const e = {
                 parameter: {
                     action: 'getStats',
-                    token: 'some_token'
+                    token: 'some_header.some_payload.some_signature'
                 }
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
