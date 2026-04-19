@@ -3,6 +3,7 @@ import { saveMapToDrive, getOrCreateMapFolder } from '../maps';
 
 describe('maps.ts', () => {
     beforeEach(() => {
+        vi.stubGlobal('sendErrorEmail', vi.fn());
         vi.clearAllMocks();
     });
 

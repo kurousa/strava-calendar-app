@@ -50,6 +50,7 @@ describe('weather.ts', () => {
         const dateObj = new Date('2024-04-12T10:30:00+09:00'); // 10:30 JST
 
         beforeEach(() => {
+        vi.stubGlobal('sendErrorEmail', vi.fn());
             vi.clearAllMocks();
         });
 

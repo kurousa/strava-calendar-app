@@ -3,6 +3,7 @@ import { generateAiComment, resetAiCache } from '../ai';
 
 describe('generateAiComment', () => {
     beforeEach(() => {
+        vi.stubGlobal('sendErrorEmail', vi.fn());
         vi.clearAllMocks();
         resetAiCache();
     });

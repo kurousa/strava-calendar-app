@@ -3,6 +3,7 @@ import { sendSyncNotification, resetCache } from '../notifier.ts';
 
 describe('notifier', () => {
     beforeEach(() => {
+        vi.stubGlobal('sendErrorEmail', vi.fn());
         vi.clearAllMocks();
         if (typeof resetCache === 'function') resetCache();
     });

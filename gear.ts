@@ -98,6 +98,8 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
             lastAlertedKm = currentConfig.lastAlertedKm;
         } catch (e) {
             Logger.log(`[Gear Alert Error] Existing configuration for gear ID: ${gearId} was corrupted. resetting lastAlertedKm to 0.`);
+            const errorMsg = `[Gear Alert Error] Existing configuration for gear ID: ${gearId} was corrupted.`;
+            if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         }
     }
 
@@ -134,6 +136,8 @@ function getGearStatus(): GearStatus[] {
                 isPeriodic = config.isPeriodic;
             } catch (e) {
                 Logger.log(`[Gear Status Error] Failed to parse config for gear ${gear.id}`);
+                const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gear.id}`;
+                if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
             }
         }
 
