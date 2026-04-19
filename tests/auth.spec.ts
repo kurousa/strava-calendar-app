@@ -115,7 +115,7 @@ describe('auth', () => {
             ];
 
             invalidTokens.forEach(token => {
-                global.UrlFetchApp.fetch = vi.fn();
+                vi.stubGlobal('UrlFetchApp', { fetch: vi.fn() });
                 const result = verifyGoogleToken(token);
                 expect(result).toBe(false);
                 expect(global.UrlFetchApp.fetch).not.toHaveBeenCalled();
