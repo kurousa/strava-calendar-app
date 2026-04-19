@@ -124,7 +124,7 @@ describe('router', () => {
                 setTitle: mockSetTitle
             });
 
-            const result = doGet({} as any);
+            const result = doGet({} as unknown as GoogleAppsScript.Events.DoGet);
 
             expect((global as any).HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
             expect(mockSetTitle).toHaveBeenCalledWith('Strava カレンダーインポート');
@@ -144,7 +144,7 @@ describe('router', () => {
                     'hub.challenge': 'test_challenge'
                 }
             };
-            const result = doGet(e as any);
+            const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
                 JSON.stringify({ "hub.challenge": "test_challenge" })
@@ -165,7 +165,7 @@ describe('router', () => {
                     'hub.verify_token': 'wrong_token'
                 }
             };
-            doGet(e as any);
+            doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect((global as any).HtmlService.createHtmlOutput).toHaveBeenCalledWith('Forbidden: Invalid Verify Token');
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
@@ -199,7 +199,7 @@ describe('router', () => {
                     token: 'valid_id_token'
                 }
             };
-            const result = doGet(e as any);
+            const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(result.getContent()).toContain('"status":"success"');
             expect(result.getContent()).toContain('"code":200');
@@ -228,7 +228,7 @@ describe('router', () => {
                     token: 'invalid_token'
                 }
             };
-            const result = doGet(e as any);
+            const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
@@ -259,7 +259,7 @@ describe('router', () => {
                     token: 'some_token'
                 }
             };
-            const result = doGet(e as any);
+            const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
@@ -274,7 +274,7 @@ describe('router', () => {
                     action: 'getStats'
                 }
             };
-            const result = doGet(e as any);
+            const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(result.getContent()).toContain('"status":"error"');
             expect(result.getContent()).toContain('"code":401');
@@ -299,7 +299,7 @@ describe('router', () => {
                 }
             };
             vi.stubGlobal('handleStravaWebhook', vi.fn());
-            const result = doPost(e as any);
+            const result = doPost(e as unknown as GoogleAppsScript.Events.DoPost);
 
             expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
             expect(result.getContent()).toBe(JSON.stringify({ status: 'ok' }));
@@ -312,7 +312,7 @@ describe('router', () => {
                 }
             };
             vi.stubGlobal('Logger', { log: vi.fn() });
-            const result = doPost(e as any);
+            const result = doPost(e as unknown as GoogleAppsScript.Events.DoPost);
 
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Webhook Error]'));
             expect(result.getContent()).toContain('status":"error"');
