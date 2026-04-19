@@ -80,8 +80,17 @@ function resetAuth(): void {
  * Google ID Tokenを検証し、許可されたユーザーか確認する
  */
 function verifyGoogleToken(idToken: string): boolean {
+
     if (!idToken) return false;
     
+    // JWT形式 (Header.Payload.Signature) かどうかを簡単な正規表現で検証
+    // Base64Urlエンコードされた文字列の3つの部分がドットで連結されていることを確認
+    const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+    if (!jwtRegex.test(idToken)) {
+        Logger.log('エラー: IDトークンの形式が正しくありません。');
+        return false;
+    }
+
     try {
         // Googleの公式検証エンドポイントを叩く
         const response = UrlFetchApp.fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
