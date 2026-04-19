@@ -38,7 +38,7 @@ function sendDiscordMessage(message: string): void {
             Logger.log('Discordへの通知が完了しました。');
         }
     } catch (e) {
-        const errorMsg = "[Notification Exception] 通知の送信に失敗しました";
+        const errorMsg = `[Notification Exception] 通知の送信に失敗しました: ${e}`;
         Logger.log(errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
     }

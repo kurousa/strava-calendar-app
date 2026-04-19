@@ -42,7 +42,7 @@ function saveMapToDrive(activity: StravaActivity): GoogleAppsScript.Drive.File |
 
         return file;
     } catch (e) {
-        const errorMsg = "マップの保存に失敗しました (Activity ID: " + activity.id + ")";
+        const errorMsg = 'マップの保存に失敗しました: ' + (e as Error).toString();
         Logger.log(errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         return null;
