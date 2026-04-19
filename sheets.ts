@@ -84,7 +84,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         Logger.log(`スプレッドシートに ${rows.length} 件バックアップしました。`);
 
     } catch (e) {
-        const errorMsg = `[Backup Error] スプレッドシートへの書き込みに失敗しました: ` + (e as Error).toString();
+        const errorMsg = '[Backup Error] スプレッドシートへの書き込みに失敗しました: ' + String(e);
         Logger.log(errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
     }
