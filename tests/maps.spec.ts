@@ -100,7 +100,7 @@ describe('maps.ts', () => {
             expect(result).toBeNull();
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
-            expect(global.sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
+            expect(sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
         });
 
         it('should not crash if sendErrorEmail is undefined when map generation fails', () => {
