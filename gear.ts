@@ -30,7 +30,9 @@ function checkGearAlerts(): void {
             config = JSON.parse(configStr);
         } catch (e) {
             // 🔒 Security: Do not log the raw error or config string to prevent PII/internal detail leakage
-            Logger.log(`[Gear Alert Error] Failed to parse configuration for gear ID: ${gear.id}`);
+            const errorMsg = `[Gear Alert Error] Failed to parse configuration for gear ID: ${gear.id}`;
+            Logger.log(errorMsg);
+            if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
             return;
         }
 
