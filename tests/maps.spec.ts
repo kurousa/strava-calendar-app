@@ -100,8 +100,42 @@ describe('maps.ts', () => {
             expect(result).toBeNull();
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
+            expect(sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
         });
 
+        it('should not crash if sendErrorEmail is undefined when map generation fails', () => {
+            vi.stubGlobal('sendErrorEmail', undefined);
+
+            const mockFiles = {
+                hasNext: vi.fn().mockReturnValue(false)
+            };
+            const mockFolder = {
+                getFilesByName: vi.fn().mockReturnValue(mockFiles),
+            };
+
+            const mockFolders = {
+                hasNext: vi.fn().mockReturnValue(true),
+                next: vi.fn().mockReturnValue(mockFolder)
+            };
+            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+
+            const errorMsg = 'Failed to generate map blob';
+            const mockMap = {
+                setSize: vi.fn().mockReturnThis(),
+                setLanguage: vi.fn().mockReturnThis(),
+                addPath: vi.fn().mockReturnThis(),
+                getBlob: vi.fn().mockImplementation(() => {
+                    throw new Error(errorMsg);
+                })
+            };
+            vi.spyOn((global as any).Maps, 'newStaticMap').mockReturnValueOnce(mockMap);
+
+            const result = saveMapToDrive(mockActivity as any);
+            expect(result).toBeNull();
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
+            vi.unstubAllGlobals();
+        });
         it('should create and return new file if it does not exist', () => {
             const mockFile = {
                 setName: vi.fn().mockReturnThis(),
