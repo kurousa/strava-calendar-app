@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { GoogleLogin, googleLogout } from '@react-oauth/google'
+import * as Sentry from "@sentry/react";
 import { Heart, Activity, Clock, Cloud, LogOut, ChevronRight, Zap } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { fetchDashboardData } from './api/client'
@@ -34,6 +35,7 @@ export default function App() {
       const result = await fetchDashboardData(idToken)
       setData(result)
     } catch (err) {
+      Sentry.captureException(err);
       setError((err as Error).message)
       if ((err as Error).message.includes('401')) {
         handleLogout()
