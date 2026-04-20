@@ -5,8 +5,7 @@ export default defineConfig({
         globals: true, // describe, it, expect などをインポートなしで使えるようにする
         setupFiles: ['./vitest.setup.ts'], // モックのセットアップファイルを指定
         exclude: [
-            ...configDefaults.exclude,
-            'dashboard/**'
+            ...configDefaults.exclude
         ],
         coverage: {
             provider: 'v8',
@@ -14,7 +13,7 @@ export default defineConfig({
             reportOnFailure: true,
             exclude: [
                 'tests/**',
-                'dashboard/**',
+                'dashboard/tests/**',
                 'vitest.*.ts',
                 '*.cjs',
                 '*.html',
@@ -24,7 +23,9 @@ export default defineConfig({
                 '.jules/**'
             ],
             include: [
-                "**/*.ts"
+                "**/*.ts",
+                "dashboard/src/**/*.ts",
+                "dashboard/src/**/*.tsx"
             ]
         }
     },

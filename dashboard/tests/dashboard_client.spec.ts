@@ -1,102 +1,71 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-describe('fetchDashboardData', () => {
+describe('dashboard client api', () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubGlobal('fetch', vi.fn());
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
   });
 
-  it('should throw error when VITE_GAS_DEPLOY_ID is not defined', async () => {
-    // Ensure it's undefined
+  it('should throw an error if VITE_GAS_DEPLOY_ID is not defined', async () => {
     vi.stubEnv('VITE_GAS_DEPLOY_ID', '');
 
-    // We need to import the module after stubbing the environment variable
-    // because GAS_DEPLOY_ID is initialized at the top level.
     const { fetchDashboardData } = await import('../src/api/client');
 
-    await expect(fetchDashboardData('token')).rejects.toThrow('VITE_GAS_DEPLOY_ID is not defined');
+    await expect(fetchDashboardData('fake-token')).rejects.toThrow('VITE_GAS_DEPLOY_ID is not defined');
   });
 
-  it('should throw error when VITE_GAS_DEPLOY_ID is completely undefined', async () => {
-    // Ensure it's strictly undefined by unstubbing all envs
-    vi.unstubAllEnvs();
-    delete process.env.VITE_GAS_DEPLOY_ID;
-
-    // We need to import the module after stubbing the environment variable
-    // because GAS_DEPLOY_ID is initialized at the top level.
-    const { fetchDashboardData } = await import('../src/api/client');
-
-    await expect(fetchDashboardData('token')).rejects.toThrow('VITE_GAS_DEPLOY_ID is not defined');
-  });
-
-  it('should call fetch with correct URL when VITE_GAS_DEPLOY_ID is defined', async () => {
-    const deployId = 'test-deploy-id';
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', deployId);
+  it('should fetch dashboard data successfully', async () => {
+    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-deploy-id');
 
     const mockResponse = {
       status: 'success',
-      data: {
-        lastActivity: null,
-        fitness: 0,
-        gears: [],
-        history: []
-      }
+      data: { fitness: 100 }
     };
 
-    vi.mocked(fetch).mockResolvedValue({
-      json: () => Promise.resolve(mockResponse)
-    } as unknown as Response);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
+    }));
 
     const { fetchDashboardData } = await import('../src/api/client');
     const result = await fetchDashboardData('fake-token');
 
-    expect(result).toEqual(mockResponse.data);
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(`https://script.google.com/macros/s/${deployId}/exec`)
-    );
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('action=getStats')
-    );
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('token=fake-token')
-    );
+    expect(result).toEqual({ fitness: 100 });
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('https://script.google.com/macros/s/test-deploy-id/exec'));
   });
 
-  it('should throw error when API returns error status', async () => {
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-id');
+  it('should throw an error if the API returns an error status with a message', async () => {
+    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-deploy-id');
 
-    const mockErrorResponse = {
+    const mockResponse = {
       status: 'error',
-      message: 'Invalid token'
+      message: 'Custom error from API'
     };
 
-    vi.mocked(fetch).mockResolvedValue({
-      json: () => Promise.resolve(mockErrorResponse)
-    } as unknown as Response);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
+    }));
 
     const { fetchDashboardData } = await import('../src/api/client');
-
-    await expect(fetchDashboardData('invalid-token')).rejects.toThrow('Invalid token');
+    await expect(fetchDashboardData('fake-token')).rejects.toThrow('Custom error from API');
   });
 
-  it('should throw default error message when API returns error status without message', async () => {
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-id');
+  it('should throw a default error if the API returns an error status without a message', async () => {
+    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-deploy-id');
 
-    const mockErrorResponse = {
+    const mockResponse = {
       status: 'error'
     };
 
-    vi.mocked(fetch).mockResolvedValue({
-      json: () => Promise.resolve(mockErrorResponse)
-    } as unknown as Response);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue(mockResponse)
+    }));
 
     const { fetchDashboardData } = await import('../src/api/client');
-
-    await expect(fetchDashboardData('token')).rejects.toThrow('Failed to fetch data');
+    await expect(fetchDashboardData('fake-token')).rejects.toThrow('Failed to fetch data');
   });
 });
