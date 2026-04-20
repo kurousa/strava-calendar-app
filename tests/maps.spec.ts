@@ -160,7 +160,9 @@ describe('maps.ts', () => {
                 addPath: vi.fn().mockReturnThis(),
                 getBlob: vi.fn().mockReturnValue('mock-blob')
             };
-            vi.spyOn((global as any).Maps, 'newStaticMap').mockReturnValueOnce(mockMap);
+            vi.stubGlobal('Maps', {
+                newStaticMap: vi.fn().mockReturnValue(mockMap)
+            });
 
             const result = saveMapToDrive(mockActivity as any);
             expect(result).toBeNull();
