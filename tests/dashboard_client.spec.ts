@@ -24,6 +24,7 @@ describe('dashboard client api', () => {
 
     const mockResponse = {
       status: 'success',
+      code: 200,
       data: { fitness: 100 }
     };
 
