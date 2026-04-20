@@ -1,10 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { saveMapToDrive, getOrCreateMapFolder } from '../maps';
 
 describe('maps.ts', () => {
     beforeEach(() => {
         vi.stubGlobal('sendErrorEmail', vi.fn());
         vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     describe('getOrCreateMapFolder', () => {
@@ -14,7 +18,10 @@ describe('maps.ts', () => {
                 hasNext: vi.fn().mockReturnValue(true),
                 next: vi.fn().mockReturnValue(mockFolder)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders)
+            });
 
             const folder = getOrCreateMapFolder();
             expect(folder).toBe(mockFolder);
@@ -26,8 +33,11 @@ describe('maps.ts', () => {
             const mockFolders = {
                 hasNext: vi.fn().mockReturnValue(false)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
-            (global as any).DriveApp.createFolder.mockReturnValue(mockFolder);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders),
+                createFolder: vi.fn().mockReturnValue(mockFolder)
+            });
 
             const folder = getOrCreateMapFolder();
             expect(folder).toBe(mockFolder);
@@ -63,7 +73,10 @@ describe('maps.ts', () => {
                 hasNext: vi.fn().mockReturnValue(true),
                 next: vi.fn().mockReturnValue(mockFolder)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders)
+            });
 
             const result = saveMapToDrive(mockActivity as any);
             expect(result).toBe(mockFile);
@@ -82,7 +95,10 @@ describe('maps.ts', () => {
                 hasNext: vi.fn().mockReturnValue(true),
                 next: vi.fn().mockReturnValue(mockFolder)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders)
+            });
 
             // Mock getBlob to throw an error
             const errorMsg = 'Failed to generate map blob';
@@ -94,7 +110,10 @@ describe('maps.ts', () => {
                     throw new Error(errorMsg);
                 })
             };
-            vi.spyOn((global as any).Maps, 'newStaticMap').mockReturnValueOnce(mockMap);
+            vi.stubGlobal('Maps', {
+                ...(global as any).Maps,
+                newStaticMap: vi.fn().mockReturnValue(mockMap)
+            });
 
             const result = saveMapToDrive(mockActivity as any);
             expect(result).toBeNull();
@@ -117,7 +136,10 @@ describe('maps.ts', () => {
                 hasNext: vi.fn().mockReturnValue(true),
                 next: vi.fn().mockReturnValue(mockFolder)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders)
+            });
 
             const errorMsg = 'Failed to generate map blob';
             const mockMap = {
@@ -128,13 +150,15 @@ describe('maps.ts', () => {
                     throw new Error(errorMsg);
                 })
             };
-            vi.spyOn((global as any).Maps, 'newStaticMap').mockReturnValueOnce(mockMap);
+            vi.stubGlobal('Maps', {
+                ...(global as any).Maps,
+                newStaticMap: vi.fn().mockReturnValue(mockMap)
+            });
 
             const result = saveMapToDrive(mockActivity as any);
             expect(result).toBeNull();
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
-            vi.unstubAllGlobals();
         });
 
         it('should return null and log error if file creation fails', () => {
@@ -152,7 +176,10 @@ describe('maps.ts', () => {
                 hasNext: vi.fn().mockReturnValue(true),
                 next: vi.fn().mockReturnValue(mockFolder)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders)
+            });
 
             const mockMap = {
                 setSize: vi.fn().mockReturnThis(),
@@ -160,7 +187,10 @@ describe('maps.ts', () => {
                 addPath: vi.fn().mockReturnThis(),
                 getBlob: vi.fn().mockReturnValue('mock-blob')
             };
-            vi.spyOn((global as any).Maps, 'newStaticMap').mockReturnValueOnce(mockMap);
+            vi.stubGlobal('Maps', {
+                ...(global as any).Maps,
+                newStaticMap: vi.fn().mockReturnValue(mockMap)
+            });
 
             const result = saveMapToDrive(mockActivity as any);
             expect(result).toBeNull();
@@ -187,7 +217,10 @@ describe('maps.ts', () => {
                 hasNext: vi.fn().mockReturnValue(true),
                 next: vi.fn().mockReturnValue(mockFolder)
             };
-            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+            vi.stubGlobal('DriveApp', {
+                ...(global as any).DriveApp,
+                getFoldersByName: vi.fn().mockReturnValue(mockFolders)
+            });
 
             const result = saveMapToDrive(mockActivity as any);
             expect(result).toBe(mockFile);
