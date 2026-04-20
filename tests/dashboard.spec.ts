@@ -34,10 +34,10 @@ describe('dashboard', () => {
         ]));
         
         // Mock Config
-        (global as any).Config = {
+        vi.stubGlobal('Config', {
             PROP_SPREADSHEET_ID: 'PROP_SPREADSHEET_ID',
             BACKUP_SHEET_NAME: 'BACKUP_SHEET_NAME'
-        };
+        });
     });
 
     afterEach(() => {
@@ -62,16 +62,21 @@ describe('dashboard', () => {
         const result = getDashboardData();
 
         expect(result).toBeUndefined();
-        expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('設定されていないため'));
+        expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('設定されていないため'));
     });
 
     it('should return undefined and log error if sheet is missing', () => {
         mockProperties['PROP_SPREADSHEET_ID'] = 'fake-ss-id';
-        (global as any).SpreadsheetApp.openById().getSheetByName.mockReturnValue(null);
+        vi.stubGlobal('SpreadsheetApp', {
+            ...SpreadsheetApp,
+            openById: vi.fn().mockReturnValue({
+                getSheetByName: vi.fn().mockReturnValue(null)
+            })
+        });
 
         const result = getDashboardData();
 
         expect(result).toBeUndefined();
-        expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('設定されていないため'));
+        expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('設定されていないため'));
     });
 });

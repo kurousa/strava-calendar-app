@@ -20,12 +20,18 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
 
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'valid_client_id',
-                    email: 'test@example.com'
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'valid_client_id',
+                        email: 'test@example.com'
+                    })
                 })
             });
 
@@ -41,12 +47,18 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
 
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'valid_client_id',
-                    email: 'test@example.com'
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'valid_client_id',
+                        email: 'test@example.com'
+                    })
                 })
             });
 
@@ -65,12 +77,18 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
 
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'wrong_client_id',
-                    email: 'test@example.com'
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'wrong_client_id',
+                        email: 'test@example.com'
+                    })
                 })
             });
 
@@ -87,12 +105,18 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
 
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'valid_client_id',
-                    email: 'intruder@example.com'
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'valid_client_id',
+                        email: 'intruder@example.com'
+                    })
                 })
             });
 
@@ -102,8 +126,11 @@ describe('router', () => {
         });
 
         it('should return false if UrlFetchApp fails', () => {
-            (global as any).UrlFetchApp.fetch.mockImplementation(() => {
-                throw new Error('Network error');
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockImplementation(() => {
+                    throw new Error('Network error');
+                })
             });
 
             const result = verifyGoogleToken('bad_header.bad_payload.bad_signature');
@@ -120,13 +147,16 @@ describe('router', () => {
 
         it('should create HTML output from index file and set title', () => {
             const mockSetTitle = vi.fn().mockReturnThis();
-            (global as any).HtmlService.createHtmlOutputFromFile.mockReturnValue({
-                setTitle: mockSetTitle
+            vi.stubGlobal('HtmlService', {
+                ...(global as any).HtmlService,
+                createHtmlOutputFromFile: vi.fn().mockReturnValue({
+                    setTitle: mockSetTitle
+                })
             });
 
             const result = doGet({} as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect((global as any).HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
+            expect(HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
             expect(mockSetTitle).toHaveBeenCalledWith('Strava カレンダーインポート');
             expect(result).toBeDefined();
         });
@@ -135,7 +165,10 @@ describe('router', () => {
             const mockProps = {
                 getProperty: vi.fn().mockReturnValue('fake_token')
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
 
             const e = {
                 parameter: {
@@ -146,7 +179,7 @@ describe('router', () => {
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(
+            expect(ContentService.createTextOutput).toHaveBeenCalledWith(
                 JSON.stringify({ "hub.challenge": "test_challenge" })
             );
             expect(result.getContent()).toBe(JSON.stringify({ "hub.challenge": "test_challenge" }));
@@ -156,7 +189,10 @@ describe('router', () => {
             const mockProps = {
                 getProperty: vi.fn().mockReturnValue('fake_token')
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
             vi.stubGlobal('Logger', { log: vi.fn() });
 
             const e = {
@@ -167,8 +203,8 @@ describe('router', () => {
             };
             doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect((global as any).HtmlService.createHtmlOutput).toHaveBeenCalledWith('Forbidden: Invalid Verify Token');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
+            expect(HtmlService.createHtmlOutput).toHaveBeenCalledWith('Forbidden: Invalid Verify Token');
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
         });
 
         it('should handle headless API getStats action with valid ID Token', () => {
@@ -183,13 +219,19 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
 
             // UrlFetchApp.fetch のモック
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'valid_client_id',
-                    email: 'test@example.com'
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'valid_client_id',
+                        email: 'test@example.com'
+                    })
                 })
             });
 
@@ -203,7 +245,7 @@ describe('router', () => {
 
             expect(result.getContent()).toContain('"status":"success"');
             expect(result.getContent()).toContain('"code":200');
-            expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_header.valid_payload.valid_signature'));
+            expect(UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_header.valid_payload.valid_signature'));
         });
 
         it('should return error for getStats action with invalid ID Token (aud mismatch)', () => {
@@ -213,11 +255,17 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'wrong_client_id',
-                    email: 'test@example.com'
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'wrong_client_id',
+                        email: 'test@example.com'
+                    })
                 })
             });
             vi.stubGlobal('Logger', { log: vi.fn() });
@@ -244,11 +292,17 @@ describe('router', () => {
                     return null;
                 })
             };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(mockProps);
-            (global as any).UrlFetchApp.fetch.mockReturnValue({
-                getContentText: () => JSON.stringify({
-                    aud: 'valid_client_id',
-                    email: 'intruder@example.com'
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'valid_client_id',
+                        email: 'intruder@example.com'
+                    })
                 })
             });
             vi.stubGlobal('Logger', { log: vi.fn() });
@@ -301,7 +355,7 @@ describe('router', () => {
             vi.stubGlobal('handleStravaWebhook', vi.fn());
             const result = doPost(e as unknown as GoogleAppsScript.Events.DoPost);
 
-            expect((global as any).ContentService.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
+            expect(ContentService.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ status: 'ok' }));
             expect(result.getContent()).toBe(JSON.stringify({ status: 'ok' }));
         });
 
@@ -314,7 +368,7 @@ describe('router', () => {
             vi.stubGlobal('Logger', { log: vi.fn() });
             const result = doPost(e as unknown as GoogleAppsScript.Events.DoPost);
 
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Webhook Error]'));
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Webhook Error]'));
             expect(result.getContent()).toContain('status":"error"');
         });
     });
@@ -340,13 +394,13 @@ describe('router', () => {
             expect(result2).toBe(expectedError);
             expect(result3).toBe(expectedError);
             expect(result4).toBe(expectedError);
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expectedError);
+            expect(Logger.log).toHaveBeenCalledWith(expectedError);
         });
 
         it('should reject invalid dates', () => {
             const result = importPastActivitiesFromWeb('2024-13-45', '2024-01-31');
             expect(result).toBe('エラー: 無効な日付が指定されました。');
-            expect((global as any).Logger.log).toHaveBeenCalledWith('エラー: 無効な日付が指定されました。');
+            expect(Logger.log).toHaveBeenCalledWith('エラー: 無効な日付が指定されました。');
         });
 
         it('should reject invalid dates with rollover', () => {
@@ -360,11 +414,11 @@ describe('router', () => {
         it('should reject date ranges where start is after end', () => {
             const result = importPastActivitiesFromWeb('2024-01-31', '2024-01-01');
             expect(result).toBe('エラー: 開始日は終了日より前の日付を指定してください。');
-            expect((global as any).Logger.log).toHaveBeenCalledWith('エラー: 開始日は終了日より前の日付を指定してください。');
+            expect(Logger.log).toHaveBeenCalledWith('エラー: 開始日は終了日より前の日付を指定してください。');
         });
 
         it('should correctly parse dates and pass them to importPastActivities', () => {
-            (global as any).importPastActivities.mockReturnValue('SUCCESS_MOCK');
+            vi.stubGlobal('importPastActivities', vi.fn().mockReturnValue('SUCCESS_MOCK'));
 
             const startStr = '2024-03-01';
             const endStr = '2024-03-31';
@@ -374,8 +428,8 @@ describe('router', () => {
             expect(result).toBe('SUCCESS_MOCK');
 
             // Check that importPastActivities was called with correctly parsed dates
-            expect((global as any).importPastActivities).toHaveBeenCalledTimes(1);
-            const callArgs = (global as any).importPastActivities.mock.calls[0];
+            expect(importPastActivities).toHaveBeenCalledTimes(1);
+            const callArgs = (importPastActivities as any).mock.calls[0];
 
             expect(callArgs[0]).toBeInstanceOf(Date);
             const expectedStart = new Date('2024-03-01T00:00:00');
