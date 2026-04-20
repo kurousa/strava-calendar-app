@@ -169,6 +169,7 @@ describe('maps.ts', () => {
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('Drive API error'));
             expect(sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('Drive API error'));
+            vi.unstubAllGlobals();
         });
 
         it('should create and return new file if it does not exist', () => {
