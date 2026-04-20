@@ -136,6 +136,39 @@ describe('maps.ts', () => {
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining(errorMsg));
             vi.unstubAllGlobals();
         });
+
+        it('should return null and log error if file creation fails', () => {
+            const mockFiles = {
+                hasNext: vi.fn().mockReturnValue(false)
+            };
+            const mockFolder = {
+                getFilesByName: vi.fn().mockReturnValue(mockFiles),
+                createFile: vi.fn().mockImplementation(() => {
+                    throw new Error('Drive API error');
+                })
+            };
+
+            const mockFolders = {
+                hasNext: vi.fn().mockReturnValue(true),
+                next: vi.fn().mockReturnValue(mockFolder)
+            };
+            (global as any).DriveApp.getFoldersByName.mockReturnValue(mockFolders);
+
+            const mockMap = {
+                setSize: vi.fn().mockReturnThis(),
+                setLanguage: vi.fn().mockReturnThis(),
+                addPath: vi.fn().mockReturnThis(),
+                getBlob: vi.fn().mockReturnValue('mock-blob')
+            };
+            vi.spyOn((global as any).Maps, 'newStaticMap').mockReturnValueOnce(mockMap);
+
+            const result = saveMapToDrive(mockActivity as any);
+            expect(result).toBeNull();
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('マップの保存に失敗しました'));
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('Drive API error'));
+            expect(sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('Drive API error'));
+        });
+
         it('should create and return new file if it does not exist', () => {
             const mockFile = {
                 setName: vi.fn().mockReturnThis(),
