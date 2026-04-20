@@ -60,7 +60,8 @@ describe('dashboard client api', () => {
     vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-deploy-id');
 
     const mockResponse = {
-      status: 'error'
+      status: 'error',
+      code: 500
     };
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
