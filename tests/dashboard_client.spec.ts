@@ -44,6 +44,7 @@ describe('dashboard client api', () => {
 
     const mockResponse = {
       status: 'error',
+      code: 400,
       message: 'Custom error from API'
     };
 
