@@ -1,15 +1,19 @@
-name: Unit Test Suite
+name: CI
+
 permissions:
   contents: read
   pull-requests: write
 
 on:
+  push:
+    branches: [main]
   pull_request:
 
 jobs:
   test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -26,7 +30,7 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run type check
         run: pnpm run typecheck
@@ -37,3 +41,5 @@ jobs:
       - name: Report coverage
         if: always()
         uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          working-directory: ./
