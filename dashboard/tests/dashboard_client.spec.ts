@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-describe('fetchDashboardData', () => {
+describe("fetchDashboardData", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubGlobal('fetch', vi.fn());
+    vi.stubGlobal("fetch", vi.fn());
   });
 
   afterEach(() => {
@@ -11,92 +11,88 @@ describe('fetchDashboardData', () => {
     vi.unstubAllEnvs();
   });
 
-  it('should throw error when VITE_GAS_DEPLOY_ID is not defined', async () => {
+  it("should throw error when VITE_GAS_DEPLOY_ID is not defined", async () => {
     // Ensure it's undefined
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', '');
+    vi.stubEnv("VITE_GAS_DEPLOY_ID", "");
 
     // We need to import the module after stubbing the environment variable
     // because GAS_DEPLOY_ID is initialized at the top level.
-    const { fetchDashboardData } = await import('../src/api/client');
+    const { fetchDashboardData } = await import("../src/api/client");
 
-    await expect(fetchDashboardData('token')).rejects.toThrow('VITE_GAS_DEPLOY_ID is not defined');
+    await expect(fetchDashboardData("token")).rejects.toThrow("VITE_GAS_DEPLOY_ID is not defined");
   });
 
-  it('should throw error when VITE_GAS_DEPLOY_ID is completely undefined', async () => {
+  it("should throw error when VITE_GAS_DEPLOY_ID is completely undefined", async () => {
     // Ensure it's strictly undefined by unstubbing all envs
     vi.unstubAllEnvs();
     delete process.env.VITE_GAS_DEPLOY_ID;
 
     // We need to import the module after stubbing the environment variable
     // because GAS_DEPLOY_ID is initialized at the top level.
-    const { fetchDashboardData } = await import('../src/api/client');
+    const { fetchDashboardData } = await import("../src/api/client");
 
-    await expect(fetchDashboardData('token')).rejects.toThrow('VITE_GAS_DEPLOY_ID is not defined');
+    await expect(fetchDashboardData("token")).rejects.toThrow("VITE_GAS_DEPLOY_ID is not defined");
   });
 
-  it('should call fetch with correct URL when VITE_GAS_DEPLOY_ID is defined', async () => {
-    const deployId = 'test-deploy-id';
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', deployId);
+  it("should call fetch with correct URL when VITE_GAS_DEPLOY_ID is defined", async () => {
+    const deployId = "test-deploy-id";
+    vi.stubEnv("VITE_GAS_DEPLOY_ID", deployId);
 
     const mockResponse = {
-      status: 'success',
+      status: "success",
       data: {
         lastActivity: null,
         fitness: 0,
         gears: [],
-        history: []
-      }
+        history: [],
+      },
     };
 
     vi.mocked(fetch).mockResolvedValue({
-      json: () => Promise.resolve(mockResponse)
+      json: () => Promise.resolve(mockResponse),
     } as unknown as Response);
 
-    const { fetchDashboardData } = await import('../src/api/client');
-    const result = await fetchDashboardData('fake-token');
+    const { fetchDashboardData } = await import("../src/api/client");
+    const result = await fetchDashboardData("fake-token");
 
     expect(result).toEqual(mockResponse.data);
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(`https://script.google.com/macros/s/${deployId}/exec`)
+      expect.stringContaining(`https://script.google.com/macros/s/${deployId}/exec`),
     );
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('action=getStats')
-    );
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('token=fake-token')
-    );
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("action=getStats"));
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("token=fake-token"));
   });
 
-  it('should throw error when API returns error status', async () => {
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-id');
+  it("should throw error when API returns error status", async () => {
+    vi.stubEnv("VITE_GAS_DEPLOY_ID", "test-id");
 
     const mockErrorResponse = {
-      status: 'error',
-      message: 'Invalid token'
+      status: "error",
+      message: "Invalid token",
     };
 
     vi.mocked(fetch).mockResolvedValue({
-      json: () => Promise.resolve(mockErrorResponse)
+      json: () => Promise.resolve(mockErrorResponse),
     } as unknown as Response);
 
-    const { fetchDashboardData } = await import('../src/api/client');
+    const { fetchDashboardData } = await import("../src/api/client");
 
-    await expect(fetchDashboardData('invalid-token')).rejects.toThrow('Invalid token');
+    await expect(fetchDashboardData("invalid-token")).rejects.toThrow("Invalid token");
   });
 
-  it('should throw default error message when API returns error status without message', async () => {
-    vi.stubEnv('VITE_GAS_DEPLOY_ID', 'test-id');
+  it("should throw default error message when API returns error status without message", async () => {
+    vi.stubEnv("VITE_GAS_DEPLOY_ID", "test-id");
 
     const mockErrorResponse = {
-      status: 'error'
+      status: "error",
     };
 
     vi.mocked(fetch).mockResolvedValue({
-      json: () => Promise.resolve(mockErrorResponse)
+      json: () => Promise.resolve(mockErrorResponse),
     } as unknown as Response);
 
-    const { fetchDashboardData } = await import('../src/api/client');
+    const { fetchDashboardData } = await import("../src/api/client");
 
-    await expect(fetchDashboardData('token')).rejects.toThrow('Failed to fetch data');
+    await expect(fetchDashboardData("token")).rejects.toThrow("Failed to fetch data");
   });
 });

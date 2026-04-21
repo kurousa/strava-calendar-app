@@ -1,16 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
-import './index.css'
-import { GoogleOAuthProvider } from '@react-oauth/google'
-import App from './App.tsx'
+import "./index.css";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import App from "./App.tsx";
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-  ],
+  integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
   // Tracing
   tracesSampleRate: 1.0, //  Capture 100% of the transactions
   // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
@@ -21,12 +18,12 @@ Sentry.init({
   environment: import.meta.env.MODE,
 });
 
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ""
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={clientId}>
       <App />
     </GoogleOAuthProvider>
   </StrictMode>,
-)
+);
