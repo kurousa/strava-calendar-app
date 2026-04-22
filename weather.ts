@@ -70,9 +70,7 @@ function fetchWeatherDataBatch(activities: StravaActivity[]): void {
         if (activity.weatherText) return;
         if (!activity.start_latlng || activity.start_latlng.length !== 2) return;
 
-        const dateObj = activity.start_date_local
-            ? new Date(activity.start_date_local.replace(/Z$/i, ''))
-            : new Date(activity.start_date);
+        const dateObj = getActivityStartDate(activity);
 
         const dateString = Utilities.formatDate(dateObj, "Asia/Tokyo", "yyyy-MM-dd");
         const hourIndex = parseInt(Utilities.formatDate(dateObj, "Asia/Tokyo", "H"), 10);

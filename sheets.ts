@@ -55,9 +55,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         const rows = targetActivities.map(activity => {
             const distanceKm = activity.distance ? (activity.distance / 1000).toFixed(2) : '0';
             const timeMin = activity.moving_time ? Math.floor(activity.moving_time / 60) : 0;
-            const date = activity.start_date_local
-                ? new Date(activity.start_date_local.replace(/Z$/i, ''))
-                : new Date(activity.start_date);
+            const date = getActivityStartDate(activity);
             
             // AIコメントの取得
             const aiComment = activity.aiComment || generateAiComment(activity);
