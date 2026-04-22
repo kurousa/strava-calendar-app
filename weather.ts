@@ -80,7 +80,7 @@ function fetchWeatherDataBatch(activities: StravaActivity[]): void {
         const url = `${Config.OPEN_METEO_API_BASE}?latitude=${activity.start_latlng[0]}&longitude=${activity.start_latlng[1]}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo&windspeed_unit=kmh`;
 
         requests.push({ url, muteHttpExceptions: true });
-        mapping.push({ activity, dateObj, hourIndex });
+        mapping.push({ activity, hourIndex });
     });
 
     if (requests.length === 0) return;

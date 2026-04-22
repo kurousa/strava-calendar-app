@@ -25,12 +25,12 @@ for (let i = 0; i < 50; i++) {
 
 test('Benchmark backupToSpreadsheet', async () => {
     // Setup mocks
-    vi.stubGlobal('Logger', { log: vi.fn() });
-    vi.stubGlobal('PropertiesService', {
+    global.Logger = { log: vi.fn() };
+    global.PropertiesService = {
         getScriptProperties: () => ({
             getProperty: () => 'fake_spreadsheet_id'
         })
-    });
+    };
 
     const mockRange = {
         setFontWeight: vi.fn().mockReturnThis(),
@@ -55,11 +55,11 @@ test('Benchmark backupToSpreadsheet', async () => {
     };
 
     // Use simulated delay for fetchWeatherData
-    vi.stubGlobal('fetchWeatherDataBatch', vi.fn((activities) => {
+    global.fetchWeatherData = vi.fn(() => {
         const start = Date.now();
-        while(Date.now() - start < 10) {} // Simulate 10ms latency for the batch request
-        activities.forEach(a => a.weatherText = 'Sunny');
-    }));
+        while(Date.now() - start < 10) {} // 10ms simulated latency (UrlFetchApp latency)
+        return 'Sunny';
+    });
 
     global.generateAiComment = vi.fn(() => 'Nice!');
 
