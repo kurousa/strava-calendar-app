@@ -119,7 +119,28 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
  * 各機材の現在のステータス（累積距離とアラートしきい値）を取得する
  */
 function getGearStatus(): GearStatus[] {
-    const profile = getStravaAthleteProfile();
+    const cache = typeof CacheService !== 'undefined' ? CacheService.getUserCache() : null;
+    const cacheKey = 'STRAVA_ATHLETE_PROFILE';
+    let profile = null;
+
+    if (cache) {
+        const cachedProfile = cache.get(cacheKey);
+        if (cachedProfile) {
+            try {
+                profile = JSON.parse(cachedProfile);
+            } catch (e) {
+                // Parse error, ignore and fetch fresh
+            }
+        }
+    }
+
+    if (!profile) {
+        profile = getStravaAthleteProfile();
+        if (profile && cache) {
+            // Cache the profile for 6 hours (21600 seconds)
+            cache.put(cacheKey, JSON.stringify(profile), 21600);
+        }
+    }
     if (!profile) return [];
 
     const gears = [...profile.bikes, ...profile.shoes];
