@@ -29,7 +29,7 @@ describe('weather.ts', () => {
                             hour: new Array(24).fill(0).map((_, i) => ({
                                 temp_c: i === 10 ? 20.5 : 0,
                                 wind_kph: i === 10 ? 5.2 : 0,
-                                condition: { text: i === 10 ? 'Sunny' : 'Unknown' }
+                                condition: { text: i === 10 ? '晴れ' : '不明' }
                             }))
                         }]
                     }
