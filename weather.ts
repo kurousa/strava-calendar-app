@@ -17,7 +17,8 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
 
     // 3. エンドポイントの構築 (history.json)
     // q=lat,lng で座標指定、dt=日付 で過去データを取得
-    const url = Config.WEATHER_API_BASE + "/history.json?key=" + apiKey + "&q=" + lat + "," + lng + "&dt=" + dateString + "&lang=ja";
+    // lang=ja で日本語の天気情報を取得
+    const url = `${Config.WEATHER_API_BASE}/history.json?key=${apiKey}&q=${lat},${lng}&dt=${dateString}&lang=ja`;
 
     try {
         const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
