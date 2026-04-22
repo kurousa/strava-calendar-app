@@ -64,7 +64,7 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
  */
 function fetchWeatherDataBatch(activities: StravaActivity[]): void {
     const requests: GoogleAppsScript.URL_Fetch.URLFetchRequest[] = [];
-    const mapping: { activity: StravaActivity, dateObj: Date, hourIndex: number }[] = [];
+    const mapping: { activity: StravaActivity, hourIndex: number }[] = [];
 
     activities.forEach(activity => {
         if (activity.weatherText) return;
