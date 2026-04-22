@@ -39,10 +39,11 @@ var Config = {
     PROP_API_KEY: 'API_KEY',
     PROP_GOOGLE_CLIENT_ID: 'GOOGLE_CLIENT_ID',
     PROP_ALLOWED_EMAILS: 'ALLOWED_EMAILS',
+    PROP_WEATHER_API_KEY: 'WEATHER_API_KEY', // GASのプロパティに設定するキー名
 
     // API エンドポイント
     STRAVA_API_BASE: 'https://www.strava.com/api/v3',
-    OPEN_METEO_API_BASE: 'https://api.open-meteo.com/v1/forecast',
+    WEATHER_API_BASE: 'https://api.weatherapi.com/v1',
     GEMINI_API_BASE: `https://generativelanguage.googleapis.com/v1beta/models/gemini-${_GEMINI_VERSION}-${_GEMINI_MODEL}:generateContent`,
 
     // 設定定数
