@@ -57,6 +57,59 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
 }
 
 // Node.js環境（テスト時）のみエクスポートする
+
+/**
+ * 複数のアクティビティに対する天気情報をUrlFetchApp.fetchAllを使って一括で取得し、
+ * アクティビティオブジェクトのweatherTextに設定します。
+ */
+function fetchWeatherDataBatch(activities: StravaActivity[]): void {
+    const requests: GoogleAppsScript.URL_Fetch.URLFetchRequest[] = [];
+    const mapping: { activity: StravaActivity, hourIndex: number }[] = [];
+
+    activities.forEach(activity => {
+        if (activity.weatherText) return;
+        if (!activity.start_latlng || activity.start_latlng.length !== 2) return;
+
+        const dateObj = getActivityStartDate(activity);
+
+        const dateString = Utilities.formatDate(dateObj, "Asia/Tokyo", "yyyy-MM-dd");
+        const hourIndex = parseInt(Utilities.formatDate(dateObj, "Asia/Tokyo", "H"), 10);
+
+        const url = `${Config.OPEN_METEO_API_BASE}?latitude=${activity.start_latlng[0]}&longitude=${activity.start_latlng[1]}&start_date=${dateString}&end_date=${dateString}&hourly=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FTokyo&windspeed_unit=kmh`;
+
+        requests.push({ url, muteHttpExceptions: true });
+        mapping.push({ activity, hourIndex });
+    });
+
+    if (requests.length === 0) return;
+
+    try {
+        const responses = UrlFetchApp.fetchAll(requests);
+        responses.forEach((response, i) => {
+            if (response.getResponseCode() !== 200) return;
+            try {
+                const data = JSON.parse(response.getContentText());
+                if (!data.hourly) return;
+
+                const { activity, hourIndex } = mapping[i];
+                const temp = data.hourly.temperature_2m[hourIndex];
+                const code = data.hourly.weathercode[hourIndex];
+                const wind = data.hourly.windspeed_10m[hourIndex];
+
+                if (temp != null && code != null && wind != null) {
+                    activity.weatherText = `天気: ${getWeatherEmoji(code)} / 気温: ${temp}℃ / 風速: ${wind}km/h`;
+                }
+            } catch (e) {
+                // Parsing error for a single response
+            }
+        });
+    } catch (e) {
+        Logger.log(`[Weather API Batch Exception] ${e}`);
+        const errorMsg = `[Weather API Batch Error] 天気情報の一括取得に失敗しました: ${e}`;
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+    }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { fetchWeatherData, getWeatherEmoji };
+    module.exports = { fetchWeatherData, fetchWeatherDataBatch, getWeatherEmoji };
 }
