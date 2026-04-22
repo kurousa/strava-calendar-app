@@ -9,17 +9,62 @@
  * within the specified date range.
  */
 function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, startDate: Date, endDate: Date): Set<string> {
-    const existingEvents = calendar.getEvents(startDate, endDate);
     const existingActivityIds = new Set<string>();
+
+    try {
+        // Use Advanced Calendar Service if available for much faster bulk reads
+        if (typeof Calendar !== 'undefined' && Calendar.Events && Calendar.Events.list) {
+            let pageToken: string | undefined;
+            do {
+                const response = Calendar.Events.list(calendar.getId(), {
+                    timeMin: startDate.toISOString(),
+                    timeMax: endDate.toISOString(),
+                    q: 'strava.com/activities', // Search reduces the result set on the server
+                    maxResults: 2500,
+                    singleEvents: true,
+                    pageToken: pageToken
+                });
+
+                if (response.items) {
+                    response.items.forEach((item: any) => {
+                        // Fast path: use extended properties (avoids parsing)
+                        if (item.extendedProperties?.private?.stravaActivityId) {
+                            existingActivityIds.add(item.extendedProperties.private.stravaActivityId);
+                        }
+                        // Fallback for older events: parse description directly from JSON (still much faster than GAS proxies)
+                        else if (item.description) {
+                            const match = item.description.match(Config.STRAVA_ACTIVITY_ID_REGEX);
+                            if (match && match[1]) {
+                                existingActivityIds.add(match[1]);
+                            }
+                        }
+                    });
+                }
+                pageToken = response.nextPageToken;
+            } while (pageToken);
+            return existingActivityIds;
+        }
+    } catch (e) {
+        Logger.log(`Advanced Calendar service error: ${e}, falling back to CalendarApp`);
+    }
+
+    // Fallback if Advanced Service is somehow unavailable
+    const existingEvents = calendar.getEvents(startDate, endDate, { search: 'strava.com/activities' });
     existingEvents.forEach(event => {
-        const desc = event.getDescription();
-        if (desc) {
-            const match = desc.match(Config.STRAVA_ACTIVITY_ID_REGEX);
-            if (match && match[1]) {
-                existingActivityIds.add(match[1]);
+        const tag = event.getTag('stravaActivityId');
+        if (tag) {
+            existingActivityIds.add(tag);
+        } else {
+            const desc = event.getDescription();
+            if (desc) {
+                const match = desc.match(Config.STRAVA_ACTIVITY_ID_REGEX);
+                if (match && match[1]) {
+                    existingActivityIds.add(match[1]);
+                }
             }
         }
     });
+
     return existingActivityIds;
 }
 
@@ -192,6 +237,13 @@ function processActivityToCalendar(
     const event = calendar.createEvent(title, startTime, endTime, {
         description: description
     });
+
+    // ⚡ Bolt Optimization: Tag the event for lightning-fast lookups in getExistingActivityIds
+    try {
+        event.setTag('stravaActivityId', String(activity.id));
+    } catch (e) {
+        Logger.log(`イベントタグの設定に失敗しました: ${e}`);
+    }
 
     // 【追加】マップ画像をカレンダーに添付する
     if (activity.mapUrl && typeof saveMapToDrive === 'function') {
