@@ -55,11 +55,11 @@ test('Benchmark backupToSpreadsheet', async () => {
     };
 
     // Use simulated delay for fetchWeatherData
-    global.fetchWeatherData = vi.fn(() => {
+    vi.stubGlobal('fetchWeatherDataBatch', vi.fn((activities) => {
         const start = Date.now();
-        while(Date.now() - start < 10) {} // 10ms simulated latency (UrlFetchApp latency)
-        return 'Sunny';
-    });
+        while(Date.now() - start < 10) {} // Simulate 10ms latency for the batch request
+        activities.forEach(a => a.weatherText = 'Sunny');
+    }));
 
     global.generateAiComment = vi.fn(() => 'Nice!');
 
