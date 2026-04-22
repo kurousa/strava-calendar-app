@@ -55,10 +55,11 @@ describe('weather.ts', () => {
         });
 
         it('should return empty string if API key is missing', () => {
-             const scriptPropertiesMock = {
-                getProperty: vi.fn(() => null)
-            };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(scriptPropertiesMock);
+            vi.stubGlobal('PropertiesService', {
+                getScriptProperties: vi.fn().mockReturnValue({
+                    getProperty: vi.fn(() => null)
+                })
+            });
 
             const result = fetchWeatherData(lat, lng, dateObj);
             expect(result).toBe('');
