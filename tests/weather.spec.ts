@@ -39,7 +39,7 @@ describe('weather.ts', () => {
 
             const result = fetchWeatherData(lat, lng, dateObj);
 
-            expect(result).toBe('天気: Sunny / 気温: 20.5℃ / 風速: 5.2km/h');
+            expect(result).toBe('天気: 晴れ / 気温: 20.5℃ / 風速: 5.2km/h');
             expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
                 expect.stringContaining('key=fake_weather_key'),
                 expect.any(Object)
