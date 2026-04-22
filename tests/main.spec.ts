@@ -306,7 +306,7 @@ describe('processActivityToCalendar', () => {
 
         const ids = getExistingActivityIds(mockCalendar, new Date('2024-01-01'), new Date('2024-01-31'));
 
-        expect(mockList).toHaveBeenCalled();
+        expect((global as any).Calendar.Events.list).toHaveBeenCalled();
         expect(ids.has('201')).toBe(true);
         expect(ids.has('202')).toBe(true);
         expect(ids.size).toBe(2);
