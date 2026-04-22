@@ -295,18 +295,13 @@ describe('processActivityToCalendar', () => {
         const { getExistingActivityIds } = await import('../main.ts');
 
         // Setup mock for Advanced Service
-        const mockList = vi.fn().mockReturnValue({
+        // Setup mock for Advanced Service
+        (global as any).Calendar.Events.list.mockReturnValueOnce({
             items: [
                 { extendedProperties: { private: { stravaActivityId: '201' } } },
                 { description: 'Link: https://www.strava.com/activities/202' }, // fallback for older event
                 { description: 'Regular meeting' } // ignored
             ]
-        });
-
-        vi.stubGlobal('Calendar', {
-            Events: {
-                list: mockList
-            }
         });
 
         const ids = getExistingActivityIds(mockCalendar, new Date('2024-01-01'), new Date('2024-01-31'));
