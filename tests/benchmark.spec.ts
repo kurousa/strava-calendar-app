@@ -25,12 +25,12 @@ for (let i = 0; i < 50; i++) {
 
 test('Benchmark backupToSpreadsheet', async () => {
     // Setup mocks
-    global.Logger = { log: vi.fn() };
-    global.PropertiesService = {
+    vi.stubGlobal('Logger', { log: vi.fn() });
+    vi.stubGlobal('PropertiesService', {
         getScriptProperties: () => ({
             getProperty: () => 'fake_spreadsheet_id'
         })
-    };
+    });
 
     const mockRange = {
         setFontWeight: vi.fn().mockReturnThis(),
