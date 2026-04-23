@@ -20,7 +20,7 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
                     timeMin: startDate.toISOString(),
                     timeMax: endDate.toISOString(),
                     q: Config.STRAVA_SEARCH_QUERY, // Search reduces the result set on the server
-                    maxResults: 2500,
+                    maxResults: Config.CALENDAR_PAGE_SIZE,
                     singleEvents: true,
                     pageToken: pageToken
                 });
