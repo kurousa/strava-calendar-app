@@ -22,7 +22,7 @@ vi.hoisted(() => {
 
     (global as any).Calendar = {
         Events: {
-            patch: vi.fn(),
+            patch: vi.fn(), list: vi.fn().mockReturnValue({ items: [] }),
         },
     };
 

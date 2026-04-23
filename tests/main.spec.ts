@@ -290,6 +290,35 @@ describe('processActivityToCalendar', () => {
         expect(mockCalendar.createEvent).toHaveBeenCalled();
         expect(result).toBe('success');
     });
+
+    it('should use Advanced Calendar Service for getExistingActivityIds if available', async () => {
+        const { getExistingActivityIds } = await import('../main.ts');
+
+        // Setup mock for Advanced Service
+        const mockList = vi.fn().mockReturnValue({
+            items: [
+                { extendedProperties: { private: { stravaActivityId: '201' } } },
+                { description: 'Link: https://www.strava.com/activities/202' }, // fallback for older event
+                { description: 'Regular meeting' } // ignored
+            ]
+        });
+
+        vi.stubGlobal('Calendar', {
+            Events: {
+                list: mockList
+            }
+        });
+
+        const ids = getExistingActivityIds(mockCalendar, new Date('2024-01-01'), new Date('2024-01-31'));
+
+        expect(mockList).toHaveBeenCalled();
+        expect(ids.has('201')).toBe(true);
+        expect(ids.has('202')).toBe(true);
+        expect(ids.size).toBe(2);
+
+        // Fallback CalendarApp shouldn't be called
+        expect(mockCalendar.getEvents).not.toHaveBeenCalled();
+    });
 });
 
 describe('main function', () => {
@@ -391,7 +420,7 @@ describe('main function', () => {
         
         // Mock existing events in calendar
         mockCalendar.getEvents.mockReturnValue([
-            { getDescription: () => 'Link: https://www.strava.com/activities/101' }
+            { getDescription: () => 'Link: https://www.strava.com/activities/101', getTag: () => null }
         ]);
 
         main();
