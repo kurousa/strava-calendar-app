@@ -22,7 +22,7 @@ vi.hoisted(() => {
 
     (global as any).Calendar = {
         Events: {
-            patch: vi.fn(),
+            patch: vi.fn(), list: vi.fn().mockReturnValue({ items: [] }),
         },
     };
 
@@ -98,6 +98,18 @@ vi.hoisted(() => {
 
     (global as any).UrlFetchApp = {
         fetch: vi.fn(),
+        fetchAll: vi.fn((requests: any[]) => {
+            return requests.map(req => ({
+                getResponseCode: () => 200,
+                getContentText: () => JSON.stringify({
+                    hourly: {
+                        temperature_2m: new Array(24).fill(20),
+                        weathercode: new Array(24).fill(0),
+                        windspeed_10m: new Array(24).fill(10)
+                    }
+                })
+            }));
+        }),
     };
 
     (global as any).Maps = {
@@ -252,3 +264,11 @@ global.sendDiscordMessage = (NotifierModuleExtension as any).sendDiscordMessage;
 // Globalize TSS functions
 import * as TssModule from './tss.ts';
 global.calculateTSS = (TssModule as any).calculateTSS;
+
+// Globalize getActivityStartDate
+import * as DateFormatter from './formatters/date.ts';
+(global as any).getActivityStartDate = (DateFormatter as any).getActivityStartDate || vi.fn((activity: any) => {
+    return activity.start_date_local
+        ? new Date(activity.start_date_local.replace(/Z$/i, ''))
+        : new Date(activity.start_date);
+});
