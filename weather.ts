@@ -2,15 +2,17 @@
 // 天気情報取得処理 (weather.ts)
 // WeatherAPI.com (APIキー必須) を利用して過去の天気を取得します。
 // ==========================================
-
+let _weatherApiKeyCache: string | null = null;
 function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
     // 1. APIキーの取得
-    const apiKey = PropertiesService.getScriptProperties().getProperty(Config.PROP_WEATHER_API_KEY);
+    if (_weatherApiKeyCache === null) {
+        _weatherApiKeyCache = PropertiesService.getScriptProperties().getProperty(Config.PROP_WEATHER_API_KEY) || '';
+    }
+    const apiKey = _weatherApiKeyCache;
     if (!apiKey) {
         Logger.log('[Weather API Error] APIキーが設定されていません。');
         return '';
     }
-
     // 2. 日付と時間のフォーマット
     const dateString = Utilities.formatDate(dateObj, "Asia/Tokyo", "yyyy-MM-dd");
     const hourIndex = parseInt(Utilities.formatDate(dateObj, "Asia/Tokyo", "H"), 10);
@@ -22,13 +24,19 @@ function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
 
     try {
         const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-        const data = JSON.parse(response.getContentText());
-
-        if (response.getResponseCode() !== 200) {
-            Logger.log(`[Weather API Error] ${data.error?.message}`);
+        const responseCode = response.getResponseCode();
+        const responseText = response.getContentText();
+        if (responseCode !== 200) {
+            let errorMsg = responseText;
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMsg = errorData.error?.message || responseText;
+            } catch (e) { /* Not JSON, use raw text */ }
+            Logger.log('[Weather API Error] ' + errorMsg);
             return '';
         }
-
+        const data = JSON.parse(responseText);
+        
         // 4. 指定した時間 (hourIndex) のデータを抽出
         const forecastDay = data.forecast?.forecastday?.[0];
         if (!forecastDay || !forecastDay.hour) return '';
