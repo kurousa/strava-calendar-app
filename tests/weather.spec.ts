@@ -133,7 +133,7 @@ describe('weather.ts', () => {
             id: 1,
             name: 'Test Run',
             sport_type: 'Run',
-            start_date_local: '2024-04-12T10:30:00',
+            start_date_local: '2024-04-12T10:30:00+09:00',
             start_latlng: [35.6895, 139.6917],
             ...overrides,
         });
