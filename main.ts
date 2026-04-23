@@ -202,7 +202,7 @@ function processActivityToCalendar(
         if (files.hasNext()) {
             const file = files.next();
             // Google Calendar API (v3) を使って添付ファイルを追加
-            // 標準のIDは "xxxx@google.com" 形式なので、ID部分のみ抽出
+            // 標準のIDは "event_id@google.com" 形式なので、ID部分のみ抽出
             const eventId = event.getId().split('@')[0];
             try {
                 // global の Calendar オブジェクト (Advanced Service) を使用

@@ -39,23 +39,28 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             });
         }
 
-        const rows = activities.map(activity => {
-            if (existingIds.has(String(activity.id))) {
-                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-                return;
-            }
+        // バックアップ対象のアクティビティを抽出
+        const targetActivities = activities.filter(activity => !existingIds.has(String(activity.id)));
+
+        if (targetActivities.length === 0) {
+            Logger.log(`全てのアクティビティは既に登録済みです。`);
+            return;
+        }
+
+        // 天気情報を一括取得してアクティビティオブジェクトに設定
+        if (typeof fetchWeatherDataBatch === 'function') {
+            fetchWeatherDataBatch(targetActivities);
+        }
+
+        const rows = targetActivities.map(activity => {
             const distanceKm = activity.distance ? (activity.distance / 1000).toFixed(2) : '0';
             const timeMin = activity.moving_time ? Math.floor(activity.moving_time / 60) : 0;
-            const date = activity.start_date_local
-                ? new Date(activity.start_date_local.replace(/Z$/i, ''))
-                : new Date(activity.start_date);
+            const date = getActivityStartDate(activity);
             
-            // 天気とAIコメントの取得
-            let weather = '';
-            if (activity.start_latlng && activity.start_latlng.length === 2) {
-                weather = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], date);
-            }
-            const aiComment = generateAiComment(activity);
+            // AIコメントの取得
+            const aiComment = activity.aiComment || generateAiComment(activity);
+            // バッチ処理で取得済みの天気を使用
+            const weather = activity.weatherText || '';
             const url = `https://www.strava.com/activities/${activity.id}`;
 
             return [
