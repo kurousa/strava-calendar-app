@@ -18,7 +18,10 @@ Sentry.init({
   environment: import.meta.env.MODE,
 });
 
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+if (!clientId) {
+  throw new Error("VITE_GOOGLE_CLIENT_ID is not defined in environment variables");
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
