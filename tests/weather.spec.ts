@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchWeatherData} from "../weather";
 
 describe('weather.ts', () => {
     describe('fetchWeatherData', () => {
@@ -7,17 +6,24 @@ describe('weather.ts', () => {
         const lng = 139.6917;
         const dateObj = new Date('2024-04-12T10:30:00+09:00'); // 10:30 JST
 
-        beforeEach(() => {
+        let fetchWeatherData: any;
+
+        beforeEach(async () => {
+            vi.resetModules();
+            const weatherModule = await import("../weather");
+            fetchWeatherData = weatherModule.fetchWeatherData;
+
             vi.stubGlobal('sendErrorEmail', vi.fn());
             vi.clearAllMocks();
             // Mock PropertiesService to return an API key
-            const scriptPropertiesMock = {
-                getProperty: vi.fn((key: string) => {
-                    if (key === 'WEATHER_API_KEY') return 'fake_weather_key';
-                    return null;
+            vi.stubGlobal('PropertiesService', {
+                getScriptProperties: vi.fn().mockReturnValue({
+                    getProperty: vi.fn((key: string) => {
+                        if (key === 'WEATHER_API_KEY') return 'fake_weather_key';
+                        return null;
+                    })
                 })
-            };
-            (global as any).PropertiesService.getScriptProperties.mockReturnValue(scriptPropertiesMock);
+            });
         });
 
         it('should fetch weather data correctly for a given date and time', () => {
@@ -60,7 +66,6 @@ describe('weather.ts', () => {
                     getProperty: vi.fn(() => null)
                 })
             });
-
             const result = fetchWeatherData(lat, lng, dateObj);
             expect(result).toBe('');
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Error] APIキーが設定されていません。'));
