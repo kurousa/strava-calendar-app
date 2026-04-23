@@ -49,7 +49,8 @@ var Config = {
     CALENDAR_API_DELAY_MS: 200,
     STRAVA_API_DELAY_MS: 200,
     STRAVA_ACTIVITY_ID_REGEX: /strava\.com\/activities\/(\d+)/i,
-
+    STRAVA_SEARCH_QUERY: 'strava.com/activities',
+    STRAVA_TAG_KEY: 'stravaActivityId',
     DISTANCE_ACTIVITIES: [
         'Run', 'Ride', 'Walk', 'Hike', 'Swim', 'AlpineSki', 'BackcountrySki', 'NordicSki', 'RollerSki',
         'Canoeing', 'Kayaking', 'Rowing', 'StandUpPaddling', 'Surfing', 'Sail', 'Windsurf', 'IceSkate',

@@ -19,7 +19,7 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
                 const response = Calendar.Events.list(calendar.getId(), {
                     timeMin: startDate.toISOString(),
                     timeMax: endDate.toISOString(),
-                    q: 'strava.com/activities', // Search reduces the result set on the server
+                    q: Config.STRAVA_SEARCH_QUERY, // Search reduces the result set on the server
                     maxResults: 2500,
                     singleEvents: true,
                     pageToken: pageToken
@@ -28,8 +28,8 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
                 if (response.items) {
                     response.items.forEach((item: any) => {
                         // Fast path: use extended properties (avoids parsing)
-                        if (item.extendedProperties?.private?.stravaActivityId) {
-                            existingActivityIds.add(item.extendedProperties.private.stravaActivityId);
+                        if (item.extendedProperties?.private?.[Config.STRAVA_TAG_KEY]) {
+                            existingActivityIds.add(item.extendedProperties.private[Config.STRAVA_TAG_KEY]);
                         }
                         // Fallback for older events: parse description directly from JSON (still much faster than GAS proxies)
                         else if (item.description) {
@@ -49,9 +49,9 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
     }
 
     // Fallback if Advanced Service is somehow unavailable
-    const existingEvents = calendar.getEvents(startDate, endDate, { search: 'strava.com/activities' });
+    const existingEvents = calendar.getEvents(startDate, endDate, { search: Config.STRAVA_SEARCH_QUERY });
     existingEvents.forEach(event => {
-        const tag = event.getTag('stravaActivityId');
+        const tag = event.getTag(Config.STRAVA_TAG_KEY);
         if (tag) {
             existingActivityIds.add(tag);
         } else {
@@ -240,7 +240,7 @@ function processActivityToCalendar(
 
     // ⚡ Bolt Optimization: Tag the event for lightning-fast lookups in getExistingActivityIds
     try {
-        event.setTag('stravaActivityId', String(activity.id));
+        event.setTag(Config.STRAVA_TAG_KEY, String(activity.id));
     } catch (e) {
         Logger.log(`イベントタグの設定に失敗しました: ${e}`);
     }
