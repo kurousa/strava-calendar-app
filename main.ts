@@ -108,13 +108,9 @@ function main(): void {
 
         // Strava 一覧API は calories を返さないため、詳細APIで補完する
         // これによりカレンダーの説明文とスプレッドシートバックアップの両方にカロリーが反映される
-        try {
-            const detail = getStravaActivity(activity.id);
-            if (detail && detail.calories != null) {
-                activity.calories = detail.calories;
-            }
-        } catch (e) {
-            Logger.log(`[Detail] カロリー取得失敗 (ID: ${activity.id}): ${e}`);
+        const detail = getStravaActivity(activity.id);
+        if (detail && detail.calories != null) {
+            activity.calories = detail.calories;
         }
 
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
