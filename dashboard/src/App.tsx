@@ -49,9 +49,11 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (token) {
-      loadData(token);
-    }
+    if (!token) return;
+    const run = async () => {
+      await loadData(token);
+    };
+    void run();
   }, [token, loadData]);
 
   if (!token) {
