@@ -49,9 +49,6 @@ var Config = {
     // 設定定数
     CALENDAR_API_DELAY_MS: 200,
     STRAVA_API_DELAY_MS: 200,
-    CALENDAR_PAGE_SIZE: 2500,
-    STRAVA_SEARCH_QUERY: 'strava.com/activities',
-    STRAVA_TAG_KEY: 'stravaActivityId',
     STRAVA_ACTIVITY_ID_REGEX: /strava\.com\/activities\/(\d+)/i,
 
     DISTANCE_ACTIVITIES: [

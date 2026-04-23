@@ -391,7 +391,7 @@ describe('main function', () => {
         
         // Mock existing events in calendar
         mockCalendar.getEvents.mockReturnValue([
-            { getTag: vi.fn().mockReturnValue(null), getDescription: () => 'Link: https://www.strava.com/activities/101' }
+            { getDescription: () => 'Link: https://www.strava.com/activities/101' }
         ]);
 
         main();
