@@ -50,10 +50,7 @@ export default function App() {
 
   useEffect(() => {
     if (token) {
-      const timer = setTimeout(() => {
-        loadData(token);
-      }, 0);
-      return () => clearTimeout(timer);
+      loadData(token);
     }
   }, [token, loadData]);
 
