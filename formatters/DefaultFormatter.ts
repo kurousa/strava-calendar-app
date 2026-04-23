@@ -41,6 +41,11 @@ function makeDefaultDescription(activity: StravaActivity): string {
         descriptionLines.push(`平均心拍数: ${activity.average_heartrate} bpm`);
     }
 
+    // カロリー (取得できていれば追加)
+    if (activity.calories) {
+        descriptionLines.push(`🔥 カロリー: ${activity.calories} kcal`);
+    }
+
     // 天気情報 (取得できていれば追加)
     if (activity.weatherText) {
         descriptionLines.push(activity.weatherText);

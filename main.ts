@@ -106,6 +106,13 @@ function main(): void {
             return;
         }
 
+        // Strava 一覧API は calories を返さないため、詳細APIで補完する
+        // これによりカレンダーの説明文とスプレッドシートバックアップの両方にカロリーが反映される
+        const detail = getStravaActivity(activity.id);
+        if (detail && detail.calories != null) {
+            activity.calories = detail.calories;
+        }
+
         // ⚡ Bolt: Pass skipDuplicateCheck=true because we already filtered duplicates above
         const result = processActivityToCalendar(activity, calendar, undefined, true);
         if (result === 'success') {
@@ -117,6 +124,7 @@ function main(): void {
     });
 
     if (typeof backupToSpreadsheet === 'function') {
+        // カロリーは上のループで既に補完済みなのでそのまま渡す
         backupToSpreadsheet(successfulActivities);
     }
 

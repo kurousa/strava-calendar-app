@@ -19,6 +19,7 @@ function makeRunDescription(activity: StravaActivity): string {
 
     // ラン専用の計算（ペース）
     const paceText = formatPace(activity.average_speed);
+    const caloriesText = activity.calories ? `🔥 カロリー: ${activity.calories} kcal` : '';
     const weatherLine = weather ? `${weather}` : '';
     const mapLine = mapUrl ? `ルート地図: ${mapUrl}` : '';
 
@@ -28,6 +29,7 @@ function makeRunDescription(activity: StravaActivity): string {
         `ペース: ${paceText}`,
         `獲得標高: ${elevation} m`,
         `平均心拍数: ${hr}`,
+        caloriesText,
         weatherLine,
         mapLine,
     ].filter(Boolean);

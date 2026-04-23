@@ -9,6 +9,7 @@ function makeRideDescription(activity: StravaActivity): string {
     const speedKmh = activity.average_speed ? (activity.average_speed * 3.6).toFixed(1) : 0;
     const wattsText = activity.average_watts ? `平均パワー: ${activity.average_watts} W` : '';
     const cadenceText = activity.average_cadence ? `平均ケイデンス: ${activity.average_cadence} rpm` : '';
+    const caloriesText = activity.calories ? `🔥 カロリー: ${activity.calories} kcal` : '';
     const weatherLine = weather ? `${weather}` : '';
     const mapLine = mapUrl ? `ルート地図: ${mapUrl}` : '';
 
@@ -20,6 +21,7 @@ function makeRideDescription(activity: StravaActivity): string {
         `平均心拍数: ${hr}`,
         wattsText,
         cadenceText,
+        caloriesText,
         weatherLine,
         mapLine,
     ].filter(Boolean);
