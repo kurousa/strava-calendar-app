@@ -98,7 +98,7 @@ vi.hoisted(() => {
 
     (global as any).UrlFetchApp = {
         fetch: vi.fn(),
-        fetchAll: vi.fn((requests) => {
+        fetchAll: vi.fn((requests: any[]) => {
             return requests.map(req => ({
                 getResponseCode: () => 200,
                 getContentText: () => JSON.stringify({
@@ -267,7 +267,7 @@ global.calculateTSS = (TssModule as any).calculateTSS;
 
 // Globalize getActivityStartDate
 import * as DateFormatter from './formatters/date.ts';
-(global as any).getActivityStartDate = (DateFormatter as any).getActivityStartDate || vi.fn((activity) => {
+(global as any).getActivityStartDate = (DateFormatter as any).getActivityStartDate || vi.fn((activity: any) => {
     return activity.start_date_local
         ? new Date(activity.start_date_local.replace(/Z$/i, ''))
         : new Date(activity.start_date);

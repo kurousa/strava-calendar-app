@@ -1,67 +1,41 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getWeatherEmoji, fetchWeatherData} from "../weather";
 
 describe('weather.ts', () => {
-    describe('getWeatherEmoji', () => {
-        it('should return "☀️ 晴れ" for code 0', () => {
-            expect(getWeatherEmoji(0)).toBe('☀️ 晴れ');
-        });
-
-        it('should return "⛅ 曇り" for codes 1, 2, 3', () => {
-            expect(getWeatherEmoji(1)).toBe('⛅ 曇り');
-            expect(getWeatherEmoji(2)).toBe('⛅ 曇り');
-            expect(getWeatherEmoji(3)).toBe('⛅ 曇り');
-        });
-
-        it('should return "🌫️ 霧" for codes 45-48', () => {
-            expect(getWeatherEmoji(45)).toBe('🌫️ 霧');
-            expect(getWeatherEmoji(48)).toBe('🌫️ 霧');
-        });
-
-        it('should return "🌧️ 雨" for codes 51-67', () => {
-            expect(getWeatherEmoji(51)).toBe('🌧️ 雨');
-            expect(getWeatherEmoji(67)).toBe('🌧️ 雨');
-        });
-
-        it('should return "❄️ 雪" for codes 71-77', () => {
-            expect(getWeatherEmoji(71)).toBe('❄️ 雪');
-            expect(getWeatherEmoji(77)).toBe('❄️ 雪');
-        });
-
-        it('should return "🚿 にわか雨" for codes 80-82', () => {
-            expect(getWeatherEmoji(80)).toBe('🚿 にわか雨');
-            expect(getWeatherEmoji(82)).toBe('🚿 にわか雨');
-        });
-
-        it('should return "⛈️ 雷雨" for codes 95-99', () => {
-            expect(getWeatherEmoji(95)).toBe('⛈️ 雷雨');
-            expect(getWeatherEmoji(99)).toBe('⛈️ 雷雨');
-        });
-
-        it('should return "☁️ 不明" for other codes', () => {
-            expect(getWeatherEmoji(100)).toBe('☁️ 不明');
-            expect(getWeatherEmoji(-1)).toBe('☁️ 不明');
-        });
-    });
-
     describe('fetchWeatherData', () => {
         const lat = 35.6895;
         const lng = 139.6917;
         const dateObj = new Date('2024-04-12T10:30:00+09:00'); // 10:30 JST
 
-        beforeEach(() => {
-        vi.stubGlobal('sendErrorEmail', vi.fn());
+        let fetchWeatherData: any;
+
+        beforeEach(async () => {
+            vi.resetModules();
+            const weatherModule = await import('../weather');
+            fetchWeatherData = weatherModule.fetchWeatherData;
+            vi.stubGlobal('sendErrorEmail', vi.fn());
             vi.clearAllMocks();
+            // Mock PropertiesService to return an API key
+            const scriptPropertiesMock = {
+                getProperty: vi.fn((key: string) => {
+                    if (key === 'WEATHER_API_KEY') return 'fake_weather_key';
+                    return null;
+                })
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(scriptPropertiesMock);
         });
 
         it('should fetch weather data correctly for a given date and time', () => {
             const mockResponse = {
                 getResponseCode: () => 200,
                 getContentText: () => JSON.stringify({
-                    hourly: {
-                        temperature_2m: new Array(24).fill(0).map((_, i) => i === 10 ? 20.5 : 0),
-                        weathercode: new Array(24).fill(0).map((_, i) => i === 10 ? 0 : 99),
-                        windspeed_10m: new Array(24).fill(0).map((_, i) => i === 10 ? 5.2 : 0)
+                    forecast: {
+                        forecastday: [{
+                            hour: new Array(24).fill(0).map((_, i) => ({
+                                temp_c: i === 10 ? 20.5 : 0,
+                                wind_kph: i === 10 ? 5.2 : 0,
+                                condition: { text: i === 10 ? '晴れ' : 'Unknown' }
+                            }))
+                        }]
                     }
                 })
             };
@@ -69,40 +43,45 @@ describe('weather.ts', () => {
 
             const result = fetchWeatherData(lat, lng, dateObj);
 
-            expect(result).toBe('天気: ☀️ 晴れ / 気温: 20.5℃ / 風速: 5.2km/h');
+            expect(result).toBe('天気: 晴れ / 気温: 20.5℃ / 風速: 5.2km/h');
             expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('latitude=35.6895'),
+                expect.stringContaining('key=fake_weather_key'),
                 expect.any(Object)
             );
             expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('longitude=139.6917'),
+                expect.stringContaining('q=35.6895,139.6917'),
                 expect.any(Object)
             );
             expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('start_date=2024-04-12'),
-                expect.any(Object)
-            );
-            expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('end_date=2024-04-12'),
-                expect.any(Object)
-            );
-            expect((global as any).UrlFetchApp.fetch).toHaveBeenCalledWith(
-                expect.stringContaining('timezone=Asia%2FTokyo'),
+                expect.stringContaining('dt=2024-04-12'),
                 expect.any(Object)
             );
         });
 
+        it('should return empty string if API key is missing', () => {
+             const scriptPropertiesMock = {
+                getProperty: vi.fn(() => null)
+            };
+            (global as any).PropertiesService.getScriptProperties.mockReturnValue(scriptPropertiesMock);
+
+            const result = fetchWeatherData(lat, lng, dateObj);
+            expect(result).toBe('');
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Error] APIキーが設定されていません。'));
+        });
+
         it('should return empty string if response code is not 200', () => {
             const mockResponse = {
-                getResponseCode: () => 500,
-                getContentText: () => 'Internal Server Error'
+                getResponseCode: () => 400,
+                getContentText: () => JSON.stringify({
+                    error: { message: 'Invalid API Key' }
+                })
             };
             (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
 
             const result = fetchWeatherData(lat, lng, dateObj);
 
             expect(result).toBe('');
-            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Error]'));
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Error] Invalid API Key'));
         });
 
         it('should return empty string if an exception occurs', () => {
@@ -116,24 +95,7 @@ describe('weather.ts', () => {
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Exception]'));
         });
 
-        it('should return empty string if temperature data is missing for the specific hour', () => {
-             const mockResponse = {
-                getResponseCode: () => 200,
-                getContentText: () => JSON.stringify({
-                    hourly: {
-                        temperature_2m: new Array(24).fill(null),
-                        weathercode: new Array(24).fill(0),
-                        windspeed_10m: new Array(24).fill(0)
-                    }
-                })
-            };
-            (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
-
-            const result = fetchWeatherData(lat, lng, dateObj);
-            expect(result).toBe('');
-        });
-
-        it('should return empty string if hourly object is missing', () => {
+        it('should return empty string if forecast data is missing', () => {
              const mockResponse = {
                 getResponseCode: () => 200,
                 getContentText: () => JSON.stringify({})
@@ -144,38 +106,166 @@ describe('weather.ts', () => {
             expect(result).toBe('');
         });
 
-        it('should return empty string if weathercode is null', () => {
+        it('should return "不明" if condition text is missing', () => {
              const mockResponse = {
                 getResponseCode: () => 200,
                 getContentText: () => JSON.stringify({
-                    hourly: {
-                        temperature_2m: new Array(24).fill(20),
-                        weathercode: new Array(24).fill(null),
-                        windspeed_10m: new Array(24).fill(5)
+                    forecast: {
+                        forecastday: [{
+                            hour: new Array(24).fill(0).map((_, i) => ({
+                                temp_c: 20,
+                                wind_kph: 5,
+                                condition: {}
+                            }))
+                        }]
                     }
                 })
             };
             (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
 
             const result = fetchWeatherData(lat, lng, dateObj);
-            expect(result).toBe('');
+            expect(result).toBe('天気: 不明 / 気温: 20℃ / 風速: 5km/h');
+        });
+    });
+
+    describe('fetchWeatherDataBatch', () => {
+        const makeActivity = (overrides: Record<string, any> = {}): any => ({
+            id: 1,
+            name: 'Test Run',
+            sport_type: 'Run',
+            start_date_local: '2024-04-12T10:30:00+09:00',
+            start_latlng: [35.6895, 139.6917],
+            ...overrides,
         });
 
-        it('should return empty string if windspeed is null', () => {
-             const mockResponse = {
+        const makeHourArray = (targetHour: number, data: object) =>
+            new Array(24).fill(null).map((_, i) => (i === targetHour ? data : { temp_c: 0, wind_kph: 0, condition: { text: 'Unknown' } }));
+
+        let fetchWeatherDataBatch: any;
+
+        beforeEach(async () => {
+            vi.resetModules();
+            const weatherModule = await import('../weather');
+            fetchWeatherDataBatch = weatherModule.fetchWeatherDataBatch;
+
+            vi.stubGlobal('sendErrorEmail', vi.fn());
+            vi.clearAllMocks();
+            vi.stubGlobal('PropertiesService', {
+                getScriptProperties: vi.fn().mockReturnValue({
+                    getProperty: vi.fn((key: string) => {
+                        if (key === 'WEATHER_API_KEY') return 'fake_weather_key';
+                        return null;
+                    })
+                })
+            });
+        });
+
+        it('should set weatherText on matched activities', () => {
+            const activity = makeActivity();
+            const mockResponse = {
                 getResponseCode: () => 200,
                 getContentText: () => JSON.stringify({
-                    hourly: {
-                        temperature_2m: new Array(24).fill(20),
-                        weathercode: new Array(24).fill(0),
-                        windspeed_10m: new Array(24).fill(null)
+                    forecast: {
+                        forecastday: [{
+                            hour: makeHourArray(10, { temp_c: 22.3, wind_kph: 10.5, condition: { text: '晴れ' } })
+                        }]
                     }
                 })
             };
-            (global as any).UrlFetchApp.fetch.mockReturnValue(mockResponse);
+            (global as any).UrlFetchApp.fetchAll.mockReturnValue([mockResponse]);
 
-            const result = fetchWeatherData(lat, lng, dateObj);
-            expect(result).toBe('');
+            fetchWeatherDataBatch([activity]);
+
+            expect(activity.weatherText).toBe('天気: 晴れ / 気温: 22.3℃ / 風速: 10.5km/h');
+            expect((global as any).UrlFetchApp.fetchAll).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        url: expect.stringContaining('key=fake_weather_key'),
+                    }),
+                ])
+            );
+            expect((global as any).UrlFetchApp.fetchAll).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        url: expect.stringContaining('q=35.6895,139.6917'),
+                    }),
+                ])
+            );
+            expect((global as any).UrlFetchApp.fetchAll).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        url: expect.stringContaining('dt=2024-04-12'),
+                    }),
+                ])
+            );
+        });
+
+        it('should use "不明" if condition.text is missing', () => {
+            const activity = makeActivity();
+            const mockResponse = {
+                getResponseCode: () => 200,
+                getContentText: () => JSON.stringify({
+                    forecast: {
+                        forecastday: [{
+                            hour: makeHourArray(10, { temp_c: 15, wind_kph: 3, condition: {} })
+                        }]
+                    }
+                })
+            };
+            (global as any).UrlFetchApp.fetchAll.mockReturnValue([mockResponse]);
+
+            fetchWeatherDataBatch([activity]);
+
+            expect(activity.weatherText).toBe('天気: 不明 / 気温: 15℃ / 風速: 3km/h');
+        });
+
+        it('should skip activity if API key is missing', () => {
+            vi.stubGlobal('PropertiesService', {
+                getScriptProperties: vi.fn().mockReturnValue({
+                    getProperty: vi.fn(() => null)
+                })
+            });
+            const activity = makeActivity();
+            fetchWeatherDataBatch([activity]);
+
+            expect(activity.weatherText).toBeUndefined();
+            expect((global as any).UrlFetchApp.fetchAll).not.toHaveBeenCalled();
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Error] APIキーが設定されていません'));
+        });
+
+        it('should skip activity if response code is not 200', () => {
+            const activity = makeActivity();
+            const mockResponse = { getResponseCode: () => 401, getContentText: () => '{}' };
+            (global as any).UrlFetchApp.fetchAll.mockReturnValue([mockResponse]);
+
+            fetchWeatherDataBatch([activity]);
+
+            expect(activity.weatherText).toBeUndefined();
+        });
+
+        it('should skip activity already having weatherText', () => {
+            const activity = makeActivity({ weatherText: '既存の天気' } as any);
+            fetchWeatherDataBatch([activity]);
+
+            expect((global as any).UrlFetchApp.fetchAll).not.toHaveBeenCalled();
+            expect(activity.weatherText).toBe('既存の天気');
+        });
+
+        it('should skip activity with no start_latlng', () => {
+            const activity = makeActivity({ start_latlng: undefined } as any);
+            fetchWeatherDataBatch([activity]);
+
+            expect((global as any).UrlFetchApp.fetchAll).not.toHaveBeenCalled();
+        });
+
+        it('should call sendErrorEmail if fetchAll throws', () => {
+            const activity = makeActivity();
+            (global as any).UrlFetchApp.fetchAll.mockImplementation(() => { throw new Error('Network Down'); });
+
+            fetchWeatherDataBatch([activity]);
+
+            expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Weather API Batch Exception]'));
+            expect((global as any).sendErrorEmail).toHaveBeenCalledWith(expect.stringContaining('[Weather API Batch Error]'));
         });
     });
 });

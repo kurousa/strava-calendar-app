@@ -104,7 +104,7 @@ function getDashboardData(): DashboardSummary | undefined {
     const summary: DashboardSummary = {
         lastActivity: lastActivity,
         fitness: Math.round(runningTotal * 10) / 10,
-        gears: getGearStatus(), // Now cached
+        gears: getGearStatus(),
         history: history,
         heatmapData: heatmapData
     };

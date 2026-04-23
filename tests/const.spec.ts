@@ -62,9 +62,10 @@ describe('const.ts', () => {
             expect(Config.PROP_DISCORD_WEBHOOK_URL).toBe('DISCORD_WEBHOOK_URL');
             expect(Config.PROP_GEMINI_API_KEY).toBe('GEMINI_API_KEY');
             expect(Config.PROP_LAST_ERROR_NOTIFIED_AT).toBe('LAST_ERROR_NOTIFIED_AT');
+            expect(Config.PROP_WEATHER_API_KEY).toBe('WEATHER_API_KEY');
 
             expect(Config.STRAVA_API_BASE).toBe('https://www.strava.com/api/v3');
-            expect(Config.OPEN_METEO_API_BASE).toBe('https://api.open-meteo.com/v1/forecast');
+            expect(Config.WEATHER_API_BASE).toBe('https://api.weatherapi.com/v1');
             expect(Config.GEMINI_API_BASE).toBe(`https://generativelanguage.googleapis.com/v1beta/models/gemini-${_GEMINI_VERSION}-${_GEMINI_MODEL}:generateContent`);
 
             expect(Config.CALENDAR_API_DELAY_MS).toBe(200);

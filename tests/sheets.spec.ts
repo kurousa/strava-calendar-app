@@ -87,7 +87,7 @@ describe('sheets.ts', () => {
         ];
 
         // モックを差し込んで副作用を抑える
-        vi.stubGlobal('fetchWeatherDataBatch', vi.fn((acts) => { acts.forEach(a => a.weatherText = 'Sunny'); }));
+        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Sunny'));
         vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Nice!'));
 
         backupToSpreadsheet(activities as any);
@@ -127,13 +127,12 @@ describe('sheets.ts', () => {
             }
         ];
 
-        vi.stubGlobal('fetchWeatherDataBatch', vi.fn((acts) => { acts.forEach(a => a.weatherText = 'Cloudy'); }));
+        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Cloudy'));
         vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Good effort!'));
 
         backupToSpreadsheet(activities as any);
 
-        // The log message was updated in sheets.ts to use targetActivities filter
-        // expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
         expect(mockSheet.getRange).toHaveBeenNthCalledWith(1, 2, 1, 1, 1);
         expect(mockSheet.getRange).toHaveBeenNthCalledWith(2, 3, 1, 1, 15); // column count is 15
         expect(mockRange.setValues).toHaveBeenCalledWith([
@@ -168,13 +167,12 @@ describe('sheets.ts', () => {
             { id: 12345, name: 'Duplicate' },
         ];
 
-        vi.stubGlobal('fetchWeatherDataBatch', vi.fn((acts) => { acts.forEach(a => a.weatherText = 'Cloudy'); }));
+        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Cloudy'));
         vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Good effort!'));
 
         backupToSpreadsheet(activities as any);
 
-        // The log message was updated in sheets.ts to use targetActivities filter
-        // expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('スキップ: 既に登録済み'));
         expect(mockSheet.getRange).toHaveBeenCalledTimes(1); // Only called to get existing IDs
         expect(mockRange.setValues).not.toHaveBeenCalled();
     });
