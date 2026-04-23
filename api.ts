@@ -87,20 +87,6 @@ function getStravaActivities(afterDate?: Date, beforeDate?: Date, perPage: numbe
  * Stravaから現在のアスリートの全プロフィール情報を取得する
  */
 function getStravaAthleteProfile(): StravaAthlete | null {
-    const cache = typeof CacheService !== 'undefined' ? CacheService.getUserCache() : null;
-    const cacheKey = 'STRAVA_ATHLETE_PROFILE';
-
-    if (cache) {
-        const cachedProfile = cache.get(cacheKey);
-        if (cachedProfile) {
-            try {
-                return JSON.parse(cachedProfile);
-            } catch (e) {
-                // Parse error, ignore and fetch fresh
-            }
-        }
-    }
-
     const service = getOAuthService();
     if (!service.hasAccess()) {
         const errorMsg = '認証エラー: プロフィールを取得できません。';
@@ -126,12 +112,7 @@ function getStravaAthleteProfile(): StravaAthlete | null {
             return null;
         }
 
-        const profile = JSON.parse(response.getContentText());
-        if (profile && cache) {
-            // Cache the profile for 6 hours (21600 seconds)
-            cache.put(cacheKey, JSON.stringify(profile), 21600);
-        }
-        return profile;
+        return JSON.parse(response.getContentText());
 
     } catch (e) {
         const errorMsg = 'Strava APIの呼び出しに失敗しました: ' + (e as Error).toString();
