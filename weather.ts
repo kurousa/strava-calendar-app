@@ -2,10 +2,14 @@
 // 天気情報取得処理 (weather.ts)
 // WeatherAPI.com (APIキー必須) を利用して過去の天気を取得します。
 // ==========================================
+let _weatherApiKeyCache: string | null = null;
 
 function fetchWeatherData(lat: number, lng: number, dateObj: Date): string {
     // 1. APIキーの取得
-    const apiKey = PropertiesService.getScriptProperties().getProperty(Config.PROP_WEATHER_API_KEY);
+    if (_weatherApiKeyCache === null) {
+        _weatherApiKeyCache = PropertiesService.getScriptProperties().getProperty(Config.PROP_WEATHER_API_KEY) || '';
+    }
+    const apiKey = _weatherApiKeyCache;
     if (!apiKey) {
         Logger.log('[Weather API Error] APIキーが設定されていません。');
         return '';

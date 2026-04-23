@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchWeatherData} from "../weather";
 
 describe('weather.ts', () => {
     describe('fetchWeatherData', () => {
@@ -7,7 +6,12 @@ describe('weather.ts', () => {
         const lng = 139.6917;
         const dateObj = new Date('2024-04-12T10:30:00+09:00'); // 10:30 JST
 
-        beforeEach(() => {
+        let fetchWeatherData: any;
+
+        beforeEach(async () => {
+            vi.resetModules();
+            const weatherModule = await import('../weather');
+            fetchWeatherData = weatherModule.fetchWeatherData;
             vi.stubGlobal('sendErrorEmail', vi.fn());
             vi.clearAllMocks();
             // Mock PropertiesService to return an API key
