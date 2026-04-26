@@ -3,22 +3,31 @@
  */
 function handleStravaWebhook(event: StravaWebhookEvent): void {
     Logger.log(`[Webhook] Handling activity ${event.object_id}`);
-    if (event.object_type === 'activity') {
-        if (event.aspect_type === 'create') {
-            // 新規作成時のみカレンダーに登録
-            const activity = (global as any).getStravaActivity(event.object_id);
-            if (activity) {
-                const calendar = (global as any).getTargetCalendar();
-                if (calendar) {
-                    const result = (global as any).processActivityToCalendar(activity, calendar);
-                    // 登録に成功した場合のみ通知を飛ばす
-                    if (result === 'success' && typeof (global as any).sendSyncNotification === 'function') {
-                        (global as any).sendSyncNotification(1, 0, false);
-                    }
-                }
-            }
-        }
-        // update, delete は現状未対応（必要に応じて実装）
+
+    if (event.object_type !== 'activity') {
+        return;
+    }
+
+    // update, delete は現状未対応（必要に応じて実装）
+    if (event.aspect_type !== 'create') {
+        return;
+    }
+
+    // 新規作成時のみカレンダーに登録
+    const activity = (global as any).getStravaActivity(event.object_id);
+    if (!activity) {
+        return;
+    }
+
+    const calendar = (global as any).getTargetCalendar();
+    if (!calendar) {
+        return;
+    }
+
+    const result = (global as any).processActivityToCalendar(activity, calendar);
+    // 登録に成功した場合のみ通知を飛ばす
+    if (result === 'success' && typeof (global as any).sendSyncNotification === 'function') {
+        (global as any).sendSyncNotification(1, 0, false);
     }
 }
 
