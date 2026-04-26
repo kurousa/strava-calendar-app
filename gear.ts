@@ -123,9 +123,8 @@ function parseGearConfig(gearId: string, configStr: string | undefined): Partial
     try {
         return JSON.parse(configStr);
     } catch (e) {
-        // [Gear Status Error] というプレフィックスは元のテストのままにしておく（あるいはテスト修正が必要になるが、元の挙動をそのまま維持するならこれでOK）
-        Logger.log(`[Gear Status Error] Failed to parse config for gear ${gearId}`);
         const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gearId}`;
+        Logger.log(errorMsg);
         if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
         return null;
     }
