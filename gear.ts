@@ -116,6 +116,21 @@ function setGearThreshold(gearId: string, thresholdKm: number, isPeriodic: boole
 }
 
 /**
+ * @internal 機材設定のパース処理とエラーハンドリング
+ */
+function parseGearConfig(gearId: string, configStr: string | undefined): Partial<GearConfig> | null {
+    if (!configStr) return null;
+    try {
+        return JSON.parse(configStr);
+    } catch (e) {
+        const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gearId}`;
+        Logger.log(errorMsg);
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        return null;
+    }
+}
+
+/**
  * 各機材の現在のステータス（累積距離とアラートしきい値）を取得する
  */
 function getGearStatus(): GearStatus[] {
@@ -138,16 +153,10 @@ function getGearStatus(): GearStatus[] {
             isPeriodic: false
         };
 
-        if (!configStr) return baseStatus;
-
-        try {
-            const config: GearConfig = JSON.parse(configStr);
-            baseStatus.thresholdKm = config.thresholdKm ?? baseStatus.thresholdKm;
-            baseStatus.isPeriodic = config.isPeriodic ?? baseStatus.isPeriodic;
-        } catch (e) {
-            Logger.log(`[Gear Status Error] Failed to parse config for gear ${gear.id}`);
-            const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gear.id}`;
-            if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        const parsedConfig = parseGearConfig(gear.id, configStr);
+        if (parsedConfig) {
+            baseStatus.thresholdKm = parsedConfig.thresholdKm ?? baseStatus.thresholdKm;
+            baseStatus.isPeriodic = parsedConfig.isPeriodic ?? baseStatus.isPeriodic;
         }
 
         return baseStatus;
