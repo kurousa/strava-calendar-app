@@ -103,11 +103,12 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
 function getExistingSheetActivityIds(sheet: GoogleAppsScript.Spreadsheet.Sheet): Set<string> {
     const existingIds = new Set<string>();
     const lastRow = sheet.getLastRow();
-    if (lastRow > 1) {
-        sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat().forEach(id => {
-            if (id) existingIds.add(String(id));
-        });
-    }
+    if (lastRow <= 1) return existingIds;
+
+    sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat().forEach(id => {
+        if (id) existingIds.add(String(id));
+    });
+
     return existingIds;
 }
 
