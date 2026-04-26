@@ -42,6 +42,21 @@ vi.hoisted(() => {
         })
     };
 
+
+
+    (global as any).CacheService = {
+        getUserCache: vi.fn(() => ({
+            get: vi.fn(() => null),
+            put: vi.fn(),
+            remove: vi.fn()
+        })),
+        getScriptCache: vi.fn(() => ({
+            get: vi.fn(() => null),
+            put: vi.fn(),
+            remove: vi.fn()
+        }))
+    };
+
     (global as any).PropertiesService = {
         getScriptProperties: vi.fn(() => scriptPropertiesMock),
         getUserProperties: vi.fn(() => ({
