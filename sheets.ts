@@ -31,13 +31,8 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
         }
         
-        const existingIds = new Set<string>();
+        const existingIds = getExistingSheetActivityIds(sheet);
         const lastRow = sheet.getLastRow();
-        if (lastRow > 1) {
-            sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat().forEach(id => {
-                if (id) existingIds.add(String(id));
-            });
-        }
 
         // 事前に天気を一括取得しておく
         const activitiesToProcess = activities.filter(a => !existingIds.has(String(a.id)));
@@ -102,9 +97,24 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
     }
 }
 
+/**
+ * シートから既存のアクティビティIDのセットを取得する
+ */
+function getExistingSheetActivityIds(sheet: GoogleAppsScript.Spreadsheet.Sheet): Set<string> {
+    const existingIds = new Set<string>();
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+        sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat().forEach(id => {
+            if (id) existingIds.add(String(id));
+        });
+    }
+    return existingIds;
+}
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        backupToSpreadsheet
+        backupToSpreadsheet,
+        getExistingSheetActivityIds
     };
 }
