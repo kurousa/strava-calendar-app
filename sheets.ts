@@ -39,6 +39,21 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
             });
         }
 
+        // 事前に天気を一括取得しておく
+        const activitiesToProcess = activities.filter(a => !existingIds.has(String(a.id)));
+        if (activitiesToProcess.length === 0) {
+            // Log skipped activities
+            activities.forEach(activity => {
+                if (existingIds.has(String(activity.id))) {
+                    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
+                }
+            });
+            return;
+        }
+        if (typeof fetchWeatherDataBatch === 'function') {
+            fetchWeatherDataBatch(activitiesToProcess);
+        }
+
         const rows = activities.map(activity => {
             if (existingIds.has(String(activity.id))) {
                 Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
@@ -51,10 +66,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
                 : new Date(activity.start_date);
             
             // 天気とAIコメントの取得
-            let weather = '';
-            if (activity.start_latlng && activity.start_latlng.length === 2) {
-                weather = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], date);
-            }
+            const weather = activity.weatherText || '';
             const aiComment = generateAiComment(activity);
             const url = `https://www.strava.com/activities/${activity.id}`;
 
