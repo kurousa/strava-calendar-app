@@ -87,7 +87,8 @@ describe('sheets.ts', () => {
         ];
 
         // モックを差し込んで副作用を抑える
-        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Sunny'));
+        vi.stubGlobal('fetchWeatherDataBatch', vi.fn((activities) => activities.forEach((a: any) => a.weatherText = 'Sunny')));
+        vi.stubGlobal('fetchWeatherData', vi.fn());
         vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Nice!'));
 
         backupToSpreadsheet(activities as any);
@@ -127,7 +128,8 @@ describe('sheets.ts', () => {
             }
         ];
 
-        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Cloudy'));
+        vi.stubGlobal('fetchWeatherDataBatch', vi.fn((activities) => activities.forEach((a: any) => a.weatherText = 'Cloudy')));
+        vi.stubGlobal('fetchWeatherData', vi.fn());
         vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Good effort!'));
 
         backupToSpreadsheet(activities as any);
@@ -167,7 +169,8 @@ describe('sheets.ts', () => {
             { id: 12345, name: 'Duplicate' },
         ];
 
-        vi.stubGlobal('fetchWeatherData', vi.fn().mockReturnValue('Cloudy'));
+        vi.stubGlobal('fetchWeatherDataBatch', vi.fn());
+        vi.stubGlobal('fetchWeatherData', vi.fn());
         vi.stubGlobal('generateAiComment', vi.fn().mockReturnValue('Good effort!'));
 
         backupToSpreadsheet(activities as any);
