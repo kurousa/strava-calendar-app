@@ -128,29 +128,29 @@ function getGearStatus(): GearStatus[] {
 
     return gears.map(gear => {
         const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
-        let thresholdKm = 0;
-        let isPeriodic = false;
 
-        if (configStr) {
-            try {
-                const config: GearConfig = JSON.parse(configStr);
-                thresholdKm = config.thresholdKm;
-                isPeriodic = config.isPeriodic;
-            } catch (e) {
-                Logger.log(`[Gear Status Error] Failed to parse config for gear ${gear.id}`);
-                const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gear.id}`;
-                if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
-            }
-        }
-
-        return {
+        const baseStatus: GearStatus = {
             id: gear.id,
             name: gear.name,
             type: profile.bikes.includes(gear) ? 'Bike' : 'Shoes',
             distanceKm: gear.distance / 1000,
-            thresholdKm: thresholdKm,
-            isPeriodic: isPeriodic
+            thresholdKm: 0,
+            isPeriodic: false
         };
+
+        if (!configStr) return baseStatus;
+
+        try {
+            const config: GearConfig = JSON.parse(configStr);
+            baseStatus.thresholdKm = config.thresholdKm;
+            baseStatus.isPeriodic = config.isPeriodic;
+        } catch (e) {
+            Logger.log(`[Gear Status Error] Failed to parse config for gear ${gear.id}`);
+            const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gear.id}`;
+            if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+        }
+
+        return baseStatus;
     });
 }
 
