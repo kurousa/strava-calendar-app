@@ -142,8 +142,8 @@ function getGearStatus(): GearStatus[] {
 
         try {
             const config: GearConfig = JSON.parse(configStr);
-            baseStatus.thresholdKm = config.thresholdKm;
-            baseStatus.isPeriodic = config.isPeriodic;
+            baseStatus.thresholdKm = config.thresholdKm ?? baseStatus.thresholdKm;
+            baseStatus.isPeriodic = config.isPeriodic ?? baseStatus.isPeriodic;
         } catch (e) {
             Logger.log(`[Gear Status Error] Failed to parse config for gear ${gear.id}`);
             const errorMsg = `[Gear Status Error] Failed to parse config for gear ${gear.id}`;
