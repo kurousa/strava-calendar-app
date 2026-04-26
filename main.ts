@@ -254,37 +254,7 @@ function processActivityToCalendar(
     }
 
     // 【追加】マップ画像をカレンダーに添付する
-    if (activity.mapUrl && typeof saveMapToDrive === 'function') {
-        const fileName = `strava_map_${activity.id}.png`;
-        const folder = getOrCreateMapFolder();
-        const files = folder.getFilesByName(fileName);
-
-        if (files.hasNext()) {
-            const file = files.next();
-            // Google Calendar API (v3) を使って添付ファイルを追加
-            // 標準のIDは "event_id@google.com" 形式なので、ID部分のみ抽出
-            const eventId = event.getId().split('@')[0];
-            try {
-                // global の Calendar オブジェクト (Advanced Service) を使用
-                if (typeof Calendar !== 'undefined') {
-                    Calendar.Events.patch({
-                        attachments: [{
-                            fileUrl: file.getUrl(),
-                            title: file.getName(),
-                            mimeType: file.getMimeType()
-                        }]
-                    }, calendar.getId(), eventId, {
-                        supportsAttachments: true
-                    });
-                    Logger.log(`添付ファイルを追加しました: ${fileName}`);
-                }
-            } catch (e) {
-                Logger.log(`添付ファイルの追加に失敗しました: ${e}`);
-                const errorMsg = `[Calendar Error] 添付ファイルの追加に失敗しました: ${e}`;
-                if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
-            }
-        }
-    }
+    attachMapToCalendarEvent(activity, calendar, event);
 
     // イベントに色を設定する
     if (style.color) {
@@ -315,6 +285,56 @@ function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
 }
 
 // Node.js環境（テスト時）のみエクスポートする
+
+/**
+ * マップ画像をカレンダーイベントに添付する
+ */
+function attachMapToCalendarEvent(
+    activity: StravaActivity,
+    calendar: GoogleAppsScript.Calendar.Calendar,
+    event: GoogleAppsScript.Calendar.CalendarEvent
+): void {
+    if (!activity.mapUrl || typeof saveMapToDrive !== 'function') {
+        return;
+    }
+
+    const fileName = `strava_map_${activity.id}.png`;
+    const folder = getOrCreateMapFolder();
+    const files = folder.getFilesByName(fileName);
+
+    if (!files.hasNext()) {
+        return;
+    }
+
+    const file = files.next();
+    // Google Calendar API (v3) を使って添付ファイルを追加
+    // 標準のIDは "event_id@google.com" 形式なので、ID部分のみ抽出
+    const eventId = event.getId().split('@')[0];
+
+    try {
+        // global の Calendar オブジェクト (Advanced Service) を使用
+        if (typeof Calendar === 'undefined') {
+            return;
+        }
+
+        Calendar.Events.patch({
+            attachments: [{
+                fileUrl: file.getUrl(),
+                title: file.getName(),
+                mimeType: file.getMimeType()
+            }]
+        }, calendar.getId(), eventId, {
+            supportsAttachments: true
+        });
+        Logger.log(`添付ファイルを追加しました: ${fileName}`);
+    } catch (e) {
+        const errStr = (e as Error).toString();
+        Logger.log(`添付ファイルの追加に失敗しました: ${errStr}`);
+        const errorMsg = `[Calendar Error] 添付ファイルの追加に失敗しました: ${errStr}`;
+        if (typeof sendErrorEmail === 'function') sendErrorEmail(errorMsg);
+    }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         main,
