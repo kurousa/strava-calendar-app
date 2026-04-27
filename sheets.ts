@@ -35,25 +35,21 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         const lastRow = sheet.getLastRow();
 
         // 事前に天気を一括取得しておく
-        const activitiesToProcess = activities.filter(a => !existingIds.has(String(a.id)));
+        const activitiesToProcess = activities.filter(a => {
+            if (existingIds.has(String(a.id))) {
+                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${a.id}`);
+                return false;
+            }
+            return true;
+        });
         if (activitiesToProcess.length === 0) {
-            // Log skipped activities
-            activities.forEach(activity => {
-                if (existingIds.has(String(activity.id))) {
-                    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-                }
-            });
             return;
         }
         if (typeof fetchWeatherDataBatch === 'function') {
             fetchWeatherDataBatch(activitiesToProcess);
         }
 
-        const rows = activities.map(activity => {
-            if (existingIds.has(String(activity.id))) {
-                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-                return;
-            }
+        const rows = activitiesToProcess.map(activity => {
             const distanceKm = activity.distance ? (activity.distance / 1000).toFixed(2) : '0';
             const timeMin = activity.moving_time ? Math.floor(activity.moving_time / 60) : 0;
             const date = activity.start_date_local
@@ -82,8 +78,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
                 aiComment || '',
                 url
             ];
-        })
-        .filter((row): row is any[] => row !== undefined);
+        });
 
         if (rows.length === 0) return;
 
