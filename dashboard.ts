@@ -2,6 +2,36 @@
  * ダッシュボード用のデータを集計して返す
  */
 function getDashboardData(): DashboardSummary | undefined {
+    const data = fetchActivitiesData();
+    if (!data || data.length <= 1) return;
+
+    const props = PropertiesService.getScriptProperties();
+    const maxHR = Number(props.getProperty(Config.PROP_USER_MAX_HR) || 190);
+    const restHR = Number(props.getProperty(Config.PROP_USER_REST_HR) || 50);
+
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+
+    const dailyTss = calculateDailyTss(data, oneYearAgo, maxHR, restHR);
+    const { history, heatmapData, currentFitness } = generateHistoryAndHeatmap(dailyTss, thirtyDaysAgo);
+
+    const lastRow = data[data.length - 1];
+    const lastActivity = parseLastActivity(lastRow);
+
+    return {
+        lastActivity,
+        fitness: currentFitness,
+        gears: getGearStatus(),
+        history,
+        heatmapData
+    };
+}
+
+/**
+ * スプレッドシートからアクティビティデータを取得する
+ */
+function fetchActivitiesData(): any[][] | undefined {
     const spreadsheetId = PropertiesService.getScriptProperties().getProperty(Config.PROP_SPREADSHEET_ID);
     if (!spreadsheetId) {
         Logger.log(`${Config.PROP_SPREADSHEET_ID} が設定されていないため、ダッシュボードのデータを取得できません。`);
@@ -15,19 +45,14 @@ function getDashboardData(): DashboardSummary | undefined {
         return;
     }
 
-    const data = sheet.getDataRange().getValues();
-    if (data.length <= 1) return;
+    return sheet.getDataRange().getValues();
+}
 
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    
-    const props = PropertiesService.getScriptProperties();
-    const maxHR = Number(props.getProperty(Config.PROP_USER_MAX_HR) || 190);
-    const restHR = Number(props.getProperty(Config.PROP_USER_REST_HR) || 50);
-
-    // 1. 日次TSSの集計
-    const dailyTss: { [date: string]: number } = {};
+/**
+ * 日次TSSを集計する
+ */
+function calculateDailyTss(data: any[][], oneYearAgo: Date, maxHR: number, restHR: number): Record<string, number> {
+    const dailyTss: Record<string, number> = {};
     for (let i = 1; i < data.length; i++) {
         const row = data[i];
         const dateObj = new Date(row[1]);
@@ -47,9 +72,13 @@ function getDashboardData(): DashboardSummary | undefined {
             dailyTss[dateStr] = (dailyTss[dateStr] || 0) + tss;
         }
     }
+    return dailyTss;
+}
 
-    // 2. 蓄積型（累積）データの生成
-    // 期間内の日付を並べて、前日の値を加算していく
+/**
+ * ヒストリーとヒートマップ用データを生成する
+ */
+function generateHistoryAndHeatmap(dailyTss: Record<string, number>, thirtyDaysAgo: Date) {
     const historyDates = [];
     for (let i = 0; i <= 30; i++) {
         const d = new Date(thirtyDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
@@ -75,15 +104,23 @@ function getDashboardData(): DashboardSummary | undefined {
         };
     });
 
-    // 3. ヒートマップ用データの生成（直近30日分に修正）
     const heatmapData = historyDates.map(date => ({
         date,
         value: dailyTss[date] || 0
     }));
 
-    // 最後のアクティビティ
-    const lastRow = data[data.length - 1];
-    const lastActivity: Activity = {
+    return {
+        history,
+        heatmapData,
+        currentFitness: Math.round(runningTotal * 10) / 10
+    };
+}
+
+/**
+ * 最後のアクティビティをパースする
+ */
+function parseLastActivity(lastRow: any[]): Activity {
+    return {
         id: String(lastRow[0]),
         date: Utilities.formatDate(new Date(lastRow[1]), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'),
         title: String(lastRow[3] || 'Untitled Activity'),
@@ -100,16 +137,6 @@ function getDashboardData(): DashboardSummary | undefined {
         aiComment: String(lastRow[13] || ''),
         mapUrl: String(lastRow[14] || '')
     };
-    
-    const summary: DashboardSummary = {
-        lastActivity: lastActivity,
-        fitness: Math.round(runningTotal * 10) / 10,
-        gears: getGearStatus(),
-        history: history,
-        heatmapData: heatmapData
-    };
-    
-    return summary;
 }
 
 // Node.js環境（テスト時）のみエクスポートする
