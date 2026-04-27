@@ -25,10 +25,13 @@ function handleStravaWebhook(event: StravaWebhookEvent): void {
     }
 
     const result = (global as any).processActivityToCalendar(activity, calendar);
+
     // 登録に成功した場合のみ通知を飛ばす
-    if (result === 'success' && typeof (global as any).sendSyncNotification === 'function') {
-        (global as any).sendSyncNotification(1, 0, false);
+    if (result !== 'success' || typeof (global as any).sendSyncNotification !== 'function') {
+        return;
     }
+
+    (global as any).sendSyncNotification(1, 0, false);
 }
 
 /**
