@@ -196,42 +196,10 @@ function processActivityToCalendar(
 
     // ーーー ここから下は「新規」の時しか実行されない ーーー
 
-    // 【追加】天気情報の取得 (座標データがある場合のみ)
-    if (activity.start_latlng && activity.start_latlng.length === 2) {
-        if (typeof fetchWeatherData === 'function') {
-            // API制限回避のため少し待機してからリクエスト
-            Utilities.sleep(100);
-            activity.weatherText = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], startTime);
-        }
-    }
+    enrichActivityData(activity, startTime);
 
-    // 【追加】AIコメントの生成
-    if (typeof generateAiComment === 'function') {
-        activity.aiComment = generateAiComment(activity);
-    }
-
-    // カレンダーに登録するタイトル（例: [Run] 朝のジョギング - 5.2km）
-    const type = activity.type; // 種類（Run, Rideなど）
-    const style = getActivityStyle(type);
-    const distanceKm = (activity.distance / 1000).toFixed(1); // 距離をkmに変換
-    const emoji = style.emoji;
-
-    // 距離を表示するアクティビティかどうかの判定
-    const hasDistance = distanceActivities.has(type) && activity.distance > 0;
-
-    const title = hasDistance ?
-        `[${emoji} ${type}] ${activity.name} - ${distanceKm}km` :
-        `[${emoji} ${type}] ${activity.name}`;
-
-    // 【追加】ルートマップの生成と保存
-    if (activity.map && activity.map.summary_polyline) {
-        if (typeof saveMapToDrive === 'function') {
-            const mapFile = saveMapToDrive(activity);
-            if (mapFile) {
-                activity.mapUrl = mapFile.getUrl();
-            }
-        }
-    }
+    const title = generateEventTitle(activity, distanceActivities);
+    const style = getActivityStyle(activity.type);
 
     // カレンダーに登録する詳細メモ
     const description = makeDescription(activity);
@@ -269,8 +237,51 @@ function processActivityToCalendar(
     return 'success';
 }
 
+
+/**
+ * アクティビティに付加情報（天気、AIコメント、ルートマップ）を追加する
+ */
+function enrichActivityData(activity: StravaActivity, startTime: Date): void {
+    if (activity.start_latlng && activity.start_latlng.length === 2) {
+        if (typeof fetchWeatherData === 'function') {
+            Utilities.sleep(100);
+            activity.weatherText = fetchWeatherData(activity.start_latlng[0], activity.start_latlng[1], startTime);
+        }
+    }
+
+    if (typeof generateAiComment === 'function') {
+        activity.aiComment = generateAiComment(activity);
+    }
+
+    if (activity.map && activity.map.summary_polyline) {
+        if (typeof saveMapToDrive === 'function') {
+            const mapFile = saveMapToDrive(activity);
+            if (mapFile) {
+                activity.mapUrl = mapFile.getUrl();
+            }
+        }
+    }
+}
+
+/**
+ * カレンダーイベントのタイトルを生成する
+ */
+function generateEventTitle(activity: StravaActivity, distanceActivities: Set<string>): string {
+    const type = activity.type;
+    const style = getActivityStyle(type);
+    const distanceKm = (activity.distance / 1000).toFixed(1);
+    const emoji = style.emoji;
+
+    const hasDistance = distanceActivities.has(type) && activity.distance > 0;
+
+    return hasDistance ?
+        `[${emoji} ${type}] ${activity.name} - ${distanceKm}km` :
+        `[${emoji} ${type}] ${activity.name}`;
+}
+
 // ==========================================
 // カレンダー取得ユーティリティ
+
 // ==========================================
 function getTargetCalendar(): GoogleAppsScript.Calendar.Calendar | null {
     const calendarId = PropertiesService.getScriptProperties().getProperty(Config.PROP_CALENDAR_ID);
