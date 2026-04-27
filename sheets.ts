@@ -2,6 +2,54 @@
 // スプレッドシートへのバックアップ処理 (sheets.ts)
 // ==========================================
 
+
+function getOrCreateBackupSheet(ss: GoogleAppsScript.Spreadsheet.Spreadsheet): GoogleAppsScript.Spreadsheet.Sheet {
+    let sheet = ss.getSheetByName(Config.BACKUP_SHEET_NAME);
+    if (!sheet) {
+        sheet = ss.insertSheet(Config.BACKUP_SHEET_NAME);
+        const headers = [
+            'ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)',
+            '平均心拍数', '最大心拍数', '平均ワット', 'ケイデンス', 'カロリー',
+            '天気', 'AIコメント', 'URL'
+        ];
+        sheet.appendRow(headers);
+        sheet.setFrozenRows(1);
+        sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    }
+    return sheet;
+}
+
+
+function formatActivityRow(activity: StravaActivity): any[] {
+    const distanceKm = activity.distance ? (activity.distance / 1000).toFixed(2) : '0';
+    const timeMin = activity.moving_time ? Math.floor(activity.moving_time / 60) : 0;
+    const date = activity.start_date_local
+        ? new Date(activity.start_date_local.replace(/Z$/i, ''))
+        : new Date(activity.start_date);
+
+    const weather = activity.weatherText || '';
+    const aiComment = generateAiComment(activity);
+    const url = `https://www.strava.com/activities/${activity.id}`;
+
+    return [
+        activity.id,
+        date,
+        activity.type,
+        activity.name,
+        Number(distanceKm),
+        timeMin,
+        activity.total_elevation_gain || 0,
+        activity.average_heartrate || '',
+        activity.max_heartrate || '',
+        activity.average_watts || '',
+        activity.average_cadence || '',
+        activity.calories || '',
+        weather || '',
+        aiComment || '',
+        url
+    ];
+}
+
 /**
  * 成功したアクティビティを一括でスプレッドシートに追記する
  */
@@ -16,20 +64,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
 
     try {
         const ss = SpreadsheetApp.openById(spreadsheetId);
-        let sheet = ss.getSheetByName(Config.BACKUP_SHEET_NAME);
-        
-        // シートが存在しない場合は新規作成し、ヘッダーを設定
-        if (!sheet) {
-            sheet = ss.insertSheet(Config.BACKUP_SHEET_NAME);
-            const headers = [
-                'ID', '日付', '種類', '名前', '距離 (km)', '時間 (分)', '獲得標高 (m)', 
-                '平均心拍数', '最大心拍数', '平均ワット', 'ケイデンス', 'カロリー', 
-                '天気', 'AIコメント', 'URL'
-            ];
-            sheet.appendRow(headers);
-            sheet.setFrozenRows(1);
-            sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
-        }
+        const sheet = getOrCreateBackupSheet(ss);
         
         const existingIds = getExistingSheetActivityIds(sheet);
         const lastRow = sheet.getLastRow();
@@ -54,34 +89,7 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
                 Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
                 return;
             }
-            const distanceKm = activity.distance ? (activity.distance / 1000).toFixed(2) : '0';
-            const timeMin = activity.moving_time ? Math.floor(activity.moving_time / 60) : 0;
-            const date = activity.start_date_local
-                ? new Date(activity.start_date_local.replace(/Z$/i, ''))
-                : new Date(activity.start_date);
-            
-            // 天気とAIコメントの取得
-            const weather = activity.weatherText || '';
-            const aiComment = generateAiComment(activity);
-            const url = `https://www.strava.com/activities/${activity.id}`;
-
-            return [
-                activity.id,
-                date,
-                activity.type,
-                activity.name,
-                Number(distanceKm),
-                timeMin,
-                activity.total_elevation_gain || 0,
-                activity.average_heartrate || '',
-                activity.max_heartrate || '',
-                activity.average_watts || '',
-                activity.average_cadence || '',
-                activity.calories || '',
-                weather || '',
-                aiComment || '',
-                url
-            ];
+            return formatActivityRow(activity);
         })
         .filter((row): row is any[] => row !== undefined);
 
@@ -115,6 +123,8 @@ function getExistingSheetActivityIds(sheet: GoogleAppsScript.Spreadsheet.Sheet):
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        getOrCreateBackupSheet,
+        formatActivityRow,
         backupToSpreadsheet,
         getExistingSheetActivityIds
     };
