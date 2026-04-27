@@ -22,7 +22,8 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
                     q: Config.STRAVA_SEARCH_QUERY, // Search reduces the result set on the server
                     maxResults: Config.CALENDAR_PAGE_SIZE,
                     singleEvents: true,
-                    pageToken: pageToken
+                    pageToken: pageToken,
+                    fields: 'items(extendedProperties,description),nextPageToken'
                 });
 
                 if (response.items) {
