@@ -145,7 +145,7 @@ describe('processActivityToCalendar', () => {
             elapsed_time: 3600
         };
 
-        const result = processActivityToCalendar(activity, mockCalendar);
+        const result = processActivityToCalendar(activity, mockCalendar, undefined, false);
 
         expect(mockCalendar.getEvents).toHaveBeenCalled();
         expect(mockCalendar.createEvent).not.toHaveBeenCalled();
