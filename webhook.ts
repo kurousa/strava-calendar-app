@@ -14,24 +14,30 @@ function handleStravaWebhook(event: StravaWebhookEvent): void {
     }
 
     // 新規作成時のみカレンダーに登録
-    const activity = (global as any).getStravaActivity(event.object_id);
-    if (!activity) {
-        return;
+    if (typeof getStravaActivity === 'function') { 
+        const activity = getStravaActivity(event.object_id);
+        if (!activity) {
+            return;
+        }
     }
 
-    const calendar = (global as any).getTargetCalendar();
-    if (!calendar) {
-        return;
+    if (typeof getTargetCalendar === 'function') {
+        const calendar = getTargetCalendar();
+        if (!calendar) {
+            return;
+        }
     }
+    if (typeof processActivityToCalendar === 'function') {
+        const result = processActivityToCalendar(activity, calendar);
+        // 登録に成功した場合のみ通知を飛ばす
+        if (result !== 'success') {
+            return;
+        }
 
-    const result = (global as any).processActivityToCalendar(activity, calendar);
-
-    // 登録に成功した場合のみ通知を飛ばす
-    if (result !== 'success' || typeof (global as any).sendSyncNotification !== 'function') {
-        return;
+        if (typeof sendSyncNotification === 'function') {
+            sendSyncNotification(1, 0, false);
+        }
     }
-
-    (global as any).sendSyncNotification(1, 0, false);
 }
 
 /**
