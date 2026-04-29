@@ -14,20 +14,32 @@ function handleStravaWebhook(event: StravaWebhookEvent): void {
     }
 
     // 新規作成時のみカレンダーに登録
-    const activity = (global as any).getStravaActivity(event.object_id);
+    let activity: StravaActivity | null = null;
+    if (typeof getStravaActivity === 'function') {
+        activity = getStravaActivity(event.object_id);
+    }
     if (!activity) {
         return;
     }
 
-    const calendar = (global as any).getTargetCalendar();
+    let calendar: GoogleAppsScript.Calendar.Calendar | null = null;
+    if (typeof getTargetCalendar === 'function') {
+        calendar = getTargetCalendar();
+    }
     if (!calendar) {
         return;
     }
 
-    const result = (global as any).processActivityToCalendar(activity, calendar);
-    // 登録に成功した場合のみ通知を飛ばす
-    if (result === 'success' && typeof (global as any).sendSyncNotification === 'function') {
-        (global as any).sendSyncNotification(1, 0, false);
+    if (typeof processActivityToCalendar === 'function') {
+        const result = processActivityToCalendar(activity, calendar);
+        // 登録に成功した場合のみ通知を飛ばす
+        if (result !== 'success') {
+            return;
+        }
+
+        if (typeof sendSyncNotification === 'function') {
+            sendSyncNotification(1, 0, false);
+        }
     }
 }
 
@@ -50,7 +62,7 @@ function registerStravaWebhook(): void {
         return;
     }
 
-    const result = (global as any).createStravaWebhookSubscription(webAppUrl, verifyToken);
+    const result = typeof createStravaWebhookSubscription === 'function' ? createStravaWebhookSubscription(webAppUrl, verifyToken) : null;
     if (result) {
         Logger.log(`Webhookを登録しました。Subscription ID: ${result.id}`);
     } else {
@@ -62,7 +74,7 @@ function registerStravaWebhook(): void {
  * 手動実行用：登録されているWebhookを確認・削除する
  */
 function manageStravaWebhooks(): void {
-    const subscriptions = (global as any).viewStravaWebhookSubscriptions();
+    const subscriptions = typeof viewStravaWebhookSubscriptions === 'function' ? viewStravaWebhookSubscriptions() : [];
     if (subscriptions.length === 0) {
         Logger.log('登録されているWebhookはありません。');
         return;
@@ -74,14 +86,14 @@ function manageStravaWebhooks(): void {
 }
 
 function unregisterStravaWebhook(): void {
-    const subscriptions = (global as any).viewStravaWebhookSubscriptions();
+    const subscriptions = typeof viewStravaWebhookSubscriptions === 'function' ? viewStravaWebhookSubscriptions() : [];
     if (subscriptions.length === 0) {
         Logger.log('削除するWebhookが見つかりません。');
         return;
     }
 
     subscriptions.forEach((sub: StravaWebhookSubscription) => {
-        const success = (global as any).deleteStravaWebhookSubscription(sub.id);
+        const success = typeof deleteStravaWebhookSubscription === 'function' ? deleteStravaWebhookSubscription(sub.id) : false;
         if (success) {
             Logger.log(`Webhook (ID: ${sub.id}) を削除しました。`);
         }
