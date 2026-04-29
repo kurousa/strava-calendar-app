@@ -70,14 +70,17 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         const lastRow = sheet.getLastRow();
 
         // 事前に天気を一括取得しておく
-        const activitiesToProcess = activities.filter(a => !existingIds.has(String(a.id)));
+        const activitiesToProcess: StravaActivity[] = [];
+        for (const a of activities) {
+            const idStr = String(a.id);
+            if (existingIds.has(idStr)) {
+                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${idStr}`);
+            } else {
+                existingIds.add(idStr); // add to existingIds to prevent duplicates in the input array
+                activitiesToProcess.push(a);
+            }
+        }
         if (activitiesToProcess.length === 0) {
-            // Log skipped activities
-            activities.forEach(activity => {
-                if (existingIds.has(String(activity.id))) {
-                    Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-                }
-            });
             return;
         }
         if (typeof fetchWeatherDataBatch === 'function') {
