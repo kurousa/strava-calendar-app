@@ -266,11 +266,9 @@ function enrichActivityData(activity: StravaActivity, startTime: Date): void {
 /**
  * カレンダーイベントのタイトルを生成する
  */
-function generateEventTitle(activity: StravaActivity, distanceActivities: Set<string>): string {
+function generateEventTitle(activity: StravaActivity, distanceActivities: Set<string>, emoji: string): string {
     const type = activity.type;
-    const style = getActivityStyle(type);
     const distanceKm = (activity.distance / 1000).toFixed(1);
-    const emoji = style.emoji;
 
     const hasDistance = distanceActivities.has(type) && activity.distance > 0;
 
