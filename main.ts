@@ -198,8 +198,8 @@ function processActivityToCalendar(
 
     enrichActivityData(activity, startTime);
 
-    const title = generateEventTitle(activity, distanceActivities);
     const style = getActivityStyle(activity.type);
+    const title = generateEventTitle(activity, distanceActivities, style.emoji);
 
     // カレンダーに登録する詳細メモ
     const description = makeDescription(activity);
