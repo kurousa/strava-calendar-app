@@ -35,13 +35,16 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         const lastRow = sheet.getLastRow();
 
         // 事前に天気を一括取得しておく
-        const activitiesToProcess = activities.filter(a => {
-            if (existingIds.has(String(a.id))) {
-                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${a.id}`);
-                return false;
+        const activitiesToProcess: StravaActivity[] = [];
+        for (const a of activities) {
+            const idStr = String(a.id);
+            if (existingIds.has(idStr)) {
+                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${idStr}`);
+            } else {
+                existingIds.add(idStr); // add to existingIds to prevent duplicates in the input array
+                activitiesToProcess.push(a);
             }
-            return true;
-        });
+        }
         if (activitiesToProcess.length === 0) {
             return;
         }
