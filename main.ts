@@ -23,7 +23,7 @@ function getExistingActivityIds(calendar: GoogleAppsScript.Calendar.Calendar, st
                     maxResults: Config.CALENDAR_PAGE_SIZE,
                     singleEvents: true,
                     pageToken: pageToken,
-                    fields: 'items(extendedProperties,description),nextPageToken'
+                    fields: 'items(extendedProperties,description),nextPageToken' // Note: Keep in sync with fields used in the loop below
                 });
 
                 if (response.items) {
