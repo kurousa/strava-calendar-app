@@ -28,7 +28,6 @@ function formatActivityRow(activity: StravaActivity): any[] {
         : new Date(activity.start_date);
 
     const weather = activity.weatherText || '';
-    const aiComment = generateAiComment(activity);
     const url = `https://www.strava.com/activities/${activity.id}`;
 
     return [
@@ -45,7 +44,7 @@ function formatActivityRow(activity: StravaActivity): any[] {
         activity.average_cadence || '',
         activity.calories || '',
         weather || '',
-        aiComment || '',
+        activity.aiComment || '',
         url
     ];
 }
@@ -69,7 +68,6 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         const existingIds = getExistingSheetActivityIds(sheet);
         const lastRow = sheet.getLastRow();
 
-        // 事前に天気を一括取得しておく
         const activitiesToProcess = activities.filter(a => !existingIds.has(String(a.id)));
         if (activitiesToProcess.length === 0) {
             // Log skipped activities
@@ -85,13 +83,9 @@ function backupToSpreadsheet(activities: StravaActivity[]): void {
         }
 
         const rows = activities.map(activity => {
-            if (existingIds.has(String(activity.id))) {
-                Logger.log(`スキップ: 既に登録済みのアクティビティです: ${activity.id}`);
-                return;
-            }
+            activity.aiComment = generateAiComment(activity);
             return formatActivityRow(activity);
         })
-        .filter((row): row is any[] => row !== undefined);
 
         if (rows.length === 0) return;
 
