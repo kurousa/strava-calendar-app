@@ -78,7 +78,7 @@ function calculateDailyTss(data: any[][], oneYearAgo: Date, maxHR: number, restH
 /**
  * ヒストリーとヒートマップ用データを生成する
  */
-function generateHistoryAndHeatmap(dailyTss: Record<string, number>, thirtyDaysAgo: Date) {
+function generateHistoryAndHeatmap(dailyTss: Record<string, number>, thirtyDaysAgo: Date): { history: { date: string; value: number }[]; heatmapData: { date: string; value: number }[]; currentFitness: number } {
     const historyDates = [];
     for (let i = 0; i <= 30; i++) {
         const d = new Date(thirtyDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
