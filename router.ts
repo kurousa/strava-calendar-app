@@ -84,9 +84,12 @@ function doPost(e: GoogleAppsScript.Events.DoPost): GoogleAppsScript.Content.Tex
         return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
             .setMimeType(ContentService.MimeType.JSON);
     } catch (err) {
-        Logger.log(`[Webhook Error] ${(err as Error).toString()}`);
-        return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Internal Server Error' }))
-            .setMimeType(ContentService.MimeType.JSON);
+        Logger.log("[Webhook Error] " + err);
+        return ContentService.createTextOutput(JSON.stringify({ 
+            status: 'error', 
+            code: 500,
+            message: 'Internal Server Error' 
+        }));
     }
 }
 
