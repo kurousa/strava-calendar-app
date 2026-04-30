@@ -34,12 +34,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
         // Google ID Token による認証
         if (!token || !verifyGoogleToken(token)) {
             Logger.log('エラー: 認証に失敗しました。');
-            return ContentService.createTextOutput(JSON.stringify({ 
-                status: 'error', 
-                code: 401,
-                message: 'Unauthorized: Invalid Token' 
-            }))
-                .setMimeType(ContentService.MimeType.JSON);
+            return createResponse('error', 401, 'Unauthorized: Invalid Token', ContentService.MimeType.JSON);
         }
 
         try {
@@ -54,11 +49,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
                 .setMimeType(ContentService.MimeType.JSON);
         } catch (err) {
             Logger.log("[Dashboard Error] " + err);
-            return ContentService.createTextOutput(JSON.stringify({ 
-                status: 'error', 
-                code: 500,
-                message: 'Internal Server Error' 
-            }));
+            return createResponse('error', 500, 'Internal Server Error');
         }
     }
 
@@ -81,15 +72,10 @@ function doPost(e: GoogleAppsScript.Events.DoPost): GoogleAppsScript.Content.Tex
         // 単発のアクティビティ取得とカレンダー登録であれば通常2秒以内に収まる。
         (global as any).handleStravaWebhook(event);
 
-        return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
-            .setMimeType(ContentService.MimeType.JSON);
+        return createResponse('ok', undefined, undefined, ContentService.MimeType.JSON);
     } catch (err) {
         Logger.log("[Webhook Error] " + err);
-        return ContentService.createTextOutput(JSON.stringify({ 
-            status: 'error', 
-            code: 500,
-            message: 'Internal Server Error' 
-        }));
+        return createResponse('error', 500, 'Internal Server Error');
     }
 }
 
