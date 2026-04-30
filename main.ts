@@ -47,7 +47,7 @@ function getExistingActivityIds(
             // Fallback for older events: parse description directly from JSON (still much faster than GAS proxies)
             else if (item.description) {
               const desc = item.description;
-              const prefix = "strava.com/activities/";
+              const prefix = Config.STRAVA_SEARCH_QUERY+ "/";
               const prefixLen = prefix.length;
               const idx = desc.indexOf(prefix);
               if (idx !== -1) {
@@ -89,7 +89,7 @@ function getExistingActivityIds(
     } else {
       const desc = event.getDescription();
       if (desc) {
-        const prefix = "strava.com/activities/";
+        const prefix = Config.STRAVA_SEARCH_QUERY + "/";
         const prefixLen = prefix.length;
         const idx = desc.indexOf(prefix);
         if (idx !== -1) {
@@ -243,7 +243,7 @@ function processActivityToCalendar(
     const existingEvents = calendar.getEvents(startTime, endTime);
     const isDuplicate = existingEvents.some((event) => {
       const desc = event.getDescription();
-      return desc && desc.includes(`strava.com/activities/${activity.id}`);
+      return desc && desc.includes(`${Config.STRAVA_SEARCH_QUERY}/${activity.id}`);
     });
 
     if (isDuplicate) {
