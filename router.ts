@@ -53,9 +53,12 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
             }))
                 .setMimeType(ContentService.MimeType.JSON);
         } catch (err) {
-            Logger.log(`[Dashboard Error] ${(err as Error).toString()}`);
-            return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Internal Server Error' }))
-                .setMimeType(ContentService.MimeType.JSON);
+            Logger.log("[Dashboard Error] " + err);
+            return ContentService.createTextOutput(JSON.stringify({ 
+                status: 'error', 
+                code: 500,
+                message: 'Internal Server Error' 
+            }));
         }
     }
 
