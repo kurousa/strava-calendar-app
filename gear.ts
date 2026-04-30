@@ -140,33 +140,23 @@ function getGearStatus(): GearStatus[] {
     const props = PropertiesService.getScriptProperties();
     const allProps = props.getProperties();
 
-    const bikeStatuses = profile.bikes.map(gear => {
+    const mapGear = (gear: typeof profile.bikes[0], type: 'Bike' | 'Shoes'): GearStatus => {
         const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
         const parsedConfig = parseGearConfig(gear.id, configStr);
         return {
             id: gear.id,
             name: gear.name,
-            type: 'Bike' as const,
+            type,
             distanceKm: gear.distance / 1000,
             thresholdKm: parsedConfig?.thresholdKm ?? 0,
             isPeriodic: parsedConfig?.isPeriodic ?? false
         };
-    });
+    };
 
-    const shoeStatuses = profile.shoes.map(gear => {
-        const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
-        const parsedConfig = parseGearConfig(gear.id, configStr);
-        return {
-            id: gear.id,
-            name: gear.name,
-            type: 'Shoes' as const,
-            distanceKm: gear.distance / 1000,
-            thresholdKm: parsedConfig?.thresholdKm ?? 0,
-            isPeriodic: parsedConfig?.isPeriodic ?? false
-        };
-    });
-
-    return [...bikeStatuses, ...shoeStatuses];
+    return [
+        ...profile.bikes.map(gear => mapGear(gear, 'Bike')),
+        ...profile.shoes.map(gear => mapGear(gear, 'Shoes'))
+    ];
 }
 
 // Node.js環境（テスト時）のみエクスポートする
