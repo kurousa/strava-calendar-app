@@ -357,6 +357,7 @@ describe('router', () => {
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":500');
             expect(result.getContent()).toContain('"message":"Internal Server Error"');
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Dashboard Error] Error: Database failure'));
         });
