@@ -351,7 +351,7 @@ describe('router', () => {
             const e = {
                 parameter: {
                     action: 'getStats',
-                    token: 'valid_token'
+                    token: 'valid_header.valid_payload.valid_signature'
                 }
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
