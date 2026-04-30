@@ -14,16 +14,15 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
         const verifyToken = PropertiesService.getScriptProperties().getProperty(Config.PROP_STRAVA_VERIFY_TOKEN);
         if (!verifyToken) {
             Logger.log(`エラー: ${Config.PROP_STRAVA_VERIFY_TOKEN} が設定されていません。`);
-            return HtmlService.createHtmlOutput('Internal Server Error: Missing Verify Token');
+            return createHtmlResponse('Internal Server Error: Missing Verify Token');
         }
 
         if (e.parameter['hub.verify_token'] === verifyToken) {
             const challenge = e.parameter['hub.challenge'];
-            return ContentService.createTextOutput(JSON.stringify({ "hub.challenge": challenge }))
-                .setMimeType(ContentService.MimeType.JSON);
+            return createResponse(null, undefined, { "hub.challenge": challenge }, ContentService.MimeType.JSON);
         } else {
             Logger.log('エラー: Webhook検証トークンが一致しません。');
-            return HtmlService.createHtmlOutput('Forbidden: Invalid Verify Token');
+            return createHtmlResponse('Forbidden: Invalid Verify Token');
         }
     }
 
@@ -41,12 +40,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
             // スプレッドシートからデータを取得する関数の呼び出し
             const stats = getDashboardData() ?? { lastActivity: [], fitness: 0, gears: [] };
             
-            return ContentService.createTextOutput(JSON.stringify({ 
-                status: 'success', 
-                code: 200,
-                data: stats 
-            }))
-                .setMimeType(ContentService.MimeType.JSON);
+            return createResponse('success', 200, stats, ContentService.MimeType.JSON);
         } catch (err) {
             Logger.log("[Dashboard Error] " + err);
             return createResponse('error', 500, 'Internal Server Error');
@@ -54,8 +48,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
     }
 
     // 通常のアクセス（インポート画面）を表示する
-    return HtmlService.createHtmlOutputFromFile('index')
-        .setTitle('Strava カレンダーインポート');
+    return createHtmlPage('index', 'Strava カレンダーインポート');
 }
 
 /**

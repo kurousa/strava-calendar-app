@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createResponse } from '../presenter';
+import { createResponse, createHtmlResponse, createHtmlPage } from '../presenter';
 
 describe('presenter', () => {
     beforeEach(() => {
@@ -55,16 +55,46 @@ describe('presenter', () => {
         expect(result).toBeDefined();
     });
 
-    it('should handle complex object as message', () => {
-        const complexMessage = { detail: 'something happened', timestamp: 123456789 };
-        const result = createResponse('success', 200, complexMessage);
+    it('should handle complex object as data when status is success', () => {
+        const complexData = { detail: 'something happened', timestamp: 123456789 };
+        const result = createResponse('success', 200, complexData);
 
         expect(ContentService.createTextOutput).toHaveBeenCalledWith(
             JSON.stringify({
                 status: 'success',
                 code: 200,
-                message: complexMessage
+                data: complexData
             })
         );
+    });
+
+    it('should merge message into top-level when status is null and message is an object', () => {
+        const challenge = { "hub.challenge": "test_123" };
+        const result = createResponse(null, undefined, challenge);
+
+        expect(ContentService.createTextOutput).toHaveBeenCalledWith(
+            JSON.stringify({
+                "hub.challenge": "test_123"
+            })
+        );
+    });
+
+    it('should create HTML response using createHtmlResponse', () => {
+        const content = 'Hello World';
+        createHtmlResponse(content);
+
+        expect(HtmlService.createHtmlOutput).toHaveBeenCalledWith(content);
+    });
+
+    it('should create HTML page using createHtmlPage', () => {
+        const filename = 'index';
+        const title = 'Page Title';
+        const mockOutput = { setTitle: vi.fn() };
+        (HtmlService.createHtmlOutputFromFile as any).mockReturnValue(mockOutput);
+
+        createHtmlPage(filename, title);
+
+        expect(HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith(filename);
+        expect(mockOutput.setTitle).toHaveBeenCalledWith(title);
     });
 });
