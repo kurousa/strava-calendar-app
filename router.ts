@@ -53,7 +53,8 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
             }))
                 .setMimeType(ContentService.MimeType.JSON);
         } catch (err) {
-            return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
+            Logger.log(`[Dashboard Error] ${(err as Error).toString()}`);
+            return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Internal Server Error' }))
                 .setMimeType(ContentService.MimeType.JSON);
         }
     }
@@ -81,7 +82,7 @@ function doPost(e: GoogleAppsScript.Events.DoPost): GoogleAppsScript.Content.Tex
             .setMimeType(ContentService.MimeType.JSON);
     } catch (err) {
         Logger.log(`[Webhook Error] ${(err as Error).toString()}`);
-        return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
+        return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Internal Server Error' }))
             .setMimeType(ContentService.MimeType.JSON);
     }
 }
