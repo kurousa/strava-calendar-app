@@ -412,6 +412,7 @@ describe('router', () => {
 
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Webhook Error]'));
             expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":500');
             expect(result.getContent()).toContain('"message":"Internal Server Error"');
         });
     });
