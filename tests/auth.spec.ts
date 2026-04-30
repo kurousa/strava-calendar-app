@@ -41,22 +41,24 @@ describe('auth', () => {
     it('should handle auth callback successfully', () => {
         const request = { parameter: { code: 'auth_code' } };
         mockService.handleCallback.mockReturnValue(true);
-        global.HtmlService.createHtmlOutput.mockImplementation((msg: string) => msg);
+        (global as any).createHtmlResponse.mockImplementation((msg: string) => msg);
 
         const result = authCallback(request);
 
         expect(result).toContain('成功');
         expect(mockService.handleCallback).toHaveBeenCalledWith(request);
+        expect((global as any).createHtmlResponse).toHaveBeenCalledWith(expect.stringContaining('成功'));
     });
 
     it('should handle auth callback failure', () => {
         const request = { parameter: { error: 'access_denied' } };
         mockService.handleCallback.mockReturnValue(false);
-        global.HtmlService.createHtmlOutput.mockImplementation((msg: string) => msg);
+        (global as any).createHtmlResponse.mockImplementation((msg: string) => msg);
 
         const result = authCallback(request);
 
         expect(result).toContain('失敗');
+        expect((global as any).createHtmlResponse).toHaveBeenCalledWith(expect.stringContaining('失敗'));
     });
 
     it('should skip auth when already logged in', () => {

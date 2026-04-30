@@ -58,7 +58,11 @@ describe('Strava Webhook Handling', () => {
 
             doGet(e);
 
-            expect(ContentServiceMock.createTextOutput).toHaveBeenCalledWith(JSON.stringify({ "hub.challenge": "challenge_123" }));
+            expect(ContentServiceMock.createTextOutput).toHaveBeenCalledWith(JSON.stringify({
+                status: 'ok',
+                code: 200,
+                'hub.challenge': 'challenge_123'
+            }));
             expect(ContentServiceMock.setMimeType).toHaveBeenCalledWith('application/json');
         });
 

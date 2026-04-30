@@ -145,19 +145,12 @@ describe('router', () => {
             resetConfigCache();
         });
 
-        it('should create HTML output from index file and set title', () => {
-            const mockSetTitle = vi.fn().mockReturnThis();
-            vi.stubGlobal('HtmlService', {
-                ...(global as any).HtmlService,
-                createHtmlOutputFromFile: vi.fn().mockReturnValue({
-                    setTitle: mockSetTitle
-                })
-            });
+        it('should create HTML page from index file and set title', () => {
+            (global as any).createHtmlPage.mockReturnValue({});
 
             const result = doGet({} as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect(HtmlService.createHtmlOutputFromFile).toHaveBeenCalledWith('index');
-            expect(mockSetTitle).toHaveBeenCalledWith('Strava カレンダーインポート');
+            expect((global as any).createHtmlPage).toHaveBeenCalledWith('index', 'Strava カレンダーインポート');
             expect(result).toBeDefined();
         });
 
@@ -180,9 +173,18 @@ describe('router', () => {
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(ContentService.createTextOutput).toHaveBeenCalledWith(
-                JSON.stringify({ "hub.challenge": "test_challenge" })
+                JSON.stringify({
+                    "status": "ok",
+                    "code": 200,
+                    "hub.challenge": "test_challenge"
+                })
             );
-            expect(result.getContent()).toBe(JSON.stringify({ "hub.challenge": "test_challenge" }));
+            expect(result.getContent()).toBe(JSON.stringify({
+                "status": "ok",
+                "code": 200,
+                "hub.challenge": "test_challenge"
+                }
+            ));
         });
 
         it('should return 403 for invalid verify token', () => {
@@ -203,7 +205,7 @@ describe('router', () => {
             };
             doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect(HtmlService.createHtmlOutput).toHaveBeenCalledWith('Forbidden: Invalid Verify Token');
+            expect((global as any).createHtmlResponse).toHaveBeenCalledWith('Forbidden: Invalid Verify Token');
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('Webhook検証トークンが一致しません'));
         });
 
@@ -243,7 +245,7 @@ describe('router', () => {
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect(result.getContent()).toContain('"status":"success"');
+            expect(result.getContent()).toContain('"status":"ok"');
             expect(result.getContent()).toContain('"code":200');
             expect(UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_header.valid_payload.valid_signature'));
         });

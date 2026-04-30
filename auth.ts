@@ -47,9 +47,9 @@ function authCallback(request: object): GoogleAppsScript.HTML.HtmlOutput {
     const service = getOAuthService();
     const authorized = service.handleCallback(request);
     if (authorized) {
-        return HtmlService.createHtmlOutput('認証が成功しました。このタブは閉じて、GASの画面に戻ってください。');
+        return createHtmlResponse('認証が成功しました。このタブは閉じて、GASの画面に戻ってください。');
     } else {
-        return HtmlService.createHtmlOutput('認証に失敗しました。');
+        return createHtmlResponse('認証に失敗しました。');
     }
 }
 
