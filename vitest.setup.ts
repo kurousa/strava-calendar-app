@@ -287,3 +287,7 @@ import * as DateFormatter from './formatters/date.ts';
         ? new Date(activity.start_date_local.replace(/Z$/i, ''))
         : new Date(activity.start_date);
 });
+
+// Globalize createResponse for tests
+import * as PresenterModule from './presenter.ts';
+(global as any).createResponse = (PresenterModule as any).createResponse || vi.fn();
