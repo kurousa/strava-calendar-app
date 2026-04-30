@@ -19,7 +19,8 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
 
         if (e.parameter['hub.verify_token'] === verifyToken) {
             const challenge = e.parameter['hub.challenge'];
-            return createResponse(null, undefined, { "hub.challenge": challenge }, ContentService.MimeType.JSON);
+            Logger.log('成功: Webhook検証成功');
+            return createResponse('ok', 200, { "hub.challenge": challenge }, ContentService.MimeType.JSON);
         } else {
             Logger.log('エラー: Webhook検証トークンが一致しません。');
             return createHtmlResponse('Forbidden: Invalid Verify Token');
@@ -40,7 +41,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
             // スプレッドシートからデータを取得する関数の呼び出し
             const stats = getDashboardData() ?? { lastActivity: [], fitness: 0, gears: [] };
             
-            return createResponse('success', 200, stats, ContentService.MimeType.JSON);
+            return createResponse('ok', 200, stats, ContentService.MimeType.JSON);
         } catch (err) {
             Logger.log("[Dashboard Error] " + err);
             return createResponse('error', 500, 'Internal Server Error');

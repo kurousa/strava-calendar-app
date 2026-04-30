@@ -173,9 +173,18 @@ describe('router', () => {
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
             expect(ContentService.createTextOutput).toHaveBeenCalledWith(
-                JSON.stringify({ "hub.challenge": "test_challenge" })
+                JSON.stringify({
+                    "status": "ok",
+                    "code": 200,
+                    "hub.challenge": "test_challenge"
+                })
             );
-            expect(result.getContent()).toBe(JSON.stringify({ "hub.challenge": "test_challenge" }));
+            expect(result.getContent()).toBe(JSON.stringify({
+                "status": "ok",
+                "code": 200,
+                "hub.challenge": "test_challenge"
+                }
+            ));
         });
 
         it('should return 403 for invalid verify token', () => {
@@ -236,7 +245,7 @@ describe('router', () => {
             };
             const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
 
-            expect(result.getContent()).toContain('"status":"success"');
+            expect(result.getContent()).toContain('"status":"ok"');
             expect(result.getContent()).toContain('"code":200');
             expect(UrlFetchApp.fetch).toHaveBeenCalledWith(expect.stringContaining('id_token=valid_header.valid_payload.valid_signature'));
         });

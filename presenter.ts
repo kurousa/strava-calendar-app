@@ -13,12 +13,18 @@ function createResponse(
     message?: any,
     output_mimetype?: GoogleAppsScript.Content.MimeType
 ): GoogleAppsScript.Content.TextOutput {
-    const payload: any = { status };
+    const payload: any = {};
+    payload.status = status;
     if (code !== undefined) {
         payload.code = code;
     }
     if (message !== undefined) {
-        payload.message = message;
+        // hub.challenge のような特殊なケースに対応（トップレベルにマージ）
+        if (status === 'ok' && typeof message === 'object' && !Array.isArray(message)) {
+            Object.assign(payload, message);
+        } else {
+            payload.message = message;
+        }
     }
 
     let output = ContentService.createTextOutput(JSON.stringify(payload));

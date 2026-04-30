@@ -63,17 +63,19 @@ describe('presenter', () => {
             JSON.stringify({
                 status: 'success',
                 code: 200,
-                data: complexData
+                message: complexData
             })
         );
     });
 
     it('should merge message into top-level when status is null and message is an object', () => {
         const challenge = { "hub.challenge": "test_123" };
-        const result = createResponse(null, undefined, challenge);
+        const result = createResponse('ok', 200, challenge);
 
         expect(ContentService.createTextOutput).toHaveBeenCalledWith(
             JSON.stringify({
+                status: 'ok',
+                code: 200,
                 "hub.challenge": "test_123"
             })
         );
