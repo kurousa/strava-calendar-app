@@ -320,6 +320,48 @@ describe('router', () => {
             expect((global as any).Logger.log).toHaveBeenCalledWith(expect.stringContaining('許可されていないユーザーによるアクセスです'));
         });
 
+        it('should return internal server error when getDashboardData fails', () => {
+            vi.stubGlobal('getDashboardData', vi.fn().mockImplementation(() => {
+                throw new Error('Database failure');
+            }));
+
+            // PropertiesService and UrlFetchApp mocks to pass authentication
+            const mockProps = {
+                getProperty: vi.fn((key) => {
+                    if (key === 'GOOGLE_CLIENT_ID') return 'valid_client_id';
+                    if (key === 'ALLOWED_EMAILS') return 'test@example.com';
+                    return null;
+                })
+            };
+            vi.stubGlobal('PropertiesService', {
+                ...(global as any).PropertiesService,
+                getScriptProperties: vi.fn().mockReturnValue(mockProps)
+            });
+            vi.stubGlobal('UrlFetchApp', {
+                ...(global as any).UrlFetchApp,
+                fetch: vi.fn().mockReturnValue({
+                    getContentText: () => JSON.stringify({
+                        aud: 'valid_client_id',
+                        email: 'test@example.com'
+                    })
+                })
+            });
+            vi.stubGlobal('Logger', { log: vi.fn() });
+
+            const e = {
+                parameter: {
+                    action: 'getStats',
+                    token: 'valid_header.valid_payload.valid_signature'
+                }
+            };
+            const result = doGet(e as unknown as GoogleAppsScript.Events.DoGet);
+
+            expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":500');
+            expect(result.getContent()).toContain('"message":"Internal Server Error"');
+            expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Dashboard Error] Error: Database failure'));
+        });
+
         it('should return error if getStats action is called without token', () => {
             vi.stubGlobal('Logger', { log: vi.fn() });
 
@@ -359,7 +401,7 @@ describe('router', () => {
             expect(result.getContent()).toBe(JSON.stringify({ status: 'ok' }));
         });
 
-        it('should handle errors in doPost', () => {
+        it('should handle errors in doPost and return generic message', () => {
             const e = {
                 postData: {
                     contents: 'invalid json'
@@ -369,7 +411,9 @@ describe('router', () => {
             const result = doPost(e as unknown as GoogleAppsScript.Events.DoPost);
 
             expect(Logger.log).toHaveBeenCalledWith(expect.stringContaining('[Webhook Error]'));
-            expect(result.getContent()).toContain('status":"error"');
+            expect(result.getContent()).toContain('"status":"error"');
+            expect(result.getContent()).toContain('"code":500');
+            expect(result.getContent()).toContain('"message":"Internal Server Error"');
         });
     });
 

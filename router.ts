@@ -53,8 +53,12 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
             }))
                 .setMimeType(ContentService.MimeType.JSON);
         } catch (err) {
-            return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
-                .setMimeType(ContentService.MimeType.JSON);
+            Logger.log("[Dashboard Error] " + err);
+            return ContentService.createTextOutput(JSON.stringify({ 
+                status: 'error', 
+                code: 500,
+                message: 'Internal Server Error' 
+            }));
         }
     }
 
@@ -80,9 +84,12 @@ function doPost(e: GoogleAppsScript.Events.DoPost): GoogleAppsScript.Content.Tex
         return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
             .setMimeType(ContentService.MimeType.JSON);
     } catch (err) {
-        Logger.log(`[Webhook Error] ${(err as Error).toString()}`);
-        return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: (err as Error).toString() }))
-            .setMimeType(ContentService.MimeType.JSON);
+        Logger.log("[Webhook Error] " + err);
+        return ContentService.createTextOutput(JSON.stringify({ 
+            status: 'error', 
+            code: 500,
+            message: 'Internal Server Error' 
+        }));
     }
 }
 
