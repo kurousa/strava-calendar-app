@@ -137,30 +137,36 @@ function getGearStatus(): GearStatus[] {
     const profile = getStravaAthleteProfile();
     if (!profile) return [];
 
-    const gears = [...profile.bikes, ...profile.shoes];
     const props = PropertiesService.getScriptProperties();
     const allProps = props.getProperties();
 
-    return gears.map(gear => {
+    const bikeStatuses = profile.bikes.map(gear => {
         const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
-
-        const baseStatus: GearStatus = {
+        const parsedConfig = parseGearConfig(gear.id, configStr);
+        return {
             id: gear.id,
             name: gear.name,
-            type: profile.bikes.includes(gear) ? 'Bike' : 'Shoes',
+            type: 'Bike' as const,
             distanceKm: gear.distance / 1000,
-            thresholdKm: 0,
-            isPeriodic: false
+            thresholdKm: parsedConfig?.thresholdKm ?? 0,
+            isPeriodic: parsedConfig?.isPeriodic ?? false
         };
-
-        const parsedConfig = parseGearConfig(gear.id, configStr);
-        if (parsedConfig) {
-            baseStatus.thresholdKm = parsedConfig.thresholdKm ?? baseStatus.thresholdKm;
-            baseStatus.isPeriodic = parsedConfig.isPeriodic ?? baseStatus.isPeriodic;
-        }
-
-        return baseStatus;
     });
+
+    const shoeStatuses = profile.shoes.map(gear => {
+        const configStr = allProps[Config.GEAR_CONFIG_PREFIX + gear.id];
+        const parsedConfig = parseGearConfig(gear.id, configStr);
+        return {
+            id: gear.id,
+            name: gear.name,
+            type: 'Shoes' as const,
+            distanceKm: gear.distance / 1000,
+            thresholdKm: parsedConfig?.thresholdKm ?? 0,
+            isPeriodic: parsedConfig?.isPeriodic ?? false
+        };
+    });
+
+    return [...bikeStatuses, ...shoeStatuses];
 }
 
 // Node.js環境（テスト時）のみエクスポートする
