@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { generateSummary, sendWeeklySummary } from '../summary';
 
 describe('summary.ts', () => {
     const mockActivities = [
@@ -8,12 +9,11 @@ describe('summary.ts', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.stubGlobal('sendDiscordMessage', vi.fn());
-        vi.stubGlobal('getStravaActivities', vi.fn());
-    });
-
-    afterEach(() => {
-        vi.unstubAllGlobals();
+        // GAS mocks are already set up in vitest.setup.ts
+        // But we ensure the specific ones we need are accessible
+        (global as any).getStravaActivities = vi.fn();
+        (global as any).sendDiscordMessage = vi.fn();
+        (global as any).formatSummaryReport = vi.fn().mockReturnValue('Mock Report');
     });
 
     describe('generateSummary', () => {

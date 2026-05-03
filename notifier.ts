@@ -69,12 +69,44 @@ function sendGearAlert(gearName: string, currentDistanceKm: number, thresholdKm:
     sendDiscordMessage(message);
 }
 
+/**
+ * エラーをメールで通知する
+ * @param message - エラーメッセージ
+ */
+function sendErrorEmail(message: string): void {
+  const email = Session.getEffectiveUser().getEmail();
+  if (!email) {
+    Logger.log(
+      "通知先メールアドレスを取得できなかったため、メール送信をスキップしました。",
+    );
+    return;
+  }
+
+  const props = PropertiesService.getUserProperties();
+  const lastNotified = props.getProperty(Config.PROP_LAST_ERROR_NOTIFIED_AT);
+  const now = new Date().getTime();
+  if (lastNotified && now - parseInt(lastNotified) < 24 * 60 * 60 * 1000) {
+    return;
+  }
+
+  const subject =
+    "【Stravaアクティビティ連携】Stravaとの連携でエラーが発生しました。";
+  const body =
+    "Stravaとの連携でエラーが発生しました。\n\nエラー内容:\n" + message;
+
+  MailApp.sendEmail(email, subject, body);
+  props.setProperty(Config.PROP_LAST_ERROR_NOTIFIED_AT, now.toString());
+  Logger.log("エラーメールを送信しました: " + email);
+}
+
+
 // Node.js環境（テスト時）のみエクスポートする
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         sendDiscordMessage,
         sendSyncNotification,
         sendGearAlert,
+        sendErrorEmail,
         get DISCORD_WEBHOOK_URL_CACHE() { return DISCORD_WEBHOOK_URL_CACHE; },
         set DISCORD_WEBHOOK_URL_CACHE(val) { DISCORD_WEBHOOK_URL_CACHE = val; },
         resetCache: () => { DISCORD_WEBHOOK_URL_CACHE = null; }

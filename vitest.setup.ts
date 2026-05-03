@@ -11,10 +11,10 @@ import * as AiModule from './ai.ts';
 import * as MapsModule from './maps.ts';
 import * as SummaryFormatterModule from './formatters/SummaryFormatter.ts';
 import * as SummaryModule from './summary.ts';
-import * as NotifierModuleExtension from './notifier.ts';
 import * as TssModule from './tss.ts';
 import * as DateFormatter from './formatters/date.ts';
 import * as PresenterModule from './presenter.ts';
+import * as CalendarModule from './calendar.ts';
 
 // GASのグローバルオブジェクトをモック化
 vi.hoisted(() => {
@@ -209,19 +209,20 @@ vi.hoisted(() => {
 vi.stubGlobal('getAthleteWeight', vi.fn().mockReturnValue(null));
 
 // Globalize DefaultFormatter for testing
-(global as any).getCommonMetrics = (DefaultFormatter as any).getCommonMetrics || (() => ({}));
-(global as any).getActivityStyle = (DefaultFormatter as any).getActivityStyle || (() => ({ color: "BLUE" }));
-(global as any).makeDescription = (DefaultFormatter as any).makeDescription || (() => "mock description");
+vi.stubGlobal('getCommonMetrics', vi.fn((DefaultFormatter as any).getCommonMetrics || (() => ({}))));
+vi.stubGlobal('getActivityStyle', vi.fn((DefaultFormatter as any).getActivityStyle || (() => ({ color: "BLUE" }))));
+vi.stubGlobal('makeDescription', vi.fn((DefaultFormatter as any).makeDescription || (() => "mock description")));
 
 // Globalize Run/Ride formatters
-(global as any).makeRunDescription = (RunFormatter as any).makeRunDescription || (() => "mock run desc");
-(global as any).makeRideDescription = (RideFormatter as any).makeRideDescription || (() => "mock ride desc");
+vi.stubGlobal('makeRunDescription', vi.fn((RunFormatter as any).makeRunDescription || (() => "mock run desc")));
+vi.stubGlobal('makeRideDescription', vi.fn((RideFormatter as any).makeRideDescription || (() => "mock ride desc")));
 
 // Globalize main functions for tests
-vi.stubGlobal('getTargetCalendar', (MainModule as any).getTargetCalendar || vi.fn());
-vi.stubGlobal('processActivityToCalendar', (MainModule as any).processActivityToCalendar || vi.fn());
-vi.stubGlobal('getExistingActivityIds', (MainModule as any).getExistingActivityIds || vi.fn(() => new Set()));
-vi.stubGlobal('sendSyncNotification', (NotifierModule as any).sendSyncNotification || vi.fn());
+vi.stubGlobal('getTargetCalendar', vi.fn((CalendarModule as any).getTargetCalendar || vi.fn()));
+vi.stubGlobal('processActivityToCalendar', vi.fn((CalendarModule as any).processActivityToCalendar || vi.fn()));
+vi.stubGlobal('getExistingActivityIds', vi.fn((CalendarModule as any).getExistingActivityIds || vi.fn(() => new Set())));
+vi.stubGlobal('sendSyncNotification', vi.fn((NotifierModule as any).sendSyncNotification || vi.fn()));
+vi.stubGlobal('sendErrorEmail', vi.fn((NotifierModule as any).sendErrorEmail || vi.fn()));
 
 // Globalize Strava API functions
 vi.stubGlobal('getStravaActivities', vi.fn(() => []));
@@ -232,43 +233,45 @@ vi.stubGlobal('viewStravaWebhookSubscriptions', vi.fn(() => []));
 vi.stubGlobal('deleteStravaWebhookSubscription', vi.fn());
 
 // Globalize Auth functions
-vi.stubGlobal('getOAuthService', (AuthModule as any).getOAuthService || vi.fn());
-vi.stubGlobal('authCallback', (AuthModule as any).authCallback || vi.fn());
-vi.stubGlobal('startAuth', (AuthModule as any).startAuth || vi.fn());
-vi.stubGlobal('resetAuth', (AuthModule as any).resetAuth || vi.fn());
-vi.stubGlobal('verifyGoogleToken', (AuthModule as any).verifyGoogleToken || vi.fn());
+vi.stubGlobal('getOAuthService', vi.fn((AuthModule as any).getOAuthService || vi.fn()));
+vi.stubGlobal('authCallback', vi.fn((AuthModule as any).authCallback || vi.fn()));
+vi.stubGlobal('startAuth', vi.fn((AuthModule as any).startAuth || vi.fn()));
+vi.stubGlobal('resetAuth', vi.fn((AuthModule as any).resetAuth || vi.fn()));
+vi.stubGlobal('verifyGoogleToken', vi.fn((AuthModule as any).verifyGoogleToken || vi.fn()));
 
 // Globalize Sheets functions
 vi.stubGlobal('backupToSpreadsheet', vi.fn());
 
 // Globalize fetchWeatherData for tests
-(global as any).fetchWeatherData = (WeatherModule as any).fetchWeatherData || vi.fn(() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s");
+vi.stubGlobal('fetchWeatherData', vi.fn((WeatherModule as any).fetchWeatherData || (() => "天気: ☀️ 晴れ / 気温: 20℃ / 風速: 2m/s")));
+vi.stubGlobal('fetchWeatherDataBatch', vi.fn((WeatherModule as any).fetchWeatherDataBatch || vi.fn()));
 
 // Globalize generateAiComment for tests
-(global as any).generateAiComment = (AiModule as any).generateAiComment || vi.fn(() => "ナイスラン！");
+vi.stubGlobal('generateAiComment', vi.fn((AiModule as any).generateAiComment || (() => "ナイスラン！")));
 
 // Globalize Maps functions for tests
-(global as any).saveMapToDrive = (MapsModule as any).saveMapToDrive || vi.fn();
-(global as any).getOrCreateMapFolder = (MapsModule as any).getOrCreateMapFolder || vi.fn();
+vi.stubGlobal('saveMapToDrive', vi.fn((MapsModule as any).saveMapToDrive || vi.fn()));
+vi.stubGlobal('getOrCreateMapFolder', vi.fn((MapsModule as any).getOrCreateMapFolder || vi.fn()));
 
 // Globalize Summary functions
-(global as any).formatSummaryReport = (SummaryFormatterModule as any).formatSummaryReport;
-(global as any).generateSummary = (SummaryModule as any).generateSummary;
-(global as any).sendWeeklySummary = (SummaryModule as any).sendWeeklySummary;
-(global as any).sendMonthlySummary = (SummaryModule as any).sendMonthlySummary;
-(global as any).sendDiscordMessage = (NotifierModuleExtension as any).sendDiscordMessage;
+vi.stubGlobal('formatSummaryReport', vi.fn((SummaryFormatterModule as any).formatSummaryReport || vi.fn()));
+vi.stubGlobal('generateSummary', vi.fn((SummaryModule as any).generateSummary || vi.fn()));
+vi.stubGlobal('sendWeeklySummary', vi.fn((SummaryModule as any).sendWeeklySummary || vi.fn()));
+vi.stubGlobal('sendMonthlySummary', vi.fn((SummaryModule as any).sendMonthlySummary || vi.fn()));
+vi.stubGlobal('sendDiscordMessage', vi.fn((NotifierModule as any).sendDiscordMessage || vi.fn()));
 
 // Globalize TSS functions
-(global as any).calculateTSS = (TssModule as any).calculateTSS;
+vi.stubGlobal('calculateTSS', vi.fn((TssModule as any).calculateTSS || vi.fn()));
 
 // Globalize getActivityStartDate
-(global as any).getActivityStartDate = (DateFormatter as any).getActivityStartDate || vi.fn((activity: any) => {
+vi.stubGlobal('getActivityStartDate', vi.fn((DateFormatter as any).getActivityStartDate || ((activity: any) => {
     return activity.start_date_local
         ? new Date(activity.start_date_local.replace(/Z$/i, ''))
         : new Date(activity.start_date);
-});
+})));
 
 // Globalize presenter functions for tests
 vi.stubGlobal('createResponse', vi.fn((PresenterModule as any).createResponse));
 vi.stubGlobal('createHtmlResponse', vi.fn((PresenterModule as any).createHtmlResponse));
 vi.stubGlobal('createHtmlPage', vi.fn((PresenterModule as any).createHtmlPage));
+
