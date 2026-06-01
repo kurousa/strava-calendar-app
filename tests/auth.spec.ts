@@ -12,6 +12,7 @@ describe('auth', () => {
         setScope: vi.fn().mockReturnThis(),
         handleCallback: vi.fn(),
         hasAccess: vi.fn(),
+        getAccessToken: vi.fn(),
         getAuthorizationUrl: vi.fn(),
         reset: vi.fn()
     };
@@ -80,9 +81,52 @@ describe('auth', () => {
         expect(global.Logger.log).toHaveBeenCalledWith('https://example.com/auth');
     });
 
-    it('should reset auth', () => {
+    it('should reset auth and call revoke endpoint if has access', () => {
+        mockService.hasAccess.mockReturnValue(true);
+        mockService.getAccessToken.mockReturnValue('fake_access_token');
+        (global as any).Utilities.base64Encode = vi.fn().mockReturnValue('encoded_creds');
+        (global as any).UrlFetchApp.fetch = vi.fn();
+
         resetAuth();
+
         expect(mockService.reset).toHaveBeenCalled();
+        expect(global.UrlFetchApp.fetch).toHaveBeenCalledWith(
+            'https://www.strava.com/oauth/revoke',
+            expect.objectContaining({
+                method: 'post',
+                headers: expect.objectContaining({
+                    'Authorization': 'Basic encoded_creds'
+                }),
+                payload: {
+                    'token': 'fake_access_token'
+                }
+            })
+        );
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('解除しました'));
+    });
+
+    it('should reset auth even if revoke endpoint fails', () => {
+        mockService.hasAccess.mockReturnValue(true);
+        mockService.getAccessToken.mockReturnValue('fake_access_token');
+        (global as any).UrlFetchApp.fetch = vi.fn().mockImplementation(() => {
+            throw new Error('API Error');
+        });
+
+        resetAuth();
+
+        expect(mockService.reset).toHaveBeenCalled();
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('エラーが発生しましたが'));
+        expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('解除しました'));
+    });
+
+    it('should just reset auth if no access', () => {
+        mockService.hasAccess.mockReturnValue(false);
+        (global as any).UrlFetchApp.fetch = vi.fn();
+
+        resetAuth();
+
+        expect(mockService.reset).toHaveBeenCalled();
+        expect(global.UrlFetchApp.fetch).not.toHaveBeenCalled();
         expect(global.Logger.log).toHaveBeenCalledWith(expect.stringContaining('解除しました'));
     });
 

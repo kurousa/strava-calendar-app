@@ -31,8 +31,8 @@ function getOAuthService(): any {
         throw new Error(`${Config.PROP_STRAVA_CLIENT_ID} または ${Config.PROP_STRAVA_CLIENT_SECRET} がスクリプトプロパティに設定されていません。`);
     }
     return OAuth2.createService('Strava')
-        .setAuthorizationBaseUrl('https://www.strava.com/oauth/authorize')
-        .setTokenUrl('https://www.strava.com/oauth/token')
+        .setAuthorizationBaseUrl(Config.STRAVA_AUTH_URL)
+        .setTokenUrl(Config.STRAVA_TOKEN_URL)
         .setClientId(CLIENT_ID)
         .setClientSecret(CLIENT_SECRET)
         .setCallbackFunction('authCallback')
@@ -72,7 +72,38 @@ function startAuth(): void {
  * 連携を解除したい時用の関数（普段は使いません）
  */
 function resetAuth(): void {
-    getOAuthService().reset();
+    const service = getOAuthService();
+    if (service.hasAccess()) {
+        try {
+            const accessToken = service.getAccessToken();
+            const props = PropertiesService.getScriptProperties();
+            const clientId = props.getProperty(Config.PROP_STRAVA_CLIENT_ID);
+            const clientSecret = props.getProperty(Config.PROP_STRAVA_CLIENT_SECRET);
+
+            if (clientId && clientSecret) {
+                // Strava API v3 oauth/revoke エンドポイントを叩く
+                // Basic認証が必要 (client_id:client_secret を Base64エンコード)
+                const authHeader = 'Basic ' + Utilities.base64Encode(clientId + ':' + clientSecret);
+
+                UrlFetchApp.fetch(Config.STRAVA_REVOKE_URL, {
+                    method: 'post',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    payload: {
+                        'token': accessToken
+                    },
+                    muteHttpExceptions: true
+                });
+                Logger.log('Stravaサーバー側の連携解除リクエストを送信しました。');
+            }
+        } catch (e) {
+            Logger.log('Strava連携解除リクエスト中にエラーが発生しましたが、ローカルの認証情報はリセットします: ' + (e as Error).toString());
+        }
+    }
+
+    service.reset();
     Logger.log('連携を解除しました。');
 }
 

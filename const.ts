@@ -43,6 +43,9 @@ var Config = {
 
     // API エンドポイント
     STRAVA_API_BASE: 'https://www.strava.com/api/v3',
+    STRAVA_AUTH_URL: 'https://www.strava.com/oauth/authorize',
+    STRAVA_TOKEN_URL: 'https://www.strava.com/oauth/token',
+    STRAVA_REVOKE_URL: 'https://www.strava.com/oauth/revoke',
     WEATHER_API_BASE: 'https://api.weatherapi.com/v1',
     GEMINI_API_BASE: `https://generativelanguage.googleapis.com/v1beta/models/gemini-${_GEMINI_VERSION}-${_GEMINI_MODEL}:generateContent`,
 
