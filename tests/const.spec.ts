@@ -64,7 +64,7 @@ describe('const.ts', () => {
             expect(Config.PROP_LAST_ERROR_NOTIFIED_AT).toBe('LAST_ERROR_NOTIFIED_AT');
             expect(Config.PROP_WEATHER_API_KEY).toBe('WEATHER_API_KEY');
 
-            expect(Config.STRAVA_API_BASE).toBe('https://www.strava.com/api/v3');
+            expect(Config.STRAVA_API_BASE).toBe('https://www.api-v3.strava.com');
             expect(Config.WEATHER_API_BASE).toBe('https://api.weatherapi.com/v1');
             expect(Config.GEMINI_API_BASE).toBe(`https://generativelanguage.googleapis.com/v1beta/models/gemini-${_GEMINI_VERSION}-${_GEMINI_MODEL}:generateContent`);
 
@@ -96,7 +96,7 @@ describe('const.ts', () => {
     describe('Global expansion', () => {
         it('should expand Config properties to global', () => {
             // These are defined in Config and should be available globally
-            expect((global as any).STRAVA_API_BASE).toBe('https://www.strava.com/api/v3');
+            expect((global as any).STRAVA_API_BASE).toBe('https://www.api-v3.strava.com');
             expect((global as any).DISTANCE_ACTIVITIES).toContain('Run');
         });
     });

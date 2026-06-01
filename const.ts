@@ -42,7 +42,7 @@ var Config = {
     PROP_WEATHER_API_KEY: 'WEATHER_API_KEY', // GASのプロパティに設定するキー名
 
     // API エンドポイント
-    STRAVA_API_BASE: 'https://www.strava.com/api/v3',
+    STRAVA_API_BASE: 'https://www.api-v3.strava.com',
     WEATHER_API_BASE: 'https://api.weatherapi.com/v1',
     GEMINI_API_BASE: `https://generativelanguage.googleapis.com/v1beta/models/gemini-${_GEMINI_VERSION}-${_GEMINI_MODEL}:generateContent`,
 
