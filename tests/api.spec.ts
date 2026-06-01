@@ -37,7 +37,7 @@ describe('api', () => {
 
         expect(result).toEqual(activities);
         expect(global.UrlFetchApp.fetch).toHaveBeenCalledWith(
-            expect.stringMatching(/https:\/\/www\.strava\.com\/api\/v3\/athlete\/activities/),
+            expect.stringMatching(/https:\/\/www\.api-v3\.strava\.com\/athlete\/activities/),
             expect.objectContaining({
                 headers: {
                     Authorization: 'Bearer fake_token'
@@ -142,7 +142,7 @@ describe('api', () => {
 
             expect(result).toEqual(athlete);
             expect(global.UrlFetchApp.fetch).toHaveBeenCalledWith(
-                'https://www.strava.com/api/v3/athlete',
+                'https://www.api-v3.strava.com/athlete',
                 expect.objectContaining({
                     headers: {
                         Authorization: 'Bearer fake_token'
