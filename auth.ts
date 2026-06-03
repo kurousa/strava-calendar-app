@@ -76,14 +76,11 @@ function resetAuth(): void {
     if (service.hasAccess()) {
         try {
             const accessToken = service.getAccessToken();
-            const props = PropertiesService.getScriptProperties();
-            const clientId = props.getProperty(Config.PROP_STRAVA_CLIENT_ID);
-            const clientSecret = props.getProperty(Config.PROP_STRAVA_CLIENT_SECRET);
 
-            if (clientId && clientSecret) {
+            if (cachedStravaClientId && cachedStravaClientSecret) {
                 // Strava API v3 oauth/revoke エンドポイントを叩く
                 // Basic認証が必要 (client_id:client_secret を Base64エンコード)
-                const authHeader = 'Basic ' + Utilities.base64Encode(clientId + ':' + clientSecret);
+                const authHeader = 'Basic ' + Utilities.base64Encode(cachedStravaClientId + ':' + cachedStravaClientSecret);
 
                 UrlFetchApp.fetch(Config.STRAVA_REVOKE_URL, {
                     method: 'post',
