@@ -84,8 +84,8 @@ describe('auth', () => {
     it('should reset auth and call revoke endpoint if has access', () => {
         mockService.hasAccess.mockReturnValue(true);
         mockService.getAccessToken.mockReturnValue('fake_access_token');
-        (global as any).Utilities.base64Encode = vi.fn().mockReturnValue('encoded_creds');
-        (global as any).UrlFetchApp.fetch = vi.fn();
+        vi.stubGlobal('Utilities', { base64Encode: vi.fn().mockReturnValue('encoded_creds') });
+        vi.stubGlobal('UrlFetchApp', { fetch: vi.fn() });
 
         resetAuth();
 
@@ -108,8 +108,10 @@ describe('auth', () => {
     it('should reset auth even if revoke endpoint fails', () => {
         mockService.hasAccess.mockReturnValue(true);
         mockService.getAccessToken.mockReturnValue('fake_access_token');
-        (global as any).UrlFetchApp.fetch = vi.fn().mockImplementation(() => {
-            throw new Error('API Error');
+        vi.stubGlobal('UrlFetchApp', {
+            fetch: vi.fn().mockImplementation(() => {
+                throw new Error('API Error');
+            })
         });
 
         resetAuth();
@@ -121,7 +123,7 @@ describe('auth', () => {
 
     it('should just reset auth if no access', () => {
         mockService.hasAccess.mockReturnValue(false);
-        (global as any).UrlFetchApp.fetch = vi.fn();
+        vi.stubGlobal('UrlFetchApp', { fetch: vi.fn() });
 
         resetAuth();
 
